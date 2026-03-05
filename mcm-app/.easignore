@@ -1,0 +1,66 @@
+# EAS Build ignore file
+# Based on .gitignore + extra exclusions for EAS
+
+# dependencies
+node_modules/
+
+# Expo
+.expo/*
+dist/
+web-build/
+expo-env.d.ts
+
+# Native
+.kotlin/
+*.orig.*
+*.jks
+*.p8
+*.p12
+*.key
+*.mobileprovision
+
+# Metro
+.metro-health-check*
+
+# debug
+npm-debug.*
+yarn-debug.*
+yarn-error.*
+
+# macOS
+.DS_Store
+*.pem
+
+# local env files
+.env.local
+.env
+.env-backup
+
+# typescript
+*.tsbuildinfo
+
+app-example
+
+/fcm-service-account.json
+/google-services.json
+google-services.json
+GoogleService-Info.plist
+firebase.json
+
+# prebuilds (CNG/Prebuild generated folders)
+/android
+/ios
+ios/
+android/
+
+# builds
+*.apk
+*.aab
+/builds/
+/android/app/build/
+
+# Claude Code agent skills (symlinks that break EAS)
+.agent/
+.agents/
+.claude/
+credentials.json
