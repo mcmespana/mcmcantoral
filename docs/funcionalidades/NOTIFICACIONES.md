@@ -365,8 +365,7 @@ Notas:
 - La visibilidad de algunas tabs depende del **perfil** (`/profileConfig`). Para
   destinos universales usa `index`, `calendario`, `fotos` o `mas`.
 - **Contrato completo con el MCM Panel** (campos del payload, `/pushTokens`,
-  segmentación, correcciones): ver `NOTIFICACIONES_CONTRATO.md` en la raíz del
-  monorepo.
+  segmentación, correcciones): ver `docs/contratos/NOTIFICACIONES_CONTRATO.md`.
 
 ---
 
