@@ -88,7 +88,7 @@ export function reportIfPermissionDenied(
   logger.error(
     `[firebase-rules] PERMISSION_DENIED al hacer ${op} en "${path}". ` +
       'Las reglas de la Realtime Database no permiten esta operación. ' +
-      'Revisa mcm-app/database.rules.json y el nodo /_config.',
+      'Las reglas son de mcmapp (mcm-app/database.rules.json allí) y el nodo /_config.',
     error instanceof Error ? error : new Error(String(error)),
   );
   return true;

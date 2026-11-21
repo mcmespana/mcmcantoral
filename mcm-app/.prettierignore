@@ -2,6 +2,4 @@ node_modules
 .expo
 web-build
 dist
-functions/lib
 uniwind-types.d.ts
-panuelo-3d/generated

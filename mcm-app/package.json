@@ -18,7 +18,8 @@
     "eas:build:ios": "npx rimraf .agent .agents && cross-env GIT_CLONE_PROTECTION_ACTIVE=false npx eas-cli@latest build -p ios",
     "eas:build:android": "npx rimraf .agent .agents && cross-env GIT_CLONE_PROTECTION_ACTIVE=false npx eas-cli@latest build -p android",
     "liturgical:window": "node scripts/generate-liturgical-window.js",
-    "postinstall": "patch-package"
+    "postinstall": "patch-package",
+    "prepare": "husky"
   },
   "dependencies": {
     "@aptabase/react-native": "^0.6.0",
@@ -90,8 +91,10 @@
     "eslint-config-expo": "~58.0.4",
     "eslint-config-prettier": "^10.1.8",
     "eslint-plugin-prettier": "^5.5.7",
+    "husky": "^9.1.7",
     "jest": "~30.5.2",
     "jest-expo": "~58.0.13",
+    "lint-staged": "^16.3.1",
     "patch-package": "^8.0.1",
     "prettier": "^3.9.10",
     "react-test-renderer": "^19.3.0",
@@ -119,5 +122,14 @@
   },
   "react-native-audio-api": {
     "enableFFmpeg": false
+  },
+  "lint-staged": {
+    "*.{js,jsx,ts,tsx}": [
+      "prettier --write",
+      "eslint --max-warnings=0 --fix"
+    ],
+    "*.{json,md}": [
+      "prettier --write"
+    ]
   }
 }
