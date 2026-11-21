@@ -118,7 +118,9 @@ describe('fuera del provider', () => {
   it('devuelve un stack no-op seguro', async () => {
     const { result } = await renderHook(() => useOverlayStack());
     expect(result.current.closeTop()).toBe(false);
-    expect(() => result.current.push({ id: 'a', onClose: jest.fn() })).not.toThrow();
+    expect(() =>
+      result.current.push({ id: 'a', onClose: jest.fn() }),
+    ).not.toThrow();
     expect(() => result.current.pop('a')).not.toThrow();
   });
 });

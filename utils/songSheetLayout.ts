@@ -146,6 +146,13 @@ export const SHEET_CSS = `
     margin-right: 0.35em;
   }
   .w.bis .t { color: var(--sh-muted); font-style: italic; }
+  /* Marcado del cantoral: \`<i>\` 2ª voz, \`<u>\` altas/bajas, \`<b>\`
+     énfasis. Distinguible también sin color (estilo y peso). */
+  .t.mk-i { font-style: italic; color: var(--sh-muted); }
+  .t.mk-u { text-decoration: underline; text-underline-offset: 0.18em; }
+  .t.mk-b { font-weight: 700; }
+  /* Anotación (\`[*CLAP]\`): va donde un acorde pero no lo es. */
+  .c.an { font-weight: 600; font-style: italic; font-size: 0.78em; color: var(--sh-label); }
   .ln.co { gap: 0.15em 1em; }
   .ln.co .c { padding-right: 0; }
   .cn { color: var(--sh-muted); font-style: italic; line-height: 1.2; }

@@ -9,7 +9,9 @@ export interface CatalogFiles {
 }
 
 /** Disco en memoria, para tests (y para simular cortes a mitad). */
-export function memoryFiles(initial: Record<string, string> = {}): CatalogFiles & {
+export function memoryFiles(
+  initial: Record<string, string> = {},
+): CatalogFiles & {
   files: Map<string, string>;
 } {
   const files = new Map(Object.entries(initial));

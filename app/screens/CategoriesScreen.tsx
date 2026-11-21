@@ -1,3 +1,5 @@
+import { songsForCategory, sortCategoryKeys } from '@/utils/songCategories';
+import { useCantoralConfig } from '@/hooks/useCantoralConfig';
 import { useAdminStatus } from '@/hooks/useAdminStatus';
 import {
   FlatList,
@@ -101,25 +103,33 @@ export default function CategoriesScreen() {
     setRefreshing(false);
   }, [refresh]);
   const { selectedSongs } = useSelectedSongs();
+  const config = useCantoralConfig();
   // ⚡ Bolt Optimization:
   // Split the useMemo to prevent re-sorting and re-mapping all categories
   // every time `selectedSongs.length` changes (O(N log N) -> O(1) on selection change).
   const { sortedCategories, baseCategoryItems } = useMemo(() => {
-    const actualCategories = songsData ? Object.keys(songsData) : [];
-    const sortedCats = actualCategories.sort((a, b) => {
-      const titleA = songsData?.[a]?.categoryTitle ?? a;
-      const titleB = songsData?.[b]?.categoryTitle ?? b;
-      return titleA.localeCompare(titleB);
-    });
+    // Orden: `order` del generador si lo trae, si no la letra del título; en
+    // modo Navidad la categoría destacada va la primera (`02` §7).
+    const ordered = sortCategoryKeys(songsData);
+    const featured =
+      config.effectiveMode === 'navidad' && config.featuredCategory
+        ? ordered.find(
+            (k) => k.toLowerCase() === config.featuredCategory!.toLowerCase(),
+          )
+        : undefined;
+    const sortedCats = featured
+      ? [featured, ...ordered.filter((k) => k !== featured)]
+      : ordered;
 
     const mappedCats = sortedCats.map((cat) => ({
       id: cat,
       name: songsData?.[cat]?.categoryTitle ?? cat,
-      songCount: songsData?.[cat]?.songs?.length || 0,
+      // Con las prestadas (`alsoIn`): es lo que se ve al entrar.
+      songCount: songsForCategory(songsData, cat).length,
     }));
 
     return { sortedCategories: sortedCats, baseCategoryItems: mappedCats };
-  }, [songsData]);
+  }, [songsData, config.effectiveMode, config.featuredCategory]);
 
   const displayCategories = useMemo(() => {
     return [

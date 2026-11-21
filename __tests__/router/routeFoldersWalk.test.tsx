@@ -103,26 +103,29 @@ const avisosDeRutas = () =>
 // en `cantoralJourney.test.tsx`.
 const QUERY_CANTORAL = 'categoryId=__ALL__&categoryName=Buscar&filename=x.cho';
 
-describe.each([['cancionero', '/cancionero', QUERY_CANTORAL]])('recorrido de «%s»', (tab, base, query) => {
-  const rutas = () => ({
-    _layout: raiz,
-    ...rutasDe(tab),
-  });
-  const slugs = Object.keys(rutasDe(tab))
-    .map((k) => k.split('/').pop() as string)
-    .filter((n) => n !== '_layout' && n !== 'index');
-
-  it('arranca sin avisos de rutas', async () => {
-    await renderRouter(rutas() as never, { initialUrl: base });
-    await waitFor(() => expect(screen.toJSON()).not.toBeNull());
-    expect(avisosDeRutas()).toEqual([]);
-  });
-
-  it.each(slugs)('abre /%s', async (slug) => {
-    await renderRouter(rutas() as never, {
-      initialUrl: `${base}/${slug}?${query}`,
+describe.each([['cancionero', '/cancionero', QUERY_CANTORAL]])(
+  'recorrido de «%s»',
+  (tab, base, query) => {
+    const rutas = () => ({
+      _layout: raiz,
+      ...rutasDe(tab),
     });
-    await waitFor(() => expect(screen.toJSON()).not.toBeNull());
-    expect(avisosDeRutas()).toEqual([]);
-  });
-});
+    const slugs = Object.keys(rutasDe(tab))
+      .map((k) => k.split('/').pop() as string)
+      .filter((n) => n !== '_layout' && n !== 'index');
+
+    it('arranca sin avisos de rutas', async () => {
+      await renderRouter(rutas() as never, { initialUrl: base });
+      await waitFor(() => expect(screen.toJSON()).not.toBeNull());
+      expect(avisosDeRutas()).toEqual([]);
+    });
+
+    it.each(slugs)('abre /%s', async (slug) => {
+      await renderRouter(rutas() as never, {
+        initialUrl: `${base}/${slug}?${query}`,
+      });
+      await waitFor(() => expect(screen.toJSON()).not.toBeNull());
+      expect(avisosDeRutas()).toEqual([]);
+    });
+  },
+);

@@ -85,7 +85,10 @@ describe('validateSongs', () => {
         .ok,
     ).toBe(true);
     expect(
-      validateSongs(data, 0, { sha256: 'mal', hashAlgo: 'sha256-canonical-v1' }),
+      validateSongs(data, 0, {
+        sha256: 'mal',
+        hashAlgo: 'sha256-canonical-v1',
+      }),
     ).toEqual({ ok: false, reason: 'huella' });
     // Sin formato declarado no se compara (no sería comparable byte a byte).
     expect(validateSongs(data, 0, { sha256: 'mal' }).ok).toBe(true);

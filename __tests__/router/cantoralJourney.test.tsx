@@ -180,65 +180,69 @@ beforeEach(async () => {
  */
 const JOURNEY_TIMEOUT_MS = 30_000;
 
-it('categorías → lista → canción → pantalla completa → atrás', async () => {
-  app = await renderRouter(
-    {
-      _layout: raiz,
-      ...rutasCantoral(),
-    } as never,
-    { initialUrl: '/cancionero' },
-  );
+it(
+  'categorías → lista → canción → pantalla completa → atrás',
+  async () => {
+    app = await renderRouter(
+      {
+        _layout: raiz,
+        ...rutasCantoral(),
+      } as never,
+      { initialUrl: '/cancionero' },
+    );
 
-  // 1. Categorías → lista de la categoría.
-  await tocar(await screen.findByText(/Cantos de entrada/));
-  await waitFor(() => expect(screen).toHavePathname('/cancionero/categoria'));
-  expect(paramsActuales()).toMatchObject({ categoryId: 'entrada' });
+    // 1. Categorías → lista de la categoría.
+    await tocar(await screen.findByText(/Cantos de entrada/));
+    await waitFor(() => expect(screen).toHavePathname('/cancionero/categoria'));
+    expect(paramsActuales()).toMatchObject({ categoryId: 'entrada' });
 
-  // 2. Lista → canción. Solo texto en la ruta; la lista, en memoria.
-  await tocar(await screen.findByText(/Alzad las manos/));
-  await waitFor(() => expect(screen).toHavePathname('/cancionero/cancion'));
-  const detalle = paramsActuales();
-  expect(detalle).toMatchObject({
-    filename: 'alzad.cho',
-    currentIndex: '0',
-    source: 'category',
-    firebaseCategory: 'entrada',
-  });
-  for (const v of Object.values(detalle)) expect(typeof v).toBe('string');
-  expect(
-    getSongNavList(detalle.list as string)?.map((s) => s.filename),
-  ).toEqual(['alzad.cho', 'vienen.cho']);
-  // El detalle ha encontrado la canción (si no, diría que no está).
-  expect(screen.queryByText('No encontramos esta canción')).toBeNull();
+    // 2. Lista → canción. Solo texto en la ruta; la lista, en memoria.
+    await tocar(await screen.findByText(/Alzad las manos/));
+    await waitFor(() => expect(screen).toHavePathname('/cancionero/cancion'));
+    const detalle = paramsActuales();
+    expect(detalle).toMatchObject({
+      filename: 'alzad.cho',
+      currentIndex: '0',
+      source: 'category',
+      firebaseCategory: 'entrada',
+    });
+    for (const v of Object.values(detalle)) expect(typeof v).toBe('string');
+    expect(
+      getSongNavList(detalle.list as string)?.map((s) => s.filename),
+    ).toEqual(['alzad.cho', 'vienen.cho']);
+    // El detalle ha encontrado la canción (si no, diría que no está).
+    expect(screen.queryByText('No encontramos esta canción')).toBeNull();
 
-  // 3. Pantalla completa, con el tono con el que se veía.
-  await tocar(await screen.findByLabelText('Pantalla completa'));
-  await waitFor(() =>
-    expect(screen).toHavePathname('/cancionero/pantalla-completa'),
-  );
-  expect(paramsActuales()).toMatchObject({
-    filename: 'alzad.cho',
-    currentIndex: '0',
-    transpose: '0',
-  });
+    // 3. Pantalla completa, con el tono con el que se veía.
+    await tocar(await screen.findByLabelText('Pantalla completa'));
+    await waitFor(() =>
+      expect(screen).toHavePathname('/cancionero/pantalla-completa'),
+    );
+    expect(paramsActuales()).toMatchObject({
+      filename: 'alzad.cho',
+      currentIndex: '0',
+      transpose: '0',
+    });
 
-  // 4. Siguiente canción dentro de la pantalla completa y cerrar: el detalle
-  //    se queda en la canción a la que se ha llegado.
-  await tocar(await screen.findByLabelText('Canción siguiente'));
-  await tocar(screen.getByLabelText('Cerrar pantalla completa'));
-  await waitFor(() => expect(screen).toHavePathname('/cancionero/cancion'));
-  expect(paramsActuales()).toMatchObject({
-    filename: 'vienen.cho',
-    currentIndex: '1',
-  });
+    // 4. Siguiente canción dentro de la pantalla completa y cerrar: el detalle
+    //    se queda en la canción a la que se ha llegado.
+    await tocar(await screen.findByLabelText('Canción siguiente'));
+    await tocar(screen.getByLabelText('Cerrar pantalla completa'));
+    await waitFor(() => expect(screen).toHavePathname('/cancionero/cancion'));
+    expect(paramsActuales()).toMatchObject({
+      filename: 'vienen.cho',
+      currentIndex: '1',
+    });
 
-  // 5. Atrás deshace el camino: lista y categorías.
-  await act(async () => router.back());
-  await waitFor(() => expect(screen).toHavePathname('/cancionero/categoria'));
-  await act(async () => router.back());
-  await waitFor(() => expect(screen).toHavePathname('/cancionero'));
-  expect(router.canGoBack()).toBe(false);
-}, JOURNEY_TIMEOUT_MS);
+    // 5. Atrás deshace el camino: lista y categorías.
+    await act(async () => router.back());
+    await waitFor(() => expect(screen).toHavePathname('/cancionero/categoria'));
+    await act(async () => router.back());
+    await waitFor(() => expect(screen).toHavePathname('/cancionero'));
+    expect(router.canGoBack()).toBe(false);
+  },
+  JOURNEY_TIMEOUT_MS,
+);
 
 it('una canción abierta en frío por su ruta se lee del catálogo', async () => {
   app = await renderRouter(

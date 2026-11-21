@@ -80,6 +80,11 @@ interface SongListItemProps {
   /** Etiquetas destacadas que lleva la canción: se ven discretas. */
   featuredTags?: ResolvedTag[];
   /**
+   * Insignia discreta fuera de contexto: la subcategoría en la búsqueda
+   * general, o «También en» si la canción viene prestada de otra categoría.
+   */
+  badge?: string;
+  /**
    * Pista de gesto (`useGestureHint`): al montarse, la fila se entreabre sola
    * un momento y enseña «Añadir», y vuelve. Solo en UNA fila de la lista.
    */
@@ -112,6 +117,7 @@ const SongListItem: React.FC<SongListItemProps> = React.memo(
     onRemoveSong,
     hideSeparator = false,
     featuredTags,
+    badge,
     hintSwipe = false,
     onHintShown,
     onSwipeAdd,
@@ -372,6 +378,13 @@ const SongListItem: React.FC<SongListItemProps> = React.memo(
                           {song.author}
                         </Text>
                       )}
+                    </View>
+                  )}
+                  {!!badge && (
+                    <View style={styles.tagPill} accessibilityLabel={badge}>
+                      <Text style={styles.tagPillText} numberOfLines={1}>
+                        {badge}
+                      </Text>
                     </View>
                   )}
                   {featuredTags && featuredTags.length > 0 && (

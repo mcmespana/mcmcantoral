@@ -6,7 +6,12 @@
 import type { SongsData } from '@/utils/filterSongsData';
 
 /** Nodos de `songs/` que viven en el catálogo local. */
-export const CATALOG_NODES = ['songs', 'tags', 'packs', 'cantoralConfig'] as const;
+export const CATALOG_NODES = [
+  'songs',
+  'tags',
+  'packs',
+  'cantoralConfig',
+] as const;
 export type CatalogNodeName = (typeof CATALOG_NODES)[number];
 
 /** Ruta de Firebase de cada nodo (`{ updatedAt, data }`). */

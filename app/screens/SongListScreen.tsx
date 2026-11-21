@@ -1,3 +1,9 @@
+import {
+  groupBySubcategory,
+  readSubcategories,
+  songsForCategory,
+  type Subcategory,
+} from '@/utils/songCategories';
 import { logger } from '@/utils/logger';
 import Animated, { useReducedMotion } from 'react-native-reanimated';
 import { useTabBarPaddingBottom } from '@/hooks/useTabBarClearance';
@@ -12,6 +18,8 @@ import {
   Platform,
   TouchableOpacity,
   TextInput,
+  ScrollView,
+  Pressable,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useColorScheme } from '@/hooks/useColorScheme';
@@ -79,8 +87,16 @@ interface Song {
   sortTitle?: string;
   searchableText?: string;
   tags?: string[];
-  /** Solo en modo etiqueta: título de la categoría a la que pertenece. */
+  /** Título del grupo: la categoría (modo etiqueta) o la subcategoría. */
   groupTitle?: string;
+  /** Clave estable del grupo (slug de la subcategoría). */
+  groupKey?: string;
+  /** Categoría de casa (la canción puede venir prestada con `alsoIn`). */
+  homeCategory?: string;
+  subcategory?: string;
+  subcategorySlug?: string | null;
+  borrowed?: boolean;
+  duration?: string;
 }
 
 interface SongCategory {
@@ -115,6 +131,23 @@ const getSongsData = (data: any): Record<string, SongCategory> => {
   logger.error('Unexpected songs data format:', data);
   return {};
 };
+
+/**
+ * La subcategoría de una canción como insignia fuera de contexto (búsqueda
+ * general): su versión corta si la tiene.
+ */
+function subcategoryLabel(
+  songsData: Record<string, SongCategory>,
+  song: Song,
+): string | undefined {
+  const home = song.homeCategory;
+  if (!home || !song.subcategory) return undefined;
+  const sub = readSubcategories(songsData[home]).find(
+    (x) => x.slug === song.subcategory,
+  );
+  if (!sub) return undefined;
+  return `${sub.emoji ? `${sub.emoji} ` : ''}${sub.short ?? sub.title}`;
+}
 
 /** Alto aproximado de una fila de canción (título + autor), para el esqueleto. */
 const SONG_ROW_HEIGHT = 64;
@@ -222,7 +255,7 @@ function toGroupedRows(songs: Song[]): ListRow[] {
       headerIndex = rows.length;
       rows.push({
         kind: 'section',
-        key: `section-${song.originalCategoryKey ?? rawTitle}`,
+        key: `section-${song.groupKey ?? song.originalCategoryKey ?? rawTitle}`,
         title: stripCategoryPrefix(cleanText),
         emoji,
         count: 0,
@@ -281,7 +314,11 @@ function buildSongList(
   songsData: Record<string, SongCategory>,
   categoryId: string,
   tagIndex?: SongTagIndex,
-): { songs: Song[]; error: SongListError | null } {
+): {
+  songs: Song[];
+  error: SongListError | null;
+  subcategories?: Subcategory[];
+} {
   try {
     if (categoryId === '__ALL__') {
       const allSongs: Song[] = [];
@@ -318,6 +355,7 @@ function buildSongList(
           const searchableText = makeSearchableText(song, tagIndex);
           return {
             ...song,
+            homeCategory: originalCategoryKey,
             originalCategoryKey: categoryLetter,
             numericFilenamePart: numericPart,
             sortTitle,
@@ -346,7 +384,13 @@ function buildSongList(
       return { songs: [], error: 'failed' };
     }
 
-    const songsWithNumericPart = categorySongs.map((song) => {
+    // Las suyas y las que otras categorías le prestan (`alsoIn`), cada una
+    // con su categoría de casa (`02-datos-offline.md` §4).
+    const inCategory = songsForCategory<Song>(
+      songsData as unknown as Parameters<typeof songsForCategory>[0],
+      categoryKey,
+    );
+    const songsWithNumericPart = inCategory.map((song) => {
       const titleMatch = song.title.match(/^(\d{1,3})\.\s*/);
       let numericPart = '';
       if (titleMatch && titleMatch[1]) {
@@ -360,15 +404,35 @@ function buildSongList(
         }
       }
       const searchableText = makeSearchableText(song, tagIndex);
-      return { ...song, numericFilenamePart: numericPart, searchableText };
+      return {
+        ...song,
+        numericFilenamePart: song.borrowed ? '' : numericPart,
+        searchableText,
+      };
     });
     songsWithNumericPart.sort((a, b) => {
+      if (a.borrowed !== b.borrowed) return a.borrowed ? 1 : -1;
       const numA = parseInt(a.numericFilenamePart, 10) || Infinity;
       const numB = parseInt(b.numericFilenamePart, 10) || Infinity;
       if (numA !== numB) return numA - numB;
       return a.title.localeCompare(b.title);
     });
-    return { songs: songsWithNumericPart, error: null };
+    // Con subcategorías, la lista va agrupada (cabeceras pegajosas).
+    const subcategories = readSubcategories(songsData[categoryKey]);
+    if (subcategories.length === 0) {
+      return { songs: songsWithNumericPart, error: null };
+    }
+    const grouped = groupBySubcategory(songsWithNumericPart, subcategories);
+    const songsBySub = grouped.flatMap((g) =>
+      g.songs.map((song) => ({
+        ...song,
+        groupTitle: g.subcategory
+          ? `${g.subcategory.title}${g.subcategory.emoji ? ` ${g.subcategory.emoji}` : ''}`
+          : 'Otras',
+        groupKey: g.subcategory?.slug ?? '__otras__',
+      })),
+    );
+    return { songs: songsBySub, error: null, subcategories };
   } catch (err) {
     logger.error('Error loading songs:', err);
     return { songs: [], error: 'failed' };
@@ -441,7 +505,11 @@ export default function SongsListScreen() {
   const [showTagSheet, setShowTagSheet] = useState(false);
   const pendingTagRef = useRef<ResolvedTag | null>(null);
 
-  const { songs, error } = useMemo(
+  const { songs, error, subcategories } = useMemo<{
+    songs: Song[];
+    error: SongListError | null;
+    subcategories?: Subcategory[];
+  }>(
     () =>
       isTagMode
         ? buildTagSongList(songsData, activeSlugs, tagIndex)
@@ -592,15 +660,22 @@ export default function SongsListScreen() {
     tagIndex,
   ]);
 
+  // Filtro por subcategoría (chips): `null` = todas.
+  const [subFilter, setSubFilter] = useState<string | null>(null);
+  const hasSubcategories = !isTagMode && (subcategories?.length ?? 0) > 0;
   const filteredSongs = useMemo(() => {
     const searchTerm = foldForSearch(search.trim());
-    if (!searchTerm) return visibleSongs;
+    const bySub =
+      hasSubcategories && subFilter
+        ? visibleSongs.filter((s) => s.groupKey === subFilter)
+        : visibleSongs;
+    if (!searchTerm) return bySub;
 
-    return visibleSongs.filter((song) => {
+    return bySub.filter((song) => {
       if (!song) return false;
       return song.searchableText?.includes(searchTerm);
     });
-  }, [visibleSongs, search]);
+  }, [visibleSongs, search, hasSubcategories, subFilter]);
 
   // En modo etiqueta la lista lleva cabeceras de categoría intercaladas; en el
   // resto es UN solo grupo. Las dos se pintan igual —tarjeta con las esquinas
@@ -608,7 +683,7 @@ export default function SongsListScreen() {
   // cantoral: antes la lista normal era un bloque de esquinas rectas.
   const listRows = useMemo<ListRow[]>(
     () =>
-      isTagMode
+      isTagMode || hasSubcategories
         ? toGroupedRows(filteredSongs)
         : filteredSongs.map((song, i) => ({
             kind: 'song' as const,
@@ -617,7 +692,7 @@ export default function SongsListScreen() {
             first: i === 0,
             last: i === filteredSongs.length - 1,
           })),
-    [isTagMode, filteredSongs],
+    [isTagMode, hasSubcategories, filteredSongs],
   );
 
   // ── Pista de gesto: «desliza para añadir» ────────────────────────────────
@@ -732,10 +807,13 @@ export default function SongsListScreen() {
                 })),
           currentIndex: categoryId === '__ALL__' ? undefined : index,
           source: categoryId === '__ALL__' ? undefined : 'category',
+          // Siempre la categoría de CASA: una canción prestada (`alsoIn`) se
+          // edita, se guarda y se comparte desde la suya.
           firebaseCategory:
-            categoryId === '__ALL__' || isTagMode
+            song.homeCategory ??
+            (categoryId === '__ALL__' || isTagMode
               ? song.originalCategoryKey
-              : categoryId,
+              : categoryId),
         }),
       );
     },
@@ -793,6 +871,43 @@ export default function SongsListScreen() {
             edgeInset={layout.isWide ? 0 : TAG_LIST_INSET}
           />
         )}
+        {hasSubcategories && (
+          <ScrollView
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            contentContainerStyle={styles.subChips}
+            accessibilityRole="tablist"
+          >
+            {[
+              { slug: null, title: 'Todas', emoji: undefined },
+              ...subcategories!,
+            ].map((sub) => {
+              const active = subFilter === sub.slug;
+              return (
+                <Pressable
+                  key={sub.slug ?? '__todas__'}
+                  onPress={() => {
+                    h.select();
+                    setSubFilter(sub.slug);
+                  }}
+                  accessibilityRole="tab"
+                  accessibilityState={{ selected: active }}
+                  style={[styles.subChip, active && styles.subChipActive]}
+                >
+                  <Text
+                    style={[
+                      styles.subChipText,
+                      active && styles.subChipTextActive,
+                    ]}
+                  >
+                    {sub.emoji ? `${sub.emoji} ` : ''}
+                    {sub.title}
+                  </Text>
+                </Pressable>
+              );
+            })}
+          </ScrollView>
+        )}
         {/* Conteo de canciones — siempre visible, muy sutil */}
         <View style={[styles.countRow, styles.countRowTag]}>
           <Text style={styles.songCount}>
@@ -838,6 +953,9 @@ export default function SongsListScreen() {
       handleAddTag,
       handleRemoveTag,
       layout.isWide,
+      hasSubcategories,
+      subcategories,
+      subFilter,
     ],
   );
 
@@ -881,6 +999,13 @@ export default function SongsListScreen() {
           onRemoveSong={removeSong}
           hideSeparator={row.last}
           featuredTags={featuredFor(item)}
+          badge={
+            item.borrowed
+              ? 'También en esta categoría'
+              : isSearchAll && item.subcategory
+                ? subcategoryLabel(songsData, item)
+                : undefined
+          }
           hintSwipe={item.filename === hintFilename}
           onHintShown={onHintShown}
           onSwipeAdd={onSwipeAdd}
@@ -1131,6 +1256,28 @@ const createStyles = (
     // «Por categoría» en la playlist.
     countRowTag: {
       paddingHorizontal: spacing.xs,
+    },
+    subChips: {
+      gap: spacing.xs,
+      paddingHorizontal: spacing.md,
+      paddingBottom: spacing.sm,
+    },
+    subChip: {
+      paddingHorizontal: spacing.md,
+      paddingVertical: spacing.xs + 2,
+      borderRadius: radii.pillFull,
+      backgroundColor: themeColors(scheme === 'dark').card,
+    },
+    subChipActive: {
+      backgroundColor: themeColors(scheme === 'dark').text,
+    },
+    subChipText: {
+      ...typography.footnote,
+      color: themeColors(scheme === 'dark').text,
+    },
+    subChipTextActive: {
+      color: themeColors(scheme === 'dark').background,
+      fontWeight: '600',
     },
     sectionHeader: {
       flexDirection: 'row',

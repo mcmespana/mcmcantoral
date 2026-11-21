@@ -1,3 +1,4 @@
+import { useSongDuration } from '@/hooks/useSongDuration';
 import { useAdminStatus } from '@/hooks/useAdminStatus';
 import { logger } from '@/utils/logger';
 import {
@@ -350,6 +351,7 @@ function SongDetailBody({
   const reducedMotion = useReducedMotion();
   const screenWidth = Dimensions.get('window').width;
 
+  const songDuration = useSongDuration(firebaseCategory, filename);
   const {
     songHtml,
     isLoadingSong: isSongProcessing,
@@ -373,6 +375,7 @@ function SongDetailBody({
     author,
     key,
     capo: effectiveCapo,
+    duration: songDuration,
     isDark,
     adminMode: isAdmin,
   });

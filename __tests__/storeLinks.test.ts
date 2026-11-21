@@ -52,9 +52,7 @@ describe('openAppStore en nativo', () => {
       .mockRejectedValueOnce(new Error('no handler'))
       .mockResolvedValueOnce(true);
     await openAppStore();
-    expect(openURL).toHaveBeenLastCalledWith(
-      STORE_URLS.ios,
-    );
+    expect(openURL).toHaveBeenLastCalledWith(STORE_URLS.ios);
   });
 
   it('abre el esquema nativo de Play Store en Android', async () => {
@@ -121,9 +119,7 @@ describe('openAppStore en web (PWA)', () => {
     setPlatform('web');
     setUserAgent('Mozilla/5.0 (iPhone; CPU iPhone OS 17_0)');
     await openAppStore();
-    expect(openURL).toHaveBeenCalledWith(
-      STORE_URLS.ios,
-    );
+    expect(openURL).toHaveBeenCalledWith(STORE_URLS.ios);
   });
 
   it('manda a Play Store si el user-agent es de Android', async () => {
@@ -139,9 +135,7 @@ describe('openAppStore en web (PWA)', () => {
     setPlatform('web');
     setUserAgent('Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7)');
     await openAppStore();
-    expect(openURL).toHaveBeenCalledWith(
-      STORE_URLS.ios,
-    );
+    expect(openURL).toHaveBeenCalledWith(STORE_URLS.ios);
   });
 });
 

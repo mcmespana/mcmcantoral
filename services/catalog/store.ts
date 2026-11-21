@@ -247,7 +247,11 @@ export class CatalogStore {
         shouldDownload(current[n]?.updatedAt ?? 0, remoteDates[i]),
       );
       if (pending.length === 0) {
-        this.set({ checking: false, offline: false, lastCheckAt: this.deps.now() });
+        this.set({
+          checking: false,
+          offline: false,
+          lastCheckAt: this.deps.now(),
+        });
         return { status: 'unchanged' };
       }
       const next: Catalog = { ...current };
@@ -278,13 +282,21 @@ export class CatalogStore {
         applied.push(node);
       }
       if (applied.length === 0) {
-        this.set({ checking: false, offline: false, lastCheckAt: this.deps.now() });
+        this.set({
+          checking: false,
+          offline: false,
+          lastCheckAt: this.deps.now(),
+        });
         return { status: 'unchanged' };
       }
       return await this.apply(next, applied, 'cloud');
     } catch (e) {
       logger.warn('[catálogo] sin conexión con la nube', e);
-      this.set({ checking: false, offline: true, lastCheckAt: this.deps.now() });
+      this.set({
+        checking: false,
+        offline: true,
+        lastCheckAt: this.deps.now(),
+      });
       return { status: 'offline' };
     }
   }

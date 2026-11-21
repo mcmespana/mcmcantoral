@@ -146,7 +146,9 @@ export function hasSongs(catalog: Catalog | null): boolean {
 
 type SongLike = { filename?: string; title?: string; content?: string };
 
-function index(data: SongsData | undefined): Map<string, SongLike & { category: string }> {
+function index(
+  data: SongsData | undefined,
+): Map<string, SongLike & { category: string }> {
   const out = new Map<string, SongLike & { category: string }>();
   if (!data) return out;
   for (const [category, cat] of Object.entries(data)) {
@@ -200,7 +202,9 @@ export function describeDiff(diff: CatalogDiff): string {
       `${diff.changed.length} ${diff.changed.length === 1 ? 'corregida' : 'corregidas'}`,
     );
   }
-  return parts.length ? `Cantoral actualizado · ${parts.join(' · ')}` : 'Cantoral actualizado';
+  return parts.length
+    ? `Cantoral actualizado · ${parts.join(' · ')}`
+    : 'Cantoral actualizado';
 }
 
 /**

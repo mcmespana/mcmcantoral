@@ -88,7 +88,9 @@ it('todas las rutas de Firebase caen en los nodos permitidos', () => {
 it('nadie escribe songs/updatedAt (obligaría a todos a re-bajar el cantoral)', () => {
   const hits = files
     .filter((f) => /['`]songs\/updatedAt['`]/.test(f.src))
-    .filter((f) => /set|push|update/i.test(f.src.split('songs/updatedAt')[0].slice(-40)))
+    .filter((f) =>
+      /set|push|update/i.test(f.src.split('songs/updatedAt')[0].slice(-40)),
+    )
     .map((f) => f.rel);
   expect(hits).toEqual([]);
 });

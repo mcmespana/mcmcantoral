@@ -49,6 +49,8 @@ export interface UseSongProcessorParams {
   author?: string;
   key?: string;
   capo?: number;
+  /** Duración `m:ss` (la publica el cantoral): insignia en la hoja. */
+  duration?: string;
   isFullscreen?: boolean;
   isDark?: boolean;
   /** Padding superior extra (px). Útil en fullscreen para evitar notch / close button. */
@@ -93,6 +95,7 @@ export const useSongProcessor = ({
   author,
   key,
   capo,
+  duration,
   isFullscreen = false,
   isDark = false,
   topInset,
@@ -192,6 +195,7 @@ export const useSongProcessor = ({
         author,
         key,
         capo,
+        duration,
         isFullscreen,
         adminMode,
         // En web no: el navegador ya tiene su propio zoom, y la vista previa
@@ -226,6 +230,7 @@ export const useSongProcessor = ({
     author,
     key,
     capo,
+    duration,
     isFullscreen,
     adminMode,
     systemFontScale,

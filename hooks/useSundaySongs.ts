@@ -37,12 +37,7 @@ import {
 } from '@/utils/sundaySongs';
 
 export function useSundaySongs(fecha: string) {
-  const {
-    data: songs,
-    loading,
-    offline,
-    refresh,
-  } = useCatalogSongs();
+  const { data: songs, loading, offline, refresh } = useCatalogSongs();
   const tagIndex = useSongTagIndex(songs);
   const { hiddenSlugs } = useHiddenTags();
   const { settings } = useSettings();

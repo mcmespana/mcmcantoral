@@ -386,3 +386,49 @@ describe('mapa de la canción', () => {
     expect(html).toContain('song-map mp-lyr');
   });
 });
+
+// ─── Marcado del cantoral y anotaciones (Fase 1 de Navidad) ───────────────────
+// El generador manda `<i>` (2ª voz), `<u>` (altas/bajas) y `<b>` (énfasis)
+// dentro de la letra, y `[*CLAP]` como anotación. La app recibe el ChordPro
+// ESCAPADO (`&lt;i&gt;`): nunca se tiene que ver la etiqueta.
+describe('marcado <i>/<u>/<b> y anotaciones', () => {
+  const esc = (s: string) => s.replace(/</g, '&lt;').replace(/>/g, '&gt;');
+
+  it('el marcado se pinta como clase y la etiqueta no se ve', () => {
+    const html = renderSheetHtml(
+      sheet(esc('[C]Noche <i>de [G]paz</i> y <b>amor</b>')),
+    );
+    expect(html).not.toContain('&lt;');
+    expect(html).toMatch(/class="t mk-i">de /);
+    expect(html).toMatch(/class="t mk-i">paz/);
+    expect(html).toMatch(/class="t mk-b">amor/);
+  });
+
+  it('una etiqueta sin cerrar no pasa a la línea siguiente', () => {
+    const html = renderSheetHtml(sheet(esc('<u>Todos a una\nSegunda línea')));
+    expect(html).toMatch(/mk-u">Todos/);
+    expect(html).not.toMatch(/mk-u">Segunda/);
+  });
+
+  it('el marcado no cuenta para detectar estribillos repetidos', () => {
+    const model = sheet(
+      esc(
+        '{soc}\n[C]Gloria a Dios\n{eoc}\n\nEstrofa uno\n\n{soc}\n[C]<i>Gloria</i> a Dios\n{eoc}',
+      ),
+    );
+    const choruses = model.sections.filter((s) => s.kind === 'chorus');
+    expect(choruses[1].repeatOf?.exact).toBe(true);
+  });
+
+  it('una anotación [*CLAP] va donde un acorde, con su clase, sin transportar', () => {
+    const html = renderSheetHtml(sheet('[*CLAP]Ya [D]viene'));
+    expect(html).toContain('<b class="c an">CLAP</b>');
+    expect(html).toContain('<b class="c">D</b>');
+  });
+
+  it('en un comentario el marcado se quita', () => {
+    const html = renderSheetHtml(sheet(esc('{c: <i>voces graves</i>}\nLetra')));
+    expect(html).toContain('voces graves');
+    expect(html).not.toContain('&lt;');
+  });
+});

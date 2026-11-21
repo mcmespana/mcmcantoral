@@ -27,7 +27,14 @@ export const PALETTE_COMMANDS: PaletteCommand[] = [
     subtitle: 'Categorías y canciones',
     icon: 'music-note',
     path: '/cancionero',
-    keywords: ['canciones', 'songs', 'acordes', 'cantar', 'cancionero', 'inicio'],
+    keywords: [
+      'canciones',
+      'songs',
+      'acordes',
+      'cantar',
+      'cancionero',
+      'inicio',
+    ],
   },
   {
     id: 'seleccion',

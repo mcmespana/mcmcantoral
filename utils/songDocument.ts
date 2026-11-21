@@ -7,6 +7,7 @@
  * `npm run build:sheet-bundle` (entrada: `utils/songDocumentBundle.ts`).
  * Así lo que se maqueta en el admin es lo que se verá en el móvil.
  */
+import { formatDuration, parseDuration } from './songCategories';
 import { ChordProParser, Song } from 'chordsheetjs';
 import { logger } from '@/utils/logger';
 import { UIColors } from '@/constants/colors';
@@ -490,6 +491,8 @@ export interface SongDocumentOptions {
   author?: string;
   key?: string;
   capo?: number;
+  /** Duración `m:ss` (la publica el cantoral). */
+  duration?: string;
   isFullscreen?: boolean;
   /** Números de línea del ChordPro (`data-line`) y toque largo → `{arr:}`. */
   adminMode?: boolean;
@@ -546,6 +549,7 @@ export function buildSongDocument(
     author,
     key,
     capo,
+    duration,
     isFullscreen = false,
     adminMode = false,
     systemFontScale,
@@ -596,6 +600,10 @@ export function buildSongDocument(
   }
   if (capo !== undefined && capo > 0) {
     badges += `<span class="meta-badge">Cejilla ${capo}</span>`;
+  }
+  const durationSeconds = parseDuration(duration);
+  if (durationSeconds !== null) {
+    badges += `<span class="meta-badge meta-badge-muted">${formatDuration(durationSeconds)}</span>`;
   }
   // Las marcas de revisión («♩ REVISAR ACORDES») ya no van en la letra.
   if (model.reviewNotes.length > 0) {

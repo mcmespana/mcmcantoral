@@ -38,6 +38,13 @@ export interface SheetSegment {
   chord: string;
   /** Texto bajo el acorde. Puede acabar en espacio (fin de palabra). */
   text: string;
+  /**
+   * Marcado del cantoral sobre este trozo de letra (`<i>` 2ª voz, `<u>`
+   * altas/bajas, `<b>` énfasis), como clases: `'i'`, `'u b'`…
+   */
+  mk?: string;
+  /** El «acorde» es una anotación (`[*CLAP]`): no se transporta. */
+  ann?: boolean;
 }
 
 /** Una palabra con su espacio final: la unidad que nunca se parte. */
@@ -162,6 +169,57 @@ function sectionLyrics(section: SheetSection): string {
 interface RawSeg {
   chord: string;
   text: string;
+  mk?: string;
+  ann?: boolean;
+}
+
+/** Etiqueta de marcado ya escapada (`&lt;i&gt;`, `&lt;/u&gt;`…). */
+const MARKUP_RE = /&lt;(\/?)([iub])&gt;/gi;
+
+/**
+ * Quita el marcado del cantoral de un texto (comentarios, etiquetas): donde
+ * no se pinta, no tiene que verse «&lt;i&gt;».
+ */
+export function stripMarkup(text: string): string {
+  return text.replace(MARKUP_RE, '');
+}
+
+/**
+ * Reparte el marcado de una línea (`<i>2ª voz</i>`, que puede cruzar
+ * acordes) en trozos con su clase. `state` es lo abierto al empezar y se
+ * actualiza: así una etiqueta que se abre en un par y se cierra en otro
+ * marca todo lo de en medio. Las etiquetas no se pintan nunca.
+ */
+export function applyMarkup(
+  seg: { chord: string; text: string; ann?: boolean },
+  state: Set<string>,
+): RawSeg[] {
+  const out: RawSeg[] = [];
+  let first = true;
+  let last = 0;
+  const push = (text: string) => {
+    const mk = state.size ? [...state].sort().join(' ') : undefined;
+    if (!text && !first) return;
+    out.push({
+      chord: first ? seg.chord : '',
+      text,
+      ...(mk ? { mk } : {}),
+      ...(first && seg.ann ? { ann: true } : {}),
+    });
+    first = false;
+  };
+  for (const m of seg.text.matchAll(MARKUP_RE)) {
+    const before = seg.text.slice(last, m.index);
+    if (before || first) push(before);
+    const tag = m[2].toLowerCase();
+    if (m[1]) state.delete(tag);
+    else state.add(tag);
+    last = (m.index ?? 0) + m[0].length;
+  }
+  const rest = seg.text.slice(last);
+  if (rest || first) push(rest);
+  // Un par que solo era etiquetas deja un trozo vacío sin acorde: fuera.
+  return out.filter((r, i) => i === 0 || r.text !== '' || r.chord !== '');
 }
 
 /**
@@ -177,7 +235,11 @@ export function splitIntoAtoms(raw: RawSeg[]): SheetAtom[] {
     if (cur.length) atoms.push({ segs: cur });
     cur = [];
   };
-  for (const { chord, text } of raw) {
+  for (const { chord, text, mk, ann } of raw) {
+    const extra = (c: string): Partial<SheetSegment> => ({
+      ...(mk ? { mk } : {}),
+      ...(c && ann ? { ann: true } : {}),
+    });
     // Trozos de «palabra + espacios»; el primero puede ser solo espacios.
     // Varios espacios seguidos cuentan como uno: en la letra no significan
     // nada y harían una palabra más ancha que la pantalla.
@@ -199,11 +261,11 @@ export function splitIntoAtoms(raw: RawSeg[]): SheetAtom[] {
           return;
         }
         flush();
-        cur.push({ chord: segChord, text: part });
+        cur.push({ chord: segChord, text: part, ...extra(segChord) });
         flush();
         return;
       }
-      cur.push({ chord: segChord, text: part });
+      cur.push({ chord: segChord, text: part, ...extra(segChord) });
       if (/\s$/.test(part)) flush();
     });
   }
@@ -218,7 +280,11 @@ export function splitIntoAtoms(raw: RawSeg[]): SheetAtom[] {
       a.segs.length === 1 && a.segs[0].chord && a.segs[0].text.trim() === '';
     const nextIsWord = next.segs.some((s) => s.text.trim() !== '');
     if (onSpace && nextIsWord && !next.segs[0].chord) {
-      next.segs[0] = { ...next.segs[0], chord: a.segs[0].chord };
+      next.segs[0] = {
+        ...next.segs[0],
+        chord: a.segs[0].chord,
+        ...(a.segs[0].ann ? { ann: true } : {}),
+      };
       if (i > 0) {
         const prev = atoms[i - 1];
         const tail = prev.segs[prev.segs.length - 1];
@@ -364,6 +430,9 @@ export function buildSheet(song: Song, opts: BuildSheetOptions): SheetModel {
       const type =
         line.type === 'chorus' || line.type === 'bridge' ? line.type : 'verse';
       const raw: RawSeg[] = [];
+      // Marcado abierto en esta línea (`<i>`, `<u>`, `<b>`): no pasa a la
+      // siguiente, así una etiqueta sin cerrar no tiñe la canción entera.
+      const markup = new Set<string>();
       for (const item of line.items) {
         if (isPair(item)) {
           const chord = item.annotation
@@ -371,12 +440,17 @@ export function buildSheet(song: Song, opts: BuildSheetOptions): SheetModel {
             : item.chords
               ? convertChord(item.chords, opts.notation)
               : '';
-          raw.push({ chord, text: item.lyrics ?? '' });
+          raw.push(
+            ...applyMarkup(
+              { chord, text: item.lyrics ?? '', ann: !!item.annotation },
+              markup,
+            ),
+          );
           continue;
         }
         if (!isTag(item)) continue;
         const name = item.name.toLowerCase();
-        const value = (item.value ?? '').trim();
+        const value = stripMarkup((item.value ?? '').trim());
         if (!COMMENT_TAGS.has(name) || !value) continue;
 
         if (value.startsWith(ARR_SENTINEL)) {
@@ -684,13 +758,21 @@ function atomHtml(atom: SheetAtom, extra = ''): string {
   const segs = atom.segs
     .map((s, i) => {
       const mid = i < atom.segs.length - 1 ? ' m' : '';
-      const chord = s.chord ? `<b class="c">${s.chord}</b>` : '';
+      const chord = s.chord
+        ? `<b class="c${s.ann ? ' an' : ''}">${s.chord}</b>`
+        : '';
+      const mk = s.mk
+        ? s.mk
+            .split(' ')
+            .map((c) => ` mk-${c}`)
+            .join('')
+        : '';
       // Un texto de solo espacios (acorde «al aire», sobre un hueco) no se
       // pintaría dentro de un flex: se escribe como espacios duros.
       const text = /^\s+$/.test(s.text)
         ? s.text.replace(/\s/g, '&#160;')
         : s.text;
-      return `<span class="s${mid}">${chord}<span class="t">${text}</span></span>`;
+      return `<span class="s${mid}">${chord}<span class="t${mk}">${text}</span></span>`;
     })
     .join('');
   return `<span class="${cls}">${extra}${segs}</span>`;

@@ -68,7 +68,6 @@ const SONGS = {
   },
 };
 
-
 const FIXTURES: Record<string, unknown> = {
   songs: SONGS,
 };
