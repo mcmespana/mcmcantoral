@@ -65,28 +65,11 @@ export function useDailyReadings(dateStr: string) {
 
         // 1. Check local cache first
         const cacheKey = `${CACHE_PREFIX}${dateStr}`;
-        let cached = await AsyncStorage.getItem(cacheKey);
-
-        let foundInBookmarks: any = null;
-
-        if (!cached) {
-          // Fallback to bookmarks if not in regular cache
-          try {
-            const bStr = await AsyncStorage.getItem('@contigo_bookmarks');
-            if (bStr) {
-              const bookmarks = JSON.parse(bStr);
-              const found = bookmarks.find((b: any) => b.date === dateStr);
-              if (found && found.readings) {
-                foundInBookmarks = found.readings;
-                cached = JSON.stringify(foundInBookmarks);
-              }
-            }
-          } catch {}
-        }
+        const cached = await AsyncStorage.getItem(cacheKey);
 
         if (cached) {
           if (isMounted) {
-            setReadings(foundInBookmarks || JSON.parse(cached));
+            setReadings(JSON.parse(cached));
             setIsLoading(false); // We can show cached data while we might re-fetch
           }
         }

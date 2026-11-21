@@ -1,9 +1,9 @@
 /**
- * Recorrido de las carpetas de ruta migradas (Expo 58): se abre CADA fichero de
- * ruta de `mas/`, `visitapapa/` y `cancionero/` con el router de verdad y se comprueba que
- * monta y que el `_layout` y los ficheros están de acuerdo.
+ * Recorrido de la carpeta de rutas del cantoral (Expo 58): se abre CADA fichero
+ * de ruta de `cancionero/` con el router de verdad y se comprueba que monta y
+ * que el `_layout` y los ficheros están de acuerdo.
  *
- * Lo que cubre y `tabsMountWithRouter` no: un `Stack.Screen` declarado sin
+ * Lo que cubre: un `Stack.Screen` declarado sin
  * fichero (o un fichero sin declarar), un fragmento donde expo-router espera un
  * array de pantallas («Unknown child element passed to Stack», que en el móvil
  * revienta), y rutas que se rompen al abrirse una a una. Los avisos de
@@ -38,11 +38,6 @@ jest.mock('@expo/vector-icons/MaterialIcons', () => {
   C.displayName = 'MaterialIcons';
   return { __esModule: true, default: C };
 });
-jest.mock('../../styles/comunica.module.css', () => ({}));
-// La hoja de Reflexiones (heroui → `@gorhom/bottom-sheet`) no cabe en el mock de
-// Reanimated (`layoutState.get is not a function`): se usa el mock oficial de
-// la librería. No es lo que se prueba aquí.
-jest.mock('@gorhom/bottom-sheet', () => require('@gorhom/bottom-sheet/mock'));
 jest.mock('react-native-webview', () => {
   const Local = require('react');
   return {
@@ -56,9 +51,9 @@ import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { __resetMockDb, __setMockSnapshot } from '@/__mocks__/firebase';
 import AppProviders from '@/components/AppProviders';
-import { Slot, Stack } from 'expo-router';
+import { Slot } from 'expo-router';
 
-const TABS_DIR = path.join(__dirname, '..', '..', 'app', '(tabs)');
+const APP_DIR = path.join(__dirname, '..', '..', 'app');
 
 const METRICS = {
   frame: { x: 0, y: 0, width: 390, height: 844 },
@@ -74,14 +69,14 @@ const raiz = () => (
   </GestureHandlerRootView>
 );
 
-/** Todos los ficheros de ruta de una carpeta de pestaña, tal cual los lee el router. */
+/** Todos los ficheros de ruta de una carpeta, tal cual los lee el router. */
 function rutasDe(tab: string): Record<string, unknown> {
-  const dir = path.join(TABS_DIR, tab);
+  const dir = path.join(APP_DIR, tab);
   const out: Record<string, unknown> = {};
   for (const file of fs.readdirSync(dir)) {
     if (!file.endsWith('.tsx')) continue;
     const name = file.replace(/\.tsx$/, '');
-    out[`(tabs)/${tab}/${name}`] = require(path.join(dir, file)).default;
+    out[`${tab}/${name}`] = require(path.join(dir, file)).default;
   }
   return out;
 }
@@ -103,21 +98,14 @@ const avisosDeRutas = () =>
     .map((c) => String(c[0]))
     .filter((m) => AVISOS_DE_RUTAS.test(m));
 
-const QUERY_EVENTO =
-  'eventId=visitapapa26&dia=0&act=0&url=https%3A%2F%2Fexample.com&title=Comida';
 // Sin datos en la caché: la canción no aparece y el detalle lo dice (la
 // pantalla completa vuelve atrás). El recorrido con canciones de verdad está
 // en `cantoralJourney.test.tsx`.
 const QUERY_CANTORAL = 'categoryId=__ALL__&categoryName=Buscar&filename=x.cho';
 
-describe.each([
-  ['mas', '/mas', QUERY_EVENTO],
-  ['visitapapa', '/visitapapa', QUERY_EVENTO],
-  ['cancionero', '/cancionero', QUERY_CANTORAL],
-])('recorrido de «%s»', (tab, base, query) => {
+describe.each([['cancionero', '/cancionero', QUERY_CANTORAL]])('recorrido de «%s»', (tab, base, query) => {
   const rutas = () => ({
     _layout: raiz,
-    '(tabs)/_layout': () => <Stack screenOptions={{ headerShown: false }} />,
     ...rutasDe(tab),
   });
   const slugs = Object.keys(rutasDe(tab))

@@ -2,59 +2,59 @@
 
 // Sentry el PRIMERO de todos los imports: se arranca como efecto de cargar el
 // módulo, así que cuanto antes se importe, más crashes de arranque captura.
-// Sin `EXPO_PUBLIC_SENTRY_DSN` no hace absolutamente nada.
+// Sin `EXPO_PUBLIC_SENTRY_DSN` no hace absolutamente nada (D-15: apagado).
 import { wrapRoot } from '@/utils/sentry';
 
-import '../notifications/NotificationHandler'; // Inicializa el handler de notificaciones
-import usePushNotifications from '../notifications/usePushNotifications'; // Hook para notificaciones push
-
-import React, { useState, useEffect, useCallback } from 'react';
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import React, { useCallback, useEffect, useState } from 'react';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
-import { View, StyleSheet, Platform } from 'react-native';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import {
   ThemeProvider as NavThemeProvider,
   DarkTheme,
   DefaultTheme,
 } from 'expo-router/react-navigation';
-import { usePathname, useSegments, router, Stack } from 'expo-router';
+import { usePathname, Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { useColorScheme } from '@/hooks/useColorScheme';
 import { useStatusBarTheme } from '@/hooks/useStatusBarTheme';
-import { useUserProfile } from '@/contexts/UserProfileContext';
 import { useSelectedSongs } from '@/contexts/SelectedSongsContext';
 import { useIncomingPlaylist } from '@/hooks/useIncomingPlaylist';
 import { useRegisterServiceWorker } from '@/hooks/useRegisterServiceWorker';
 import { useScreenTracking } from '@/hooks/useScreenTracking';
 import { useDocumentTitle } from '@/hooks/useDocumentTitle';
+import { useCantoralConfig } from '@/hooks/useCantoralConfig';
 import { trackEvent } from '@/utils/analytics';
 import { tramoTamano } from '@/constants/analyticsEvents';
-import { useResolvedProfileConfig } from '@/hooks/useResolvedProfileConfig';
-import { HelloWave } from '@/components/HelloWave';
 import AddToHomeBanner from '@/components/AddToHomeBanner';
 import CommandPalette from '@/components/CommandPalette';
 import ErrorBoundary from '@/components/ErrorBoundary';
 import MaintenanceScreen from '@/components/MaintenanceScreen';
 import UpdateRequiredScreen from '@/components/UpdateRequiredScreen';
-import { useToast } from '@/contexts/AppToastContext';
-import { PreviewChannelModal } from '@/components/PreviewChannelModal';
-import { useAuth } from '@/contexts/AuthContext';
-import { updateUserMCMData } from '@/utils/authHelpers';
 import FirebaseConfigErrorScreen from '@/components/FirebaseConfigErrorScreen';
-import CarismochitoOverlay from '@/components/CarismochitoOverlay';
+import { useToast } from '@/contexts/AppToastContext';
 import { useVersionGate } from '@/contexts/VersionGateContext';
+import { getFirebaseApp } from '@/utils/firebaseApp';
 // Importar iconos para asegurar que se incluyan en el build
 import '@/constants/iconAssets';
-import colors from '@/constants/colors';
 import AppProviders from '@/components/AppProviders';
-import ComunicaBackground from '@/components/comunica/ComunicaBackground';
-import ContigoRemindersBackground from '@/components/contigo/ContigoRemindersBackground';
 import { holdSplash, releaseSplash } from '@/utils/splashGate';
 
 // El splash nativo se queda hasta que el layout sabe qué pintar (ver
 // `utils/splashGate.ts`, que además lo suelta solo si algo se cuelga).
 holdSplash();
+
+/**
+ * Firebase mal configurado en el build (faltan las `EXPO_PUBLIC_FIREBASE_*`).
+ * Se resuelve una vez: es un fallo del build, no algo que cambie en marcha.
+ */
+function readFirebaseConfigError(): string | null {
+  try {
+    getFirebaseApp();
+    return null;
+  } catch (error) {
+    return error instanceof Error ? error.message : String(error);
+  }
+}
 
 function RootLayout() {
   return (
@@ -63,7 +63,7 @@ function RootLayout() {
         <SafeAreaProvider>
           {/* La torre de providers vive en `components/AppProviders.tsx`:
               el orden importa y hace falta montarla igual en los tests de
-              humo de pantallas. Ver el docblock de ese fichero. */}
+              humo de pantallas. */}
           <AppProviders>
             <InnerLayout />
           </AppProviders>
@@ -74,22 +74,15 @@ function RootLayout() {
 }
 
 /**
- * - `checking`: aún no se sabe si toca la bienvenida; se pinta `null` y el
- *   splash nativo sigue encima.
- * - `show`: primer arranque de la vida de la app → HelloWave 600 ms.
- * - `done`: la app.
+ * Una sola pila, sin pestañas ni FAB (T-05, DIV-001): `/` entra directo en el
+ * cantoral (`app/index.tsx`) y las rutas `/cancionero/*` se conservan para que
+ * los enlaces de MCM App sigan valiendo.
  */
-type WelcomePhase = 'checking' | 'show' | 'done';
-
 function InnerLayout() {
-  const [welcome, setWelcome] = useState<WelcomePhase>('checking');
-  const showAnimation = welcome !== 'done';
   const scheme = useColorScheme();
   const pathname = usePathname();
-  const segments = useSegments();
-  const { profile, loading: profileLoading } = useUserProfile();
-  const { user: authUser, configError: firebaseConfigError } = useAuth();
-  const resolved = useResolvedProfileConfig();
+  const [firebaseConfigError] = useState(readFirebaseConfigError);
+  const config = useCantoralConfig();
   const {
     updateRequired,
     updateSkipped,
@@ -99,25 +92,10 @@ function InnerLayout() {
     currentVersion: appVersion,
     minAppVersion,
   } = useVersionGate();
-
-  // Sync MCM profile data to RTDB whenever user is logged in and profile changes
-  useEffect(() => {
-    if (!authUser) return;
-    updateUserMCMData(authUser.uid, {
-      profileType: profile.profileType,
-      delegationId: profile.delegationId,
-      onboardingCompleted: profile.onboardingCompleted,
-    });
-  }, [
-    authUser,
-    profile.profileType,
-    profile.delegationId,
-    profile.onboardingCompleted,
-  ]);
   const { addSong } = useSelectedSongs();
   const { toast } = useToast();
 
-  // Handle incoming .mcm files (opened from WhatsApp, Files, etc.)
+  // Ficheros .mcm que llegan de fuera (WhatsApp, Archivos…).
   const handleIncomingPlaylist = useCallback(
     (songs: string[]) => {
       songs.forEach((fn) => addSong(fn));
@@ -126,7 +104,7 @@ function InnerLayout() {
         tamano: tramoTamano(songs.length),
       });
       toast.show({
-        label: `Playlist importada (${songs.length} ${songs.length === 1 ? 'canción' : 'canciones'})`,
+        label: `Repertorio importado (${songs.length} ${songs.length === 1 ? 'canción' : 'canciones'})`,
         actionLabel: 'OK',
         onActionPress: ({ hide }) => hide(),
       });
@@ -136,90 +114,27 @@ function InnerLayout() {
   useIncomingPlaylist(handleIncomingPlaylist);
 
   useStatusBarTheme(pathname);
-  // Analítica: arranca Aptabase y registra cada cambio de pantalla. Sin
-  // EXPO_PUBLIC_APTABASE_KEY no hace nada.
+  // Analítica: sin EXPO_PUBLIC_APTABASE_KEY no hace nada (D-15).
   useScreenTracking();
   // Web: título de la pestaña del navegador según la pantalla.
   useDocumentTitle();
+  // Registra el service worker en web (PWA).
+  useRegisterServiceWorker();
+
+  // Sin bienvenida ni onboarding: en cuanto hay layout, fuera el splash.
+  useEffect(() => {
+    releaseSplash();
+  }, []);
 
   const navigationTheme = scheme === 'dark' ? DarkTheme : DefaultTheme;
 
-  useEffect(() => {
-    let timer: ReturnType<typeof setTimeout>;
-    const showWelcome = () => {
-      setWelcome('show');
-      timer = setTimeout(() => setWelcome('done'), 600);
-    };
-    AsyncStorage.getItem('seenWelcomeOnce')
-      .then((seen) => {
-        if (seen) {
-          setWelcome('done');
-          return;
-        }
-        AsyncStorage.setItem('seenWelcomeOnce', '1').catch(() => {});
-        showWelcome();
-      })
-      .catch(showWelcome);
-    return () => clearTimeout(timer);
-  }, []);
-
-  // En cuanto hay algo que pintar (la bienvenida o la app), fuera el splash.
-  useEffect(() => {
-    if (welcome !== 'checking') releaseSplash();
-  }, [welcome]);
-
-  // Redirigir al onboarding si:
-  //   - la config global pide onboarding (`showOnboarding`)
-  //   - el usuario no lo ha completado ni lo ha saltado (`profileType === null`)
-  // El banner de la Home se ocupará del caso "saltado" (profileType definido pero `onboardingCompleted === false`).
-  useEffect(() => {
-    if (showAnimation) return;
-    if (profileLoading) return;
-    if (Platform.OS === 'web') return; // Omitir onboarding inicial en plataforma web
-    if (!resolved.showOnboarding) return;
-    if (profile.profileType !== null) return;
-    // Evitar redirigir si ya estamos en la pantalla de onboarding.
-    // (segments[0] está tipado por expo-router con las rutas conocidas; la
-    //  ruta `onboarding` es un Stack.Screen registrado más abajo, no se
-    //  detecta automáticamente — comparación con cast.)
-    if ((segments[0] as string) === 'onboarding') return;
-    router.replace('/onboarding' as any);
-  }, [
-    showAnimation,
-    profileLoading,
-    resolved.showOnboarding,
-    profile.profileType,
-    segments,
-  ]);
-
-  usePushNotifications();
-
-  // Registra el service worker en web (PWA)
-  useRegisterServiceWorker();
-
-  if (welcome === 'checking') return null;
-
-  if (welcome === 'show') {
-    return (
-      <View
-        style={[
-          styles.animationContainer,
-          scheme === 'dark' && styles.animationContainerDark,
-        ]}
-      >
-        <HelloWave />
-      </View>
-    );
-  }
-
-  // Firebase mal configurado — pantalla de diagnóstico para el desarrollador
   if (firebaseConfigError) {
     return <FirebaseConfigErrorScreen error={firebaseConfigError} />;
   }
 
-  // Kill switches remotos: mantenimiento + versión mínima
-  if (resolved.maintenanceMode) {
-    return <MaintenanceScreen message={resolved.maintenanceMessage} />;
+  // Interruptores remotos propios del cantoral (`songs/cantoralConfig`).
+  if (config.maintenance) {
+    return <MaintenanceScreen message={config.maintenanceMessage} />;
   }
   if (updateRequired && !updateSkipped) {
     return (
@@ -234,80 +149,20 @@ function InnerLayout() {
 
   return (
     <NavThemeProvider value={navigationTheme}>
-      <Stack>
-        <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-        <Stack.Screen name="notifications" options={{ headerShown: false }} />
-        <Stack.Screen
-          name="onboarding"
-          options={{
-            headerShown: false,
-            presentation: 'fullScreenModal',
-            contentStyle: { backgroundColor: colors.primary },
-          }}
-        />
-        <Stack.Screen
-          name="wordle"
-          options={{
-            headerShown: true,
-            title: 'Wordle Jubileo',
-          }}
-        />
-        <Stack.Screen name="evaluacion-app" options={{ headerShown: false }} />
-        <Stack.Screen name="encuesta/[id]" options={{ headerShown: false }} />
-        {/* Solo se llega desde el Laboratorio Alpha (ver app/carismochito.tsx). */}
-        <Stack.Screen
-          name="carismochito"
-          options={{ headerShown: true, title: 'Colección' }}
-        />
-        {/* Solo se llega desde el Laboratorio Alpha (ver app/panuelo.tsx). */}
-        <Stack.Screen
-          name="panuelo"
-          // Sin el gesto de «atrás» de iOS: girar el pañuelo o arrastrar una
-          // pieza desde el borde se llevaba la pantalla. Se sale con la flecha.
-          // En iOS la cabecera va transparente y la pantalla reserva su alto
-          // (`useHeaderHeight` en app/panuelo.tsx): así se sabe siempre dónde
-          // empieza el contenido, sin medirlo.
-          options={{
-            headerShown: true,
-            title: 'Tu pañuelo',
-            gestureEnabled: false,
-            headerTransparent: Platform.OS === 'ios',
-            headerBackButtonDisplayMode: 'minimal',
-          }}
-        />
-        <Stack.Screen
-          name="playlist"
-          options={{
-            headerShown: false,
-          }}
-        />
+      <Stack screenOptions={{ headerShown: false }}>
+        <Stack.Screen name="index" />
+        <Stack.Screen name="cancionero" />
+        <Stack.Screen name="playlist" />
+        <Stack.Screen name="coro" />
         {/* Enlace a una canción (`/cancion?f=…`): puente al cantoral. */}
-        <Stack.Screen name="cancion" options={{ headerShown: false }} />
+        <Stack.Screen name="cancion" />
       </Stack>
       <StatusBar style={scheme === 'dark' ? 'light' : 'dark'} />
       <AddToHomeBanner />
       <CommandPalette />
-      <PreviewChannelModal />
-      <CarismochitoOverlay />
-      {/* Avisos del área de Comunica: registro del móvil y aviso local (plan 08). */}
-      <ComunicaBackground />
-      <ContigoRemindersBackground />
     </NavThemeProvider>
   );
 }
 
-const styles = StyleSheet.create({
-  animationContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: '#fff',
-  },
-  animationContainerDark: {
-    backgroundColor: '#2C2C2E',
-  },
-});
-
-// `wrapRoot` es la identidad cuando Sentry está apagado (sin DSN), así que el
-// árbol de componentes no cambia en absoluto en ese caso.
+// `wrapRoot` es la identidad cuando Sentry está apagado (sin DSN).
 export default wrapRoot(RootLayout);

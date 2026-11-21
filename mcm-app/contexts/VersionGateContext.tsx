@@ -8,8 +8,8 @@ import React, {
 } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import Constants from 'expo-constants';
-import { useResolvedProfileConfig } from '@/hooks/useResolvedProfileConfig';
-import { isAppVersionSupported } from '@/utils/resolveProfileConfig';
+import { useCantoralConfig } from '@/hooks/useCantoralConfig';
+import { isAppVersionSupported } from '@/utils/appVersion';
 import { openAppStore } from '@/utils/storeLinks';
 import { logger } from '@/utils/logger';
 
@@ -80,7 +80,7 @@ export function VersionGateProvider({
 }: {
   children: React.ReactNode;
 }) {
-  const resolved = useResolvedProfileConfig();
+  const resolved = useCantoralConfig();
   const [updateSkipped, setUpdateSkipped] = useState(false);
   // `null` = aún sin leer del disco.
   const [skipsUsed, setSkipsUsed] = useState<number | null>(null);

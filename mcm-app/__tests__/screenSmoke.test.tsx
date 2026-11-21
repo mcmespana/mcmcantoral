@@ -132,23 +132,13 @@ jest.mock('expo-router/react-navigation', () => {
 //
 // Se importan DESPUÉS de los mocks (Jest los eleva, pero el orden deja claro
 // de qué depende cada cosa). Son las pantallas de contenido: las que la gente
-// abre y las que han dado guerra. Las rutas de `app/(tabs)/*` son navegadores
+// abre y las que han dado guerra. Las rutas de `app/cancionero/*` son navegadores
 // de expo-router, no pantallas, y montarlas aquí probaría el router y no el
 // código de la casa.
-import AppsScreen from '@/app/screens/AppsScreen';
 import CategoriesScreen from '@/app/screens/CategoriesScreen';
-import ContactosScreen from '@/app/screens/ContactosScreen';
-import EventosPasadosScreen from '@/app/screens/EventosPasadosScreen';
-import GruposScreen from '@/app/screens/GruposScreen';
-import HorarioScreen from '@/app/screens/HorarioScreen';
-import MasHomeScreen from '@/app/screens/MasHomeScreen';
-import MaterialesScreen from '@/app/screens/MaterialesScreen';
-import ProfundizaScreen from '@/app/screens/ProfundizaScreen';
-import ReflexionesScreen from '@/app/screens/ReflexionesScreen';
 import SelectedSongsScreen from '@/app/screens/SelectedSongsScreen';
 import SongListScreen from '@/app/screens/SongListScreen';
-import VisitasScreen from '@/app/screens/VisitasScreen';
-import NotificationsScreen from '@/app/notifications/index';
+import SundaySongsScreen from '@/app/screens/SundaySongsScreen';
 
 const INITIAL_METRICS = {
   frame: { x: 0, y: 0, width: 390, height: 844 },
@@ -171,32 +161,13 @@ const CACHE = {
       ],
     },
   },
-  'jubileo/grupos': [{ nombre: 'Grupo 1', miembros: ['Ana', 'Luis'] }],
-  'jubileo/horario': [{ dia: 'Lunes', actividades: [] }],
-  'jubileo/materiales': [{ titulo: 'Material', contenido: '[b]Hola[/b]' }],
-  'jubileo/profundiza': [{ titulo: 'Tema', contenido: 'Texto' }],
-  'jubileo/contactos': [{ nombre: 'Contacto', telefono: '600000000' }],
-  'jubileo/visitas': [{ titulo: 'Visita', fecha: '2026-09-10' }],
-  'jubileo/compartiendo': {},
 } as const;
 
 const PANTALLAS: [string, React.ComponentType<any>][] = [
   ['Cantoral (categorías)', CategoriesScreen],
-  ['Más', MasHomeScreen],
-  ['Reflexiones', ReflexionesScreen],
-  ['Grupos', GruposScreen],
-  ['Horario', HorarioScreen],
-  ['Materiales', MaterialesScreen],
-  ['Profundiza', ProfundizaScreen],
-  ['Contactos', ContactosScreen],
-  ['Visitas', VisitasScreen],
-  ['Apps', AppsScreen],
-  ['Eventos pasados', EventosPasadosScreen],
-  // Las dos que petaban al montar el 2026-09-09, por si hacía falta decir a
-  // qué viene todo esto.
-  ['Notificaciones', NotificationsScreen],
   ['Cantoral (canciones)', SongListScreen],
   ['Tu selección', SelectedSongsScreen],
+  ['Cantos del domingo', SundaySongsScreen],
 ];
 
 type Escenario = 'vacía' | 'con datos' | 'offline';

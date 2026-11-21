@@ -58,7 +58,7 @@ export default function PlaylistDeepLink() {
         // ignore
       }
     }
-    router.replace('/(tabs)/cancionero' as any);
+    router.replace('/cancionero' as any);
   }, [code, offline, choirId]);
 
   return (

@@ -26,7 +26,7 @@ import {
   type SelectedSong,
 } from '@/contexts/SelectedSongsContext';
 import { useChoirSession } from '@/contexts/ChoirSessionContext';
-import { useUserProfile } from '@/contexts/UserProfileContext';
+import { useAppSettings } from '@/contexts/AppSettingsContext';
 import { useMyChoir, type MyChoir } from '@/hooks/useMyChoir';
 import { usePlaylistLink, type PlaylistLink } from '@/hooks/usePlaylistLink';
 import {
@@ -64,7 +64,7 @@ export function usePlaylistSharing(opts: {
   onShowQr: (link: PlaylistLink) => void;
 }) {
   const { selectedSongs, replaceAll, clearSelection } = useSelectedSongs();
-  const { profile } = useUserProfile();
+  const { settings } = useAppSettings();
   const choirSession = useChoirSession();
   const { toast } = useToast();
   const { choir: myChoir, setChoir: setMyChoir } = useMyChoir();
@@ -78,9 +78,9 @@ export function usePlaylistSharing(opts: {
   const identity = useMemo(
     () => ({
       deviceId: choirSession.deviceId,
-      name: profile.name?.trim() || undefined,
+      name: settings.choirName.trim() || undefined,
     }),
-    [choirSession.deviceId, profile.name],
+    [choirSession.deviceId, settings.choirName],
   );
 
   const signature = useMemo(

@@ -41,7 +41,7 @@ export default function ChoirDeepLink() {
         // ignore
       }
     }
-    router.replace('/(tabs)/cancionero' as any);
+    router.replace('/cancionero' as any);
   }, [code]);
 
   return (

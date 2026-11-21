@@ -13,31 +13,24 @@
  * Gana el detalle si lo hay. Fuera de la web no se toca nada.
  */
 import { Platform } from 'react-native';
-import { TABS_CONFIG } from '@/constants/tabsCatalog';
 
 /** Nombre de la app en la pestaña. El mismo que el `<title>` de `+html.tsx`. */
-export const APP_TITLE = 'MCM España';
+export const APP_TITLE = 'MCM Cantoral';
 
-/** Rutas de primer nivel que no son pestañas, con su nombre legible. */
-const EXTRA_ROUTES: Record<string, string> = {
-  notifications: 'Notificaciones',
-  wordle: 'Wordle',
-  playlist: 'Cantoral',
-  coro: 'Cantoral',
+/** Rutas de primer nivel con su nombre legible. */
+const ROUTES: Record<string, string> = {
+  cancionero: 'Cantoral',
+  playlist: 'Repertorio',
+  coro: 'Directo',
   cancion: 'Cantoral',
-  encuesta: 'Encuesta',
-  'evaluacion-app': 'Valora la app',
-  carismochito: 'Colección',
-  onboarding: 'Bienvenida',
 };
 
-/** «Etiqueta · MCM» según el primer segmento de la ruta; la raíz, el nombre. */
+/** «Etiqueta · MCM Cantoral» según el primer segmento; la raíz, el nombre. */
 export function titleForPath(pathname: string): string {
   const segment = pathname.split('?')[0].split('/').filter(Boolean)[0];
   if (!segment) return APP_TITLE;
-  const tab = TABS_CONFIG.find((t) => t.name === segment);
-  const label = tab?.label ?? EXTRA_ROUTES[segment];
-  return label ? `${label} · MCM` : APP_TITLE;
+  const label = ROUTES[segment];
+  return label && label !== 'Cantoral' ? `${label} · ${APP_TITLE}` : APP_TITLE;
 }
 
 /** Título de una canción abierta: «Alzad las manos · Cantoral». */

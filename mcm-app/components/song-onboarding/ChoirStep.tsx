@@ -22,7 +22,7 @@ import {
   type SheetPalette,
 } from '@/components/song-sheet/sheetKit';
 import { useChoirSession } from '@/contexts/ChoirSessionContext';
-import { useUserProfile } from '@/contexts/UserProfileContext';
+import { useAppSettings } from '@/contexts/AppSettingsContext';
 import { useMyChoir } from '@/hooks/useMyChoir';
 import {
   createChoir,
@@ -50,7 +50,7 @@ export default function ChoirStep({
   const t = themeColors(isDark);
   const { choir: myChoir, setChoir } = useMyChoir();
   const { deviceId } = useChoirSession();
-  const { profile } = useUserProfile();
+  const { settings } = useAppSettings();
 
   const [choirs, setChoirs] = useState<Choir[] | null>(null);
   const [loadError, setLoadError] = useState(false);
@@ -92,7 +92,7 @@ export default function ChoirStep({
     try {
       const created = await createChoir(name, {
         deviceId,
-        name: profile.name?.trim() || undefined,
+        name: settings.choirName.trim() || undefined,
       });
       h.formSuccess();
       setChoir({ id: created.id, name: created.name });

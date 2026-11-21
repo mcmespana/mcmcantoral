@@ -1,46 +1,31 @@
 import React from 'react';
 import { HeroUINativeProvider } from 'heroui-native';
 
-import { ActiveEventProvider } from '@/contexts/ActiveEventContext';
 import { AppSettingsProvider } from '@/contexts/AppSettingsContext';
 import { AppToastProvider } from '@/contexts/AppToastContext';
-import { AuthProvider } from '@/contexts/AuthContext';
-import { CalendarConfigProvider } from '@/contexts/CalendarConfigContext';
-import { CarismochitoProvider } from '@/contexts/CarismochitoContext';
-import { CarismochitoHuntProvider } from '@/contexts/CarismochitoHuntContext';
 import { ChoirSessionProvider } from '@/contexts/ChoirSessionContext';
-import { EventSubscriptionsProvider } from '@/contexts/EventSubscriptionsContext';
-import { NotificationsProvider } from '@/contexts/NotificationsContext';
 import { OTAProvider } from '@/contexts/OTAContext';
 import { OverlayStackProvider } from '@/contexts/OverlayStackContext';
-import { PreviewChannelProvider } from '@/contexts/PreviewChannelContext';
-import { ProfileConfigProvider } from '@/contexts/ProfileConfigContext';
 import { SelectedSongsProvider } from '@/contexts/SelectedSongsContext';
-import { UserProfileProvider } from '@/contexts/UserProfileContext';
 import { VersionGateProvider } from '@/contexts/VersionGateContext';
 import UniwindThemeBridge from '@/components/UniwindThemeBridge';
 
 /**
  * La torre de providers de la app, en su orden exacto.
  *
- * **Por qué está aquí y no en `app/_layout.tsx`.** El orden importa —
- * `AuthProvider` necesita el perfil, `OTAProvider` el canal de preview,
- * `VersionGateProvider` la config remota— así que no se puede reconstruir "a
- * mano" en otro sitio sin que se desincronice. Y hace falta reconstruirlo:
- * `__tests__/screenSmoke.test.tsx` monta las pantallas DENTRO de los
- * providers de verdad, que es la única forma de que un test se enterase de
- * fallos como los del 2026-09-09 (dos pantallas que petaban al montar en
- * cualquier plataforma sin que lo viera `tsc`, el lint ni 1.600 tests).
+ * **Por qué está aquí y no en `app/_layout.tsx`.** El orden importa y hace
+ * falta reconstruirlo igual en `__tests__/screenSmoke.test.tsx`, que monta las
+ * pantallas DENTRO de los providers de verdad (es la única forma de que un
+ * test se entere de una pantalla que peta al montar). Teniéndolo en un solo
+ * componente, añadir un provider lo mete en la app Y en el test a la vez.
  *
- * Teniéndolo en un solo componente, añadir un provider lo mete en la app Y en
- * el test a la vez. Si esto se vuelve a copiar en el layout, el test empieza a
- * mentir el día que cambie el orden.
+ * MCM Cantoral no tiene perfiles, login, notificaciones ni eventos: solo lo
+ * que usa el cantoral (`docs/planes/fork-cantoral/01-arranque-y-poda.md`
+ * §2.3).
  *
  * Fuera de aquí se quedan, a propósito, `ErrorBoundary`,
- * `GestureHandlerRootView` y `SafeAreaProvider`: son la cáscara de la app (uno
- * captura, los otros dos necesitan medidas de pantalla reales) y en un test se
- * quieren controlar a mano — el ErrorBoundary, sobre todo, porque un test que
- * lo lleve dentro se traga el error que queremos ver.
+ * `GestureHandlerRootView` y `SafeAreaProvider`: son la cáscara de la app y
+ * en un test se quieren controlar a mano.
  */
 export default function AppProviders({
   children,
@@ -51,38 +36,16 @@ export default function AppProviders({
     <HeroUINativeProvider config={{ devInfo: { stylingPrinciples: false } }}>
       <AppToastProvider>
         <OverlayStackProvider>
-          <ProfileConfigProvider>
-            <AppSettingsProvider>
-              <UniwindThemeBridge />
-              <UserProfileProvider>
-                <EventSubscriptionsProvider>
-                  <AuthProvider>
-                    <SelectedSongsProvider>
-                      <ChoirSessionProvider>
-                        <NotificationsProvider>
-                          <CalendarConfigProvider>
-                            <PreviewChannelProvider>
-                              <OTAProvider>
-                                <CarismochitoProvider>
-                                  <CarismochitoHuntProvider>
-                                    <ActiveEventProvider>
-                                      <VersionGateProvider>
-                                        {children}
-                                      </VersionGateProvider>
-                                    </ActiveEventProvider>
-                                  </CarismochitoHuntProvider>
-                                </CarismochitoProvider>
-                              </OTAProvider>
-                            </PreviewChannelProvider>
-                          </CalendarConfigProvider>
-                        </NotificationsProvider>
-                      </ChoirSessionProvider>
-                    </SelectedSongsProvider>
-                  </AuthProvider>
-                </EventSubscriptionsProvider>
-              </UserProfileProvider>
-            </AppSettingsProvider>
-          </ProfileConfigProvider>
+          <AppSettingsProvider>
+            <UniwindThemeBridge />
+            <SelectedSongsProvider>
+              <ChoirSessionProvider>
+                <OTAProvider>
+                  <VersionGateProvider>{children}</VersionGateProvider>
+                </OTAProvider>
+              </ChoirSessionProvider>
+            </SelectedSongsProvider>
+          </AppSettingsProvider>
         </OverlayStackProvider>
       </AppToastProvider>
     </HeroUINativeProvider>

@@ -16,7 +16,7 @@ import {
   cantoralHref,
   type CantoralScreenName,
   type RouteParams,
-} from '@/utils/eventRoutes';
+} from '@/utils/cantoralRoutes';
 
 export function openCantoral(
   screen: CantoralScreenName,

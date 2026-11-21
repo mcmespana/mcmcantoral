@@ -82,8 +82,7 @@ interface Props {
   /** Flujo desde el que se abre, para avisar si el QR es del otro. */
   expected: QrTarget;
   onClose: () => void;
-  /** QR con código de 4 dígitos (o, con `expected: 'panuelo'`, el de 6 de un
-   *  intercambio del pañuelo). */
+  /** QR con código de 4 dígitos. */
   onCode: (code: string) => void;
   /** QR offline con la playlist embebida (solo llega en `expected: playlist`). */
   onOffline?: (payload: string) => void;
@@ -192,7 +191,7 @@ const QrScannerModal: React.FC<Props> = ({
           // que va por el mismo camino que un código de 4 dígitos.
           if (result.target === 'choir') onCode(result.choirId);
           else onChoir?.(result.choirId);
-        } else onCode(result.code); // 'code' y 'trade'
+        } else onCode(result.code);
       }, CELEBRATION_MS);
     },
     [onCode, onOffline, onChoir],
@@ -295,10 +294,8 @@ const QrScannerModal: React.FC<Props> = ({
             >
               <Text style={styles.title}>
                 {expected === 'choir'
-                  ? 'Escanea el QR del coro'
-                  : expected === 'panuelo'
-                    ? 'Escanea el QR del intercambio'
-                    : 'Escanea el QR de la playlist'}
+                  ? 'Escanea el QR del directo'
+                  : 'Escanea el QR del repertorio'}
               </Text>
               <TouchableOpacity
                 onPress={() => {
@@ -360,8 +357,8 @@ function PermissionDenied({
       <MaterialIcons name="no-photography" size={56} color="#8E8E93" />
       <Text style={styles.deniedTitle}>Sin acceso a la cámara</Text>
       <Text style={styles.deniedText}>
-        Dale permiso a MCM App en los ajustes del móvil. También puedes escribir
-        el código{expected === 'panuelo' ? '.' : ' de 4 dígitos.'}
+        Dale permiso a MCM Cantoral en los ajustes del móvil. También puedes
+        escribir el código de 4 dígitos.
       </Text>
       <TouchableOpacity onPress={onClose} style={styles.deniedBtn}>
         <Text style={styles.deniedBtnText}>Escribir el código</Text>

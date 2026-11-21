@@ -1,9 +1,9 @@
 /**
- * Tests de los tres contextos de ajustes persistidos en AsyncStorage:
- * `SettingsContext` (cantoral), `AppSettingsContext` (fuente y tema) y
- * `UserProfileContext` (perfil/onboarding).
+ * Tests de los dos contextos de ajustes persistidos en AsyncStorage:
+ * `SettingsContext` (cantoral) y `AppSettingsContext` (fuente, tema y el
+ * nombre con el que te ven en el coro).
  *
- * Los tres comparten el mismo patrón —cargar → fusionar con defaults →
+ * Los dos comparten el mismo patrón —cargar → fusionar con defaults →
  * guardar en cada cambio— y el mismo par de fallos posibles: escribir antes
  * de haber cargado (que borra los ajustes del usuario al arrancar) y no
  * fusionar con los defaults (que deja `undefined` en claves nuevas cuando el
@@ -24,10 +24,6 @@ import {
   AppSettingsProvider,
   useAppSettings,
 } from '@/contexts/AppSettingsContext';
-import {
-  UserProfileProvider,
-  useUserProfile,
-} from '@/contexts/UserProfileContext';
 
 beforeEach(async () => {
   await AsyncStorage.clear();
@@ -165,12 +161,12 @@ describe('AppSettingsContext (fuente y tema)', () => {
     return hook;
   }
 
-  it('arranca con escala 1 y tema del sistema', async () => {
+  it('arranca con escala 1, tema del sistema y sin nombre', async () => {
     const { result } = await mount();
     expect(result.current.settings).toEqual({
       fontScale: 1,
       theme: 'system',
-      sectionFontScales: {},
+      choirName: '',
     });
   });
 
@@ -181,14 +177,12 @@ describe('AppSettingsContext (fuente y tema)', () => {
     expect(result.current.settings.theme).toBe('system');
   });
 
-  it('guarda los overrides de sección', async () => {
+  it('guarda el nombre del coro', async () => {
     const { result } = await mount();
-    await act(async () =>
-      result.current.setSettings({ sectionFontScales: { contigo: 1.6 } }),
-    );
+    await act(async () => result.current.setSettings({ choirName: 'Lucía' }));
     await waitFor(async () => {
       const raw = await AsyncStorage.getItem(KEY);
-      expect(JSON.parse(raw!).sectionFontScales).toEqual({ contigo: 1.6 });
+      expect(JSON.parse(raw!).choirName).toBe('Lucía');
     });
   });
 
@@ -226,91 +220,5 @@ describe('AppSettingsContext (fuente y tema)', () => {
     const { result } = await renderHook(() => useAppSettings());
     expect(result.current.loading).toBe(true);
     expect(result.current.settings.fontScale).toBe(1);
-  });
-});
-
-describe('UserProfileContext', () => {
-  const KEY = '@user_profile';
-
-  const wrapper = ({ children }: { children: React.ReactNode }) => (
-    <UserProfileProvider>{children}</UserProfileProvider>
-  );
-
-  async function mount() {
-    const hook = await renderHook(() => useUserProfile(), { wrapper });
-    await waitFor(() => expect(hook.result.current.loading).toBe(false));
-    return hook;
-  }
-
-  it('arranca sin perfil y sin onboarding completado', async () => {
-    const { result } = await mount();
-    expect(result.current.profile).toEqual({
-      name: '',
-      profileType: null,
-      delegationId: null,
-      onboardingCompleted: false,
-    });
-  });
-
-  it('recupera el perfil guardado', async () => {
-    await AsyncStorage.setItem(
-      KEY,
-      JSON.stringify({
-        name: 'Ana',
-        profileType: 'joven',
-        delegationId: 'madrid',
-        onboardingCompleted: true,
-      }),
-    );
-    const { result } = await mount();
-    expect(result.current.profile.name).toBe('Ana');
-    expect(result.current.profile.profileType).toBe('joven');
-    expect(result.current.profile.delegationId).toBe('madrid');
-    expect(result.current.profile.onboardingCompleted).toBe(true);
-  });
-
-  it('normaliza las claves ausentes del JSON guardado', async () => {
-    await AsyncStorage.setItem(KEY, JSON.stringify({ name: 'Ana' }));
-    const { result } = await mount();
-    expect(result.current.profile.profileType).toBeNull();
-    expect(result.current.profile.delegationId).toBeNull();
-    expect(result.current.profile.onboardingCompleted).toBe(false);
-  });
-
-  it('onboardingCompleted solo es true con el booleano exacto', async () => {
-    await AsyncStorage.setItem(
-      KEY,
-      JSON.stringify({ onboardingCompleted: 'true' }),
-    );
-    const { result } = await mount();
-    expect(result.current.profile.onboardingCompleted).toBe(false);
-  });
-
-  it('no revienta con JSON corrupto', async () => {
-    await AsyncStorage.setItem(KEY, '{{{');
-    const { result } = await mount();
-    expect(result.current.profile.name).toBe('');
-  });
-
-  it('setProfile fusiona y persiste', async () => {
-    const { result } = await mount();
-    await act(async () => result.current.setProfile({ name: 'Luis' }));
-    await act(async () =>
-      result.current.setProfile({ onboardingCompleted: true }),
-    );
-    expect(result.current.profile.name).toBe('Luis');
-    await waitFor(async () => {
-      const raw = await AsyncStorage.getItem(KEY);
-      expect(JSON.parse(raw!)).toMatchObject({
-        name: 'Luis',
-        onboardingCompleted: true,
-      });
-    });
-  });
-
-  it('fuera del provider devuelve defaults (SSG)', async () => {
-    const { result } = await renderHook(() => useUserProfile());
-    expect(result.current.loading).toBe(true);
-    expect(result.current.profile.onboardingCompleted).toBe(false);
   });
 });

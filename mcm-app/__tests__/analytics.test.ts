@@ -111,34 +111,18 @@ describe('con clave configurada', () => {
     expect(Aptabase.trackEvent).not.toHaveBeenCalled();
   });
 
-  it('trackEvent manda el nombre con las baseProps por defecto', () => {
+  it('trackEvent manda el nombre sin datos de persona (no hay perfiles)', () => {
     const { Aptabase, analytics } = cargar({ key: 'A-EU-0000000000' });
     analytics.initAnalytics();
     analytics.trackEvent('app_abierta');
-    expect(Aptabase.trackEvent).toHaveBeenCalledWith('app_abierta', {
-      perfil: 'sin_perfil',
-      delegacion: 'sin_delegacion',
-    });
+    expect(Aptabase.trackEvent).toHaveBeenCalledWith('app_abierta', {});
   });
 
-  it('setAnalyticsProfile actualiza lo que acompaña a los eventos siguientes', () => {
-    const { Aptabase, analytics } = cargar({ key: 'A-EU-0000000000' });
-    analytics.initAnalytics();
-    analytics.setAnalyticsProfile({ perfil: 'monitor', delegacion: 'madrid' });
-    analytics.trackEvent('app_abierta');
-    expect(Aptabase.trackEvent).toHaveBeenCalledWith('app_abierta', {
-      perfil: 'monitor',
-      delegacion: 'madrid',
-    });
-  });
-
-  it('las propiedades propias del evento se mezclan sobre las baseProps', () => {
+  it('las propiedades propias del evento viajan tal cual', () => {
     const { Aptabase, analytics } = cargar({ key: 'A-EU-0000000000' });
     analytics.initAnalytics();
     analytics.trackEvent('pantalla_vista', { ruta: 'cancionero' });
     expect(Aptabase.trackEvent).toHaveBeenCalledWith('pantalla_vista', {
-      perfil: 'sin_perfil',
-      delegacion: 'sin_delegacion',
       ruta: 'cancionero',
     });
   });

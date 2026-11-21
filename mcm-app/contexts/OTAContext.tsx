@@ -9,7 +9,6 @@ import React, {
 import { AppState, AppStateStatus } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import useOTAUpdate from '@/hooks/useOTAUpdate';
-import { usePreviewChannel } from '@/contexts/PreviewChannelContext';
 import OTAUpdatingOverlay from '@/components/OTAUpdatingOverlay';
 import {
   LAST_AUTO_APPLY_KEY,
@@ -72,12 +71,9 @@ async function readLastAutoApply(): Promise<number | null> {
  * pantalla: si llega con la app en uso, espera a la próxima vuelta.
  */
 export function OTAProvider({ children }: { children: React.ReactNode }) {
-  // `OTAProvider` va DENTRO de `PreviewChannelProvider` (ver `app/_layout.tsx`):
-  // no buscamos updates hasta que el canal esté reconciliado, para que un
-  // tester en modo alpha no acabe pidiéndole el update a `production` por
-  // ganarle la carrera al override.
-  const { hydrated } = usePreviewChannel();
-  const ota = useOTAUpdate({ ready: hydrated });
+  // MCM Cantoral no tiene canal de preview (Laboratorio Alpha): la OTA se
+  // busca en cuanto arranca la app.
+  const ota = useOTAUpdate({ ready: true });
   const [applying, setApplying] = useState(false);
   const applyingRef = useRef(false);
   // La persona cerró la pantalla con «hacer más tarde» mientras el flujo seguía.

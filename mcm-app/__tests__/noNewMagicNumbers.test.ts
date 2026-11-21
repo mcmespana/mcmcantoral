@@ -40,7 +40,7 @@ const COLOR_LITERAL = /'(#[0-9a-fA-F]{3,8})'/g;
  * Ficheros que DEFINEN tokens. Ahí el hex es el sitio correcto: son la fuente.
  * `constants/` entero queda fuera por no estar en los directorios que se miran.
  */
-const TOKEN_FILES = new Set(['components/contigo/theme.ts']);
+const TOKEN_FILES = new Set<string>();
 
 function walk(dir: string): string[] {
   const out: string[] = [];
@@ -88,8 +88,10 @@ const BUDGET = {
   // Y a 133 / 275 el 2026-10-17 (pulido de octubre): verdes de Carismochito
   // a `CarismoColors`, accesos rápidos de la Home y tarjetas de Más con el
   // color de su pestaña, grises de la hoja de medios a roles.
-  app: 133,
-  components: 255,
+  // Y a 5 / 138 el 2026-11-21: la poda de MCM Cantoral (fuera todo lo que
+  // no es el cantoral, `01-arranque-y-poda.md` §2.7).
+  app: 5,
+  components: 138,
 };
 
 describe('no se añaden colores a mano', () => {
@@ -134,8 +136,9 @@ describe('no se añaden colores a mano', () => {
  * hay que migrar uno a uno porque ahí el spread sí puede cambiar el render.
  */
 const FONT_SIZE_BUDGET = {
-  app: 77,
-  components: 164,
+  // 5 / 38 el 2026-11-21, con la poda de MCM Cantoral.
+  app: 5,
+  components: 38,
 };
 
 const INLINE_FONT_SIZE = /fontSize: \d+/g;
@@ -190,11 +193,12 @@ const RADIUS_BUDGET = {
   //
   // Antes de esto: 107 → 95 al migrar los `borderRadius: 100` (mismo caso), y
   // 300 → 122 al colapsar la escala en agosto de 2026.
-  app: 4,
+  // 0 / 2 el 2026-11-21, con la poda de MCM Cantoral.
+  app: 0,
   // 40 el 2026-10-17: radios sueltos de SongMediaSheet y PlaylistRow a la escala.
   // 12 el 2026-11-05: 3/5/6/10/11/13/15 de 20 ficheros a `radii.*` (quedan los
   // decorativos de Carismochito, Wordle, el cargador y el marco del QR).
-  components: 12,
+  components: 2,
 };
 
 const INLINE_RADIUS = /borderRadius: \d+/g;
@@ -236,7 +240,7 @@ const BRAND_FOREGROUND =
  * rehicieron con `themeColors`.) Cualquiera nuevo hay que mirarlo antes de
  * subir este número.
  */
-const BRAND_FOREGROUND_BUDGET = 1;
+const BRAND_FOREGROUND_BUDGET = 0;
 
 describe('los colores de marca no se usan de primer plano', () => {
   it('no crecen los usos de brand como color de texto o icono', () => {

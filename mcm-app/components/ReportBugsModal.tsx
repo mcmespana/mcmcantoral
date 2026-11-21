@@ -13,8 +13,7 @@ import {
   getCategoryFromFirebaseCategory,
   cleanSongTitle,
 } from '@/utils/songUtils';
-import { useUserProfile } from '@/contexts/UserProfileContext';
-import { useResolvedProfileConfig } from '@/hooks/useResolvedProfileConfig';
+import { useAppSettings } from '@/contexts/AppSettingsContext';
 import typography from '@/constants/typography';
 
 interface ReportBugsModalProps {
@@ -42,8 +41,7 @@ export default function ReportBugsModal({
   const scheme = useColorScheme();
   const isDark = scheme === 'dark';
   const theme = Colors[scheme ?? 'light'];
-  const { profile } = useUserProfile();
-  const resolved = useResolvedProfileConfig();
+  const { settings } = useAppSettings();
   const [bugDescription, setBugDescription] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -63,9 +61,8 @@ export default function ReportBugsModal({
         platform: Platform.OS,
         status: 'pending',
         reportedAt: new Date().toISOString(),
-        userName: profile.name || 'Anónimo',
-        userProfileType: profile.profileType ?? 'sin-perfil',
-        userDelegation: resolved.delegationLabel || 'Sin delegación',
+        userName: settings.choirName.trim() || 'Anónimo',
+        app: 'mcm-cantoral',
       });
       setBugDescription('');
       onClose();

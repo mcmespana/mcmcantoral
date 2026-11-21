@@ -18,9 +18,7 @@ import path from 'path';
 
 import brand, { Colors, TabHeaderColors, UIColors } from '@/constants/colors';
 import { radii, shadows } from '@/constants/uiStyles';
-import { WARM_DARK, WARM_LIGHT } from '@/components/contigo/theme';
 import { onColor, readableOn } from '@/utils/colorUtils';
-import { categoryVisual } from '@/utils/notificationCategory';
 import spacing from '@/constants/spacing';
 
 const cssPath = path.join(__dirname, '..', 'global.css');
@@ -219,24 +217,6 @@ describe('contraste de los roles de texto', () => {
     ).toBeGreaterThan(4);
   });
 
-  it('el acento de Contigo se lee sobre las tres superficies cálidas', () => {
-    // §A3 de PLAN_DISENO. `accent` (#C4922A) es un relleno: como TEXTO da
-    // 2,60:1 y aun así pintaba el kicker, la cita, el CTA y el día de hoy.
-    // `accentText` es el mismo dorado bajado de luminosidad hasta que se lee.
-    for (const surface of [
-      WARM_LIGHT.bg,
-      WARM_LIGHT.bgCard,
-      WARM_LIGHT.bgDeep,
-    ]) {
-      expect(contrast(WARM_LIGHT.accentText, surface)).toBeGreaterThanOrEqual(
-        4.5,
-      );
-    }
-    expect(contrast(WARM_DARK.accentText, WARM_DARK.bg)).toBeGreaterThanOrEqual(
-      4.5,
-    );
-  });
-
   it('onColor da una tinta legible sobre todos los acentos que se usan', () => {
     // `SegmentedControl` recibe el acento por props (celeste de marca en el
     // calendario, azul en Ajustes, dorado en el lector de Contigo) y la tinta
@@ -250,42 +230,9 @@ describe('contraste de los roles de texto', () => {
       brand.accent,
       brand.green,
       brand.purple,
-      WARM_LIGHT.accent,
-      WARM_LIGHT.accentText,
-      WARM_DARK.accent,
     ];
     for (const acento of acentos) {
       expect(contrast(onColor(acento), acento)).toBeGreaterThanOrEqual(4.5);
-    }
-  });
-
-  it('todas las categorías de notificación se leen en los dos modos', () => {
-    // Los colores de categoría son UN valor usado como texto en claro Y en
-    // oscuro, y medidos daban `#9D1E74` a 1,91:1 sobre el fondo oscuro,
-    // `#C62828` a 2,48 y `#0E7490` a 2,60 — cinco de seis ilegibles en oscuro,
-    // dos también en claro. `AppChip` los pasa por `readableOn`, que conserva
-    // el tono y mueve la luminosidad lo justo. Este test cubre el contrato
-    // para las que hay Y para las que el Panel añada mañana: si alguien mete
-    // un color a pelo en el chip, se cae aquí.
-    // Las categorías que conoce la app hoy. La lista vive en
-    // `utils/notificationCategory.ts` y no se exporta a propósito (tolera
-    // strings desconocidos); aquí se nombran las que deben pintar chip.
-    const CATEGORIAS = [
-      'eventos',
-      'cancionero',
-      'fotos',
-      'urgente',
-      'mantenimiento',
-      'celebraciones',
-    ];
-    for (const categoria of CATEGORIAS) {
-      const visual = categoryVisual(categoria);
-      expect(visual).not.toBeNull();
-      for (const fondo of [Colors.light.background, Colors.dark.background]) {
-        expect(
-          contrast(readableOn(visual!.color, fondo), fondo),
-        ).toBeGreaterThanOrEqual(4.5);
-      }
     }
   });
 
@@ -304,21 +251,12 @@ describe('contraste de los roles de texto', () => {
       brand.yellow,
       brand.green,
       brand.purple,
-      WARM_LIGHT.accent,
-      WARM_DARK.accent,
     ];
     for (const relleno of rellenos) {
       const tinta =
         contrast('#FFFFFF', relleno) >= 3 ? '#FFFFFF' : onColor(relleno);
       expect(contrast(tinta, relleno)).toBeGreaterThanOrEqual(3);
     }
-  });
-
-  it('la raya de la pestaña Contigo es el mismo dorado que la sección', () => {
-    // Eran dos: #B8860B en la cabecera y #C4922A en la pantalla, uno pegado al
-    // otro. `constants/colors.ts` no puede importar de un componente, así que
-    // la coherencia se sostiene con este test.
-    expect(TabHeaderColors.contigo).toBe(WARM_LIGHT.accent);
   });
 
   it('avisa de que el terciario NO vale sobre una card oscura', () => {

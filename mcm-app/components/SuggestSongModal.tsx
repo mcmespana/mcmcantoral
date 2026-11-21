@@ -15,8 +15,7 @@ import { MaterialIcons } from '@/components/ui/icons';
 import { Colors, themeColors } from '@/constants/colors';
 import { useColorScheme } from '@/hooks/useColorScheme';
 import { pushWithRetry } from '@/services/firebaseWrites';
-import { useUserProfile } from '@/contexts/UserProfileContext';
-import { useResolvedProfileConfig } from '@/hooks/useResolvedProfileConfig';
+import { useAppSettings } from '@/contexts/AppSettingsContext';
 import typography from '@/constants/typography';
 import { radii } from '@/constants/uiStyles';
 
@@ -38,8 +37,7 @@ export default function SuggestSongModal({
   const scheme = useColorScheme();
   const isDark = scheme === 'dark';
   const theme = Colors[scheme ?? 'light'];
-  const { profile } = useUserProfile();
-  const resolved = useResolvedProfileConfig();
+  const { settings } = useAppSettings();
 
   const [titulo, setTitulo] = useState('');
   const [artista, setArtista] = useState('');
@@ -74,9 +72,8 @@ export default function SuggestSongModal({
         timestamp: Date.now(),
         platform: Platform.OS,
         requestedAt: new Date().toISOString(),
-        userName: profile.name || 'Anónimo',
-        userProfileType: profile.profileType ?? 'sin-perfil',
-        userDelegation: resolved.delegationLabel || 'Sin delegación',
+        userName: settings.choirName.trim() || 'Anónimo',
+        app: 'mcm-cantoral',
       });
 
       // Sin tocar `songs/updatedAt`: una solicitud no cambia el catálogo, y

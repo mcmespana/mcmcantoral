@@ -83,7 +83,7 @@ jest.mock('react-native-webview', () => {
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
-import { router, Slot, Stack } from 'expo-router';
+import { router, Slot } from 'expo-router';
 import {
   __resetMockDb,
   __setMockNode,
@@ -92,7 +92,7 @@ import {
 import AppProviders from '@/components/AppProviders';
 import { getSongNavList } from '@/utils/songNavList';
 
-const DIR = path.join(__dirname, '..', '..', 'app', '(tabs)', 'cancionero');
+const DIR = path.join(__dirname, '..', '..', 'app', 'cancionero');
 
 function rutasCantoral(): Record<string, unknown> {
   const out: Record<string, unknown> = {};
@@ -101,7 +101,7 @@ function rutasCantoral(): Record<string, unknown> {
     // El módulo entero, no solo `default`: el `_layout` lleva
     // `unstable_settings.anchor`, que es lo que pone las categorías debajo de
     // una canción abierta en frío.
-    out[`(tabs)/cancionero/${file.replace(/\.tsx$/, '')}`] = require(
+    out[`cancionero/${file.replace(/\.tsx$/, '')}`] = require(
       path.join(DIR, file),
     );
   }
@@ -182,7 +182,6 @@ it('categorías → lista → canción → pantalla completa → atrás', async 
   app = await renderRouter(
     {
       _layout: raiz,
-      '(tabs)/_layout': () => <Stack screenOptions={{ headerShown: false }} />,
       ...rutasCantoral(),
     } as never,
     { initialUrl: '/cancionero' },
@@ -243,7 +242,6 @@ it('una canción abierta en frío por su ruta se lee del catálogo', async () =>
   app = await renderRouter(
     {
       _layout: raiz,
-      '(tabs)/_layout': () => <Stack screenOptions={{ headerShown: false }} />,
       ...rutasCantoral(),
     } as never,
     { initialUrl: '/cancionero/cancion?filename=vienen.cho' },
@@ -256,18 +254,16 @@ it('una canción abierta en frío por su ruta se lee del catálogo', async () =>
 });
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
-it('desde otra pestaña (⌘K, enlace) la canción entra con las categorías debajo', async () => {
-  const { Tabs } = require('expo-router');
+it('desde fuera del cantoral (⌘K, enlace) la canción entra con las categorías debajo', async () => {
   const { Text } = require('react-native');
   const { openCantoral } = require('@/utils/cantoralNavigation');
   app = await renderRouter(
     {
       _layout: raiz,
-      '(tabs)/_layout': () => <Tabs />,
-      '(tabs)/index': () => <Text>Inicio</Text>,
+      otra: () => <Text>Otra</Text>,
       ...rutasCantoral(),
     } as never,
-    { initialUrl: '/' },
+    { initialUrl: '/otra' },
   );
   await act(async () =>
     openCantoral(
@@ -277,9 +273,8 @@ it('desde otra pestaña (⌘K, enlace) la canción entra con las categorías deb
     ),
   );
   await waitFor(() => expect(screen).toHavePathname('/cancionero/cancion'));
-  // Se mira la pila y no «atrás»: con `Tabs` bajo Jest la pila anidada no
-  // llega a montarse y `router.back()` cambia de pestaña. Lo que importa es
-  // que la canción NO entre sola (sin `withAnchor`, `routes` sería
+  // Se mira la pila del cantoral. Lo que importa es que la canción NO entre
+  // sola (sin `withAnchor`, `routes` sería
   // `['cancion']` y en el móvil «atrás» no tendría adónde ir).
   const pila = (estado: any): string[] | null => {
     for (const r of estado?.routes ?? []) {

@@ -8,9 +8,6 @@
  *    vaticanNews — y el default es 'vidaNueva' si el campo no viene).
  *  - La caché local: se pinta lo cacheado al instante y se guarda lo nuevo
  *    tras la respuesta de Firebase.
- *  - El fallback a los bookmarks de CONTIGO si el día no está en la caché
- *    normal (un día guardado no debería "perder" sus lecturas al caducar el
- *    nodo global a los 30 días).
  *  - Un `dateStr` vacío no debe intentar nada (y no oculta el loading).
  */
 import { renderHook, waitFor } from '@testing-library/react-native';
@@ -143,25 +140,6 @@ describe('caché', () => {
     );
     const stored = await AsyncStorage.getItem('@daily_readings_2026-08-23');
     expect(JSON.parse(stored!).evangelio.texto).toBe('nuevo');
-  });
-
-  it('cae a los bookmarks de CONTIGO si el día no está en la caché normal', async () => {
-    await AsyncStorage.setItem(
-      '@contigo_bookmarks',
-      JSON.stringify([
-        {
-          date: '2026-08-24',
-          readings: {
-            info: { diaLiturgico: 'Lunes', titulo: 'De un bookmark' },
-          },
-        },
-      ]),
-    );
-    (get as jest.Mock).mockResolvedValueOnce(snapshot(null));
-    const { result } = await renderHook(() => useDailyReadings('2026-08-24'));
-    await waitFor(() =>
-      expect(result.current.readings?.info?.titulo).toBe('De un bookmark'),
-    );
   });
 
   it('sin caché ni Firebase, readings queda en null', async () => {

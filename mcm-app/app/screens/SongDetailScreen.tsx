@@ -34,9 +34,7 @@ import { rubberBand, shouldCommitGesture } from '@/utils/gesturePhysics';
 import { PressableFeedback } from 'heroui-native';
 import SongDisplay from '@/components/SongDisplay';
 import { useSongProcessor } from '@/hooks/useSongProcessor';
-import { useForceCompact } from '@/components/tabs/tabBarController';
 import { useKeepAwakeWhileFocused } from '@/hooks/useKeepAwakeWhileFocused';
-import { useSuppressCarismochito } from '@/hooks/useSuppressCarismochito';
 import { trackEvent } from '@/utils/analytics';
 import SongControls from '@/components/SongControls';
 import type { SheetViewOptions } from '@/components/SongFontBottomSheet';
@@ -206,15 +204,10 @@ function SongDetailBody({
   route: { params: SongDetailParams };
   navigation: NavigationProp<ParamListBase>;
 }) {
-  // La barra de pestañas se queda COMPACTA mientras se lee una canción: aquí
-  // lo que importa es que quepa la mayor cantidad de letra posible.
-  useForceCompact(true);
   // Con el móvil en el atril la pantalla no se apaga a mitad de canción. Solo
   // con el foco: al abrir la pantalla completa encima o irse a otra pestaña,
   // el detalle sigue montado y no hace falta.
   useKeepAwakeWhileFocused('song-detail');
-  // Es la hoja con la que se canta: Carismochito no se asoma aquí.
-  useSuppressCarismochito();
 
   const {
     filename,
@@ -659,7 +652,7 @@ function SongDetailBody({
   }, [choir.mode, filename]);
 
   // (la navegación del esclavo la lleva `useChoirFollower`, en
-  //  `app/(tabs)/cancionero/_layout.tsx`)
+  //  `app/cancionero/_layout.tsx`)
 
   const handleSetCapoOverride = (newCapo: number | null) => {
     if (selectedMeta) {

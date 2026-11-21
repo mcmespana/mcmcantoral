@@ -84,13 +84,6 @@ jest.mock('@/hooks/useMyChoir', () => ({
 jest.mock('@/hooks/usePlaylistLink', () => ({
   usePlaylistLink: () => ({ link: null, setLink: jest.fn() }),
 }));
-jest.mock('@/components/tabs/useTabScroll', () => ({
-  useTabListScroll: () => ({
-    listRef: { current: null },
-    onScroll: undefined,
-    contentPaddingBottom: 0,
-  }),
-}));
 jest.mock('@/utils/cantoralNavigation', () => ({
   openCantoral: (...a: unknown[]) => mockOpenCantoral(...a),
 }));

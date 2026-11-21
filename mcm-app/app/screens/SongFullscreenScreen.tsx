@@ -20,7 +20,7 @@ import { MaterialIcons } from '@/components/ui/icons';
 import * as Haptics from 'expo-haptics';
 import { PressableFeedback } from 'heroui-native';
 import { useRouteSong } from '@/hooks/useRouteSong';
-import { cantoralHref } from '@/utils/eventRoutes';
+import { cantoralHref } from '@/utils/cantoralRoutes';
 import {
   songRouteParams,
   type SongFullscreenRouteParams,
@@ -46,7 +46,6 @@ import {
 } from '@/hooks/useAutoScroller';
 import typography from '@/constants/typography';
 import { radii } from '@/constants/uiStyles';
-import { useSuppressCarismochito } from '@/hooks/useSuppressCarismochito';
 import { useImmersiveChrome } from '@/hooks/useImmersiveChrome';
 import { useKeepAwakeWhileFocused } from '@/hooks/useKeepAwakeWhileFocused';
 import { useBrowserFullscreen } from '@/hooks/useBrowserFullscreen';
@@ -334,7 +333,6 @@ function SongFullscreenBody({
 }: {
   route: { params: FullscreenParams };
 }) {
-  useSuppressCarismochito();
   // Modo presentación: la pantalla no se apaga mientras se toca.
   useKeepAwakeWhileFocused('song-fullscreen');
   const params = route.params;

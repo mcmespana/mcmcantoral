@@ -17,8 +17,8 @@ jest.mock('@expo/vector-icons', () => ({ MaterialIcons: () => null }));
 jest.mock('@/contexts/ChoirSessionContext', () => ({
   useChoirSession: () => ({ deviceId: 'dev-1' }),
 }));
-jest.mock('@/contexts/UserProfileContext', () => ({
-  useUserProfile: () => ({ profile: { name: ' Lucía ' } }),
+jest.mock('@/contexts/AppSettingsContext', () => ({
+  useAppSettings: () => ({ settings: { choirName: ' Lucía ' } }),
 }));
 const mockSetChoir = jest.fn();
 let mockMyChoir: { id: string; name: string } | null = null;

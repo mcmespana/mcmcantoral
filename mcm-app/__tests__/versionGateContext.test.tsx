@@ -9,15 +9,15 @@
 import React from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { renderHook, act, waitFor } from '@testing-library/react-native';
-import { useResolvedProfileConfig } from '@/hooks/useResolvedProfileConfig';
+import { useCantoralConfig } from '@/hooks/useCantoralConfig';
 import { openAppStore } from '@/utils/storeLinks';
 import {
   VersionGateProvider,
   useVersionGate,
 } from '@/contexts/VersionGateContext';
 
-jest.mock('@/hooks/useResolvedProfileConfig', () => ({
-  useResolvedProfileConfig: jest.fn(),
+jest.mock('@/hooks/useCantoralConfig', () => ({
+  useCantoralConfig: jest.fn(),
 }));
 jest.mock('@/utils/storeLinks', () => ({
   openAppStore: jest.fn(),
@@ -38,7 +38,7 @@ async function mount() {
 beforeEach(async () => {
   jest.clearAllMocks();
   await AsyncStorage.clear();
-  (useResolvedProfileConfig as jest.Mock).mockReturnValue({
+  (useCantoralConfig as jest.Mock).mockReturnValue({
     minAppVersion: '0.0.0',
   });
 });
@@ -51,7 +51,7 @@ describe('updateRequired', () => {
   });
 
   it('con minAppVersion por debajo de la instalada, no bloquea', async () => {
-    (useResolvedProfileConfig as jest.Mock).mockReturnValue({
+    (useCantoralConfig as jest.Mock).mockReturnValue({
       minAppVersion: '2.0.0',
     });
     const { result } = await mount();
@@ -59,7 +59,7 @@ describe('updateRequired', () => {
   });
 
   it('con minAppVersion por encima de la instalada, bloquea', async () => {
-    (useResolvedProfileConfig as jest.Mock).mockReturnValue({
+    (useCantoralConfig as jest.Mock).mockReturnValue({
       minAppVersion: '3.0.0',
     });
     const { result } = await mount();
@@ -70,7 +70,7 @@ describe('updateRequired', () => {
 
 describe('skipUpdate', () => {
   it('marca el aviso como saltado', async () => {
-    (useResolvedProfileConfig as jest.Mock).mockReturnValue({
+    (useCantoralConfig as jest.Mock).mockReturnValue({
       minAppVersion: '3.0.0',
     });
     const { result } = await mount();
@@ -85,7 +85,7 @@ describe('skipUpdate', () => {
 
 describe('límite de «Ahora no» (minAppVersionSkips)', () => {
   const block = (skips?: number) =>
-    (useResolvedProfileConfig as jest.Mock).mockReturnValue({
+    (useCantoralConfig as jest.Mock).mockReturnValue({
       minAppVersion: '3.0.0',
       minAppVersionSkips: skips,
     });

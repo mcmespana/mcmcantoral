@@ -19,7 +19,7 @@ import { renderHook, act, waitFor } from '@testing-library/react-native';
 import { useToast } from '@/contexts/AppToastContext';
 import { useSelectedSongs } from '@/contexts/SelectedSongsContext';
 import { useChoirSession } from '@/contexts/ChoirSessionContext';
-import { useUserProfile } from '@/contexts/UserProfileContext';
+import { useAppSettings } from '@/contexts/AppSettingsContext';
 import { useMyChoir } from '@/hooks/useMyChoir';
 import { usePlaylistLink } from '@/hooks/usePlaylistLink';
 import {
@@ -44,8 +44,8 @@ jest.mock('@/contexts/SelectedSongsContext', () => ({
 jest.mock('@/contexts/ChoirSessionContext', () => ({
   useChoirSession: jest.fn(),
 }));
-jest.mock('@/contexts/UserProfileContext', () => ({
-  useUserProfile: jest.fn(),
+jest.mock('@/contexts/AppSettingsContext', () => ({
+  useAppSettings: jest.fn(),
 }));
 jest.mock('@/hooks/useMyChoir', () => ({
   useMyChoir: jest.fn(),
@@ -108,8 +108,8 @@ function setup() {
     replaceAll: mockReplaceAll,
     clearSelection: mockClearSelection,
   }));
-  (useUserProfile as jest.Mock).mockReturnValue({
-    profile: { name: 'Ana' },
+  (useAppSettings as jest.Mock).mockReturnValue({
+    settings: { choirName: 'Ana' },
   });
   (useChoirSession as jest.Mock).mockImplementation(() => ({
     deviceId: 'device-1',

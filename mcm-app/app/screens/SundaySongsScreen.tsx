@@ -8,12 +8,12 @@
  * solo se pinta. Todo dentro de la lista (el header del cantoral es
  * transparente: lo que va fuera de la lista se pinta bajo la barra de estado).
  */
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useMemo, useRef, useState } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 import Animated from 'react-native-reanimated';
 import { router, useLocalSearchParams } from 'expo-router';
 import { PressableFeedback } from 'heroui-native';
-import { useTabListScroll } from '@/components/tabs/useTabScroll';
+import { useTabBarPaddingBottom } from '@/hooks/useTabBarClearance';
 import CandidatesSheet from '@/components/song-sunday/CandidatesSheet';
 import SundayReadingsSheet from '@/components/playlist/SundayReadingsSheet';
 import MomentBlock from '@/components/song-sunday/MomentBlock';
@@ -34,7 +34,7 @@ import { usePlaylistLink } from '@/hooks/usePlaylistLink';
 import { useResponsiveLayout } from '@/hooks/useResponsiveLayout';
 import { useSundaySongs } from '@/hooks/useSundaySongs';
 import { openCantoral } from '@/utils/cantoralNavigation';
-import { cantoralHref } from '@/utils/eventRoutes';
+import { cantoralHref } from '@/utils/cantoralRoutes';
 import { h } from '@/utils/haptics';
 import {
   addDays,
@@ -66,8 +66,8 @@ export default function SundaySongsScreen() {
   const roles = themeColors(isDark);
   const layout = useResponsiveLayout();
   const { toast } = useToast();
-  const { listRef, onScroll, contentPaddingBottom } =
-    useTabListScroll<Animated.FlatList<MomentSuggestion>>('cancionero');
+  const listRef = useRef<Animated.FlatList<MomentSuggestion>>(null);
+  const contentPaddingBottom = useTabBarPaddingBottom();
 
   const sunday = useSundaySongs(fecha);
   const { day, mass, change, remove, restore, choose } = sunday;
@@ -346,7 +346,6 @@ export default function SundaySongsScreen() {
     >
       <Animated.FlatList
         ref={listRef}
-        onScroll={onScroll}
         scrollEventThrottle={16}
         data={mass}
         keyExtractor={(m) => m.moment}

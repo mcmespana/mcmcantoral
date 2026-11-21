@@ -19,7 +19,7 @@ import {
   useEffect,
 } from 'react';
 import Animated from 'react-native-reanimated';
-import { useTabListScroll } from '@/components/tabs/useTabScroll';
+import { useTabBarPaddingBottom } from '@/hooks/useTabBarClearance';
 import ListSkeleton from '@/components/ListSkeleton';
 import EmptyState from '@/components/ui/EmptyState';
 import { useFirebaseData } from '@/hooks/useFirebaseData';
@@ -79,8 +79,8 @@ export default function CategoriesScreen() {
   const layout = useResponsiveLayout();
   // Pantalla raíz del tab Cantoral: colapsa la barra flotante al scrollear y
   // reserva su hueco al final de la lista.
-  const { listRef, onScroll, contentPaddingBottom } =
-    useTabListScroll<FlatList>('cancionero');
+  const listRef = useRef<FlatList>(null);
+  const contentPaddingBottom = useTabBarPaddingBottom();
   const styles = useMemo(
     () => createStyles(scheme, layout.isWide, layout.contentMaxWidth),
     [scheme, layout.isWide, layout.contentMaxWidth],
@@ -703,7 +703,6 @@ export default function CategoriesScreen() {
     <View style={styles.container}>
       <Animated.FlatList
         ref={listRef}
-        onScroll={onScroll}
         scrollEventThrottle={16}
         data={gridData}
         keyExtractor={(item) => item.id}

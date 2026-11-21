@@ -41,15 +41,8 @@ export const isAnalyticsEnabled = APP_KEY.length > 0;
 
 let started = false;
 
-/**
- * Propiedades comunes de cada evento. Aptabase no tiene "propiedades de
- * usuario", así que se adjuntan a mano. Son categorías gruesas (perfil y
- * delegación), nunca datos de una persona concreta.
- */
-let baseProps: AnalyticsBaseProps = {
-  perfil: 'sin_perfil',
-  delegacion: 'sin_delegacion',
-};
+/** Propiedades comunes de cada evento: ninguna (no hay perfiles). */
+const baseProps: AnalyticsBaseProps = {};
 
 /**
  * Arranca Aptabase. Idempotente y silenciosa sin clave. Se llama una vez al
@@ -73,14 +66,6 @@ export function initAnalytics(): void {
     started = false;
     logger.warn('[analytics] no se pudo inicializar:', error);
   }
-}
-
-/**
- * Actualiza el perfil y la delegación que acompañan a los eventos. Se llama
- * cuando el perfil del usuario cambia (onboarding, cambio manual).
- */
-export function setAnalyticsProfile(props: Partial<AnalyticsBaseProps>): void {
-  baseProps = { ...baseProps, ...props };
 }
 
 /**

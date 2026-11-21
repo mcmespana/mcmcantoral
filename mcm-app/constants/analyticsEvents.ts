@@ -17,11 +17,9 @@
 //      puede leer en un gráfico. Preferir la categoría al elemento concreto.
 //   4. Si hace falta un evento nuevo, se añade AQUÍ primero.
 //
-// Aptabase no tiene "propiedades de usuario": el perfil y la delegación se
-// añaden a cada evento desde `utils/analytics.ts` (ver `baseProps`).
-
-import type { ProfileType } from '@/types/profileConfig';
-import type { NotificationCategory } from '@/types/notifications';
+// MCM Cantoral no tiene usuarios ni perfiles: no hay propiedades comunes de
+// persona. La analítica va instalada y APAGADA hasta la Fase 5 (D-15): sin
+// `EXPO_PUBLIC_APTABASE_KEY` no se manda nada.
 
 /** Evento sin propiedades propias (igual lleva las comunes). */
 export type SinPropiedades = Record<never, never>;
@@ -39,7 +37,7 @@ export interface AnalyticsEvents {
    * `hooks/useScreenTracking.ts`), así que NO hay que llamarla a mano.
    *
    * `ruta` va normalizada: los ids concretos se sustituyen por `:id` para no
-   * disparar la cardinalidad (`/(tabs)/mas/jubileo` → `/(tabs)/mas/:id`).
+   * disparar la cardinalidad (`/cancionero/1234` → `/cancionero/:id`).
    */
   pantalla_vista: { ruta: string };
 
@@ -61,68 +59,12 @@ export interface AnalyticsEvents {
     tamano: '1-5' | '6-15' | '16-30' | '30+';
   };
 
-  /** El usuario toca una notificación y entra en la app. */
-  notificacion_abierta: {
-    /** `comunica`: un aviso del área privada nativa (plan 08), sin ids.
-     *  `contigo`: un recordatorio local de Contigo. */
-    categoria: NotificationCategory | 'sin_categoria' | 'comunica' | 'contigo';
-  };
-
-  /**
-   * Se sale del onboarding. `via` distingue quién lo rellenó de quién le dio a
-   * "saltar": es el dato que dice si el onboarding estorba o ayuda.
-   */
-  onboarding_completado: { via: 'completado' | 'saltado' };
-
-  /** Se abre el hub de un evento (Jubileo, encuentros…). */
-  evento_abierto: { evento: string };
-
-  /** Se activa el modo Carismochito agitando el móvil. */
-  carismochito_activado: SinPropiedades;
-
-  /**
-   * Se atrapa un Carismochito tocándolo (la caza del Laboratorio Alpha).
-   * La rareza, no la variante: son pocas, pero así el gráfico se lee de un
-   * vistazo y el catálogo puede crecer sin romperlo.
-   */
-  carismochito_atrapado: {
-    rareza: 'comun' | 'poco_comun' | 'raro' | 'legendario';
-    /** Primera vez que esa persona atrapa esa variante. */
-    nuevo: boolean;
-  };
-
-  /** Se abre la pantalla del pañuelo virtual. */
-  panuelo_abierto: SinPropiedades;
-
-  /**
-   * Se consigue una pieza del pañuelo. La clase y la vía, no la pieza: el
-   * catálogo crece con cada actividad y el gráfico tiene que seguir leyéndose.
-   */
-  panuelo_pieza_conseguida: {
-    clase:
-      'chapa' | 'pin' | 'cinta' | 'parche' | 'medalla' | 'pulsera' | 'troncho';
-    via: 'all' | 'code' | 'manual' | 'demo' | 'trade';
-  };
-
-  /**
-   * Un paso de un intercambio del pañuelo. Sin ids, códigos ni nombres: solo
-   * cuántos se abren, se proponen, se cierran y cuántos son regalos.
-   */
-  panuelo_intercambio: {
-    paso: 'abierto' | 'propuesto' | 'aceptado' | 'cancelado';
-    regalo: boolean;
-  };
 }
 
 export type AnalyticsEventName = keyof AnalyticsEvents;
 
-/** Propiedades comunes que se añaden a TODOS los eventos. */
-export interface AnalyticsBaseProps {
-  /** Perfil resuelto del usuario. Categoría, no identificador. */
-  perfil: ProfileType | 'sin_perfil';
-  /** Delegación. Igual: sirve para segmentar por zona, no para identificar. */
-  delegacion: string;
-}
+/** Propiedades comunes que se añaden a TODOS los eventos (ninguna, hoy). */
+export type AnalyticsBaseProps = Record<never, never>;
 
 /** Tramo de tamaño de una playlist, para no mandar el número exacto. */
 export function tramoTamano(

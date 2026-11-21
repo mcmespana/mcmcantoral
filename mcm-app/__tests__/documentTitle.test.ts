@@ -18,15 +18,11 @@ describe('titleForPath', () => {
     expect(titleForPath('/')).toBe(APP_TITLE);
   });
 
-  it('cada pestaña con su etiqueta, también en sus rutas anidadas', () => {
-    expect(titleForPath('/cancionero')).toBe('Cantoral · MCM');
-    expect(titleForPath('/contigo/evangelio')).toBe('Contigo · MCM');
-    expect(titleForPath('/calendario?x=1')).toBe('Calendario · MCM');
-  });
-
-  it('las rutas sueltas conocidas y, si no, el nombre de la app', () => {
-    expect(titleForPath('/notifications')).toBe('Notificaciones · MCM');
-    expect(titleForPath('/cancion')).toBe('Cantoral · MCM');
+  it('el cantoral es la app; las rutas sueltas, con su etiqueta', () => {
+    expect(titleForPath('/cancionero')).toBe(APP_TITLE);
+    expect(titleForPath('/cancionero/categoria?x=1')).toBe(APP_TITLE);
+    expect(titleForPath('/playlist')).toBe('Repertorio · MCM Cantoral');
+    expect(titleForPath('/coro')).toBe('Directo · MCM Cantoral');
     expect(titleForPath('/no-existe')).toBe(APP_TITLE);
   });
 });

@@ -128,7 +128,7 @@ function countLooseDurations(src: string): number {
  * que se migre algo; no subir nunca (ver arriba la excepción de los merges).
  */
 const SPRING_BUDGET = 3;
-const DURATION_BUDGET = 50;
+const DURATION_BUDGET = 14;
 /**
  * Cuánto puede quedar el recuento por debajo del tope sin obligar a bajarlo.
  * Más corto que en los colores porque aquí los números son pequeños.

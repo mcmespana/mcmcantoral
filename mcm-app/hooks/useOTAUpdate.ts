@@ -1,7 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { AppState, AppStateStatus, Platform } from 'react-native';
 import * as Updates from 'expo-updates';
-import { settleSession } from '@/services/comunica/session';
 
 /**
  * Resultado del hook de actualización OTA.
@@ -127,8 +126,6 @@ export default function useOTAUpdate({
           if (fetched?.isNew) setIsReady(true);
         }
         if (shouldReload && !shouldReload()) return;
-        // Que un refresco de la sesión de Comunica no se corte a medias.
-        await settleSession();
         await Updates.reloadAsync();
       } catch (err) {
         setIsDownloading(false);

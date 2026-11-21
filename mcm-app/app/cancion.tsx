@@ -27,7 +27,7 @@ import {
   findSongByFilename,
   songOpenParams,
 } from '@/utils/songIndex';
-import { cantoralHref } from '@/utils/eventRoutes';
+import { cantoralHref } from '@/utils/cantoralRoutes';
 
 export default function SongDeepLink() {
   const params = useLocalSearchParams<{ f?: string }>();

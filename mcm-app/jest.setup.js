@@ -18,13 +18,6 @@
  * fichero, que gana sobre esto.
  */
 
-// El icono alternativo de Carismochito (`utils/appIcon.ts`).
-jest.mock('expo-alternate-app-icons', () => ({
-  getAppIconName: jest.fn(() => 'DEFAULT'),
-  setAlternateAppIcon: jest.fn(() => Promise.resolve()),
-  supportsAlternateIcons: false,
-}));
-
 // Hápticas: se llaman desde cualquier pulsación.
 jest.mock('expo-haptics', () => ({
   impactAsync: jest.fn(() => Promise.resolve()),
@@ -50,54 +43,10 @@ jest.mock('expo-haptics', () => ({
   },
 }));
 
-// Notificaciones push: el provider pide permisos y se suscribe al montar.
-jest.mock('expo-notifications', () => ({
-  getPermissionsAsync: jest.fn(() =>
-    Promise.resolve({ status: 'undetermined' }),
-  ),
-  requestPermissionsAsync: jest.fn(() => Promise.resolve({ status: 'denied' })),
-  getExpoPushTokenAsync: jest.fn(() => Promise.resolve({ data: 'mock-token' })),
-  setNotificationHandler: jest.fn(),
-  addNotificationReceivedListener: jest.fn(() => ({ remove: jest.fn() })),
-  addNotificationResponseReceivedListener: jest.fn(() => ({
-    remove: jest.fn(),
-  })),
-  setNotificationChannelAsync: jest.fn(() => Promise.resolve()),
-  getNotificationChannelsAsync: jest.fn(() => Promise.resolve([])),
-  setBadgeCountAsync: jest.fn(() => Promise.resolve()),
-  getLastNotificationResponseAsync: jest.fn(() => Promise.resolve(null)),
-  AndroidImportance: { MAX: 5, HIGH: 4, DEFAULT: 3, LOW: 2, MIN: 1 },
-  AndroidNotificationVisibility: { PUBLIC: 1, PRIVATE: 0, SECRET: -1 },
-}));
-
-// Sesión del navegador (login con Google en web) y Apple Authentication.
+// Navegador del sistema (enlaces de canciones, partituras).
 jest.mock('expo-web-browser', () => ({
   openAuthSessionAsync: jest.fn(() => Promise.resolve({ type: 'cancel' })),
   maybeCompleteAuthSession: jest.fn(),
-}));
-
-jest.mock('expo-apple-authentication', () => ({
-  isAvailableAsync: jest.fn(() => Promise.resolve(false)),
-  signInAsync: jest.fn(),
-  AppleAuthenticationScope: { FULL_NAME: 0, EMAIL: 1 },
-}));
-
-// Detector de sacudidas de Carismochito (acelerómetro).
-jest.mock('expo-sensors', () => ({
-  Accelerometer: {
-    isAvailableAsync: jest.fn(() => Promise.resolve(false)),
-    addListener: jest.fn(() => ({ remove: jest.fn() })),
-    setUpdateInterval: jest.fn(),
-  },
-}));
-
-// El módulo local del menú "Subrayar" (`modules/highlight-menu`), que es
-// nativo puro y no tiene shim.
-jest.mock('@/modules/highlight-menu', () => ({
-  __esModule: true,
-  isHighlightMenuAvailable: false,
-  setHighlightMenuEnabled: jest.fn(),
-  addHighlightRequestListener: jest.fn(() => ({ remove: jest.fn() })),
 }));
 
 // Analítica (Aptabase) y Sentry: se importan desde utils y arrancan al cargar.

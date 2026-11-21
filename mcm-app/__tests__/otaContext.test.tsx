@@ -2,10 +2,8 @@
  * Test de `contexts/OTAContext.tsx`.
  *
  * Dos cosas:
- *  1. Wrapper de `useOTAUpdate` que espera a que `PreviewChannelContext` esté
- *     hidratado antes de comprobar updates — si `OTAProvider` pidiera el update
- *     antes de tiempo, un tester en modo alpha podría acabar pidiéndoselo a
- *     `production` por ganarle la carrera al override del canal.
+ *  1. Wrapper de `useOTAUpdate`: MCM Cantoral no tiene canal de preview, así
+ *     que busca la OTA en cuanto arranca.
  *  2. La OTA ya descargada se aplica SOLA y sin preguntar, pero solo en el
  *     momento que no molesta (recién abierta la app o al volver del fondo), con
  *     la pantalla de «un momentín» puesta y con cortafuegos anti-bucle.
@@ -26,7 +24,6 @@ import {
   LAST_AUTO_APPLY_KEY,
 } from '@/utils/otaAutoApply';
 
-let mockHydrated = true;
 const mockOta = {
   isReady: false,
   isDownloading: false,
@@ -41,10 +38,6 @@ const mockUseOTAUpdate = jest.fn((opts: { ready: boolean }) => {
 });
 let mockLastReadyArg: boolean | undefined;
 let mockOverlayVisible = false;
-
-jest.mock('@/contexts/PreviewChannelContext', () => ({
-  usePreviewChannel: () => ({ hydrated: mockHydrated }),
-}));
 
 jest.mock('@/hooks/useOTAUpdate', () => ({
   __esModule: true,
@@ -63,7 +56,6 @@ let appStateHandler: ((s: string) => void) | undefined;
 
 beforeEach(async () => {
   jest.useFakeTimers();
-  mockHydrated = true;
   mockLastReadyArg = undefined;
   mockOverlayVisible = false;
   mockOta.isReady = false;
@@ -104,14 +96,7 @@ describe('useOTAContext sin Provider', () => {
 });
 
 describe('OTAProvider — canal', () => {
-  it('pasa `ready` a useOTAUpdate desde el hydrated del canal', async () => {
-    mockHydrated = false;
-    await renderHook(() => useOTAContext(), { wrapper });
-    expect(mockLastReadyArg).toBe(false);
-  });
-
-  it('espera a hydrated: true para permitir la comprobación', async () => {
-    mockHydrated = true;
+  it('busca la OTA desde el arranque (sin canal de preview)', async () => {
     await renderHook(() => useOTAContext(), { wrapper });
     expect(mockLastReadyArg).toBe(true);
   });

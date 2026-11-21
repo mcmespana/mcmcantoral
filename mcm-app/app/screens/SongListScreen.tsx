@@ -1,6 +1,6 @@
 import { logger } from '@/utils/logger';
 import Animated, { useReducedMotion } from 'react-native-reanimated';
-import { useTabListScroll } from '@/components/tabs/useTabScroll';
+import { useTabBarPaddingBottom } from '@/hooks/useTabBarClearance';
 import EmptyState from '@/components/ui/EmptyState';
 import { useState, useMemo, useLayoutEffect, useCallback, useRef } from 'react';
 import { useGestureHint } from '@/hooks/useGestureHint';
@@ -399,8 +399,8 @@ export default function SongsListScreen() {
   const layout = useResponsiveLayout();
   // Se registra con la clave del tab igual que CategoriesScreen: gana el
   // último montado, así el re-tap sube ESTA lista mientras se está viendo.
-  const { listRef, onScroll, contentPaddingBottom } =
-    useTabListScroll<FlatList>('cancionero');
+  const listRef = useRef<FlatList>(null);
+  const contentPaddingBottom = useTabBarPaddingBottom();
   const styles = useMemo(
     () =>
       createStyles(
@@ -1015,7 +1015,6 @@ export default function SongsListScreen() {
 
       <Animated.FlatList
         ref={listRef}
-        onScroll={onScroll}
         scrollEventThrottle={16}
         data={listRows}
         keyExtractor={(item: ListRow) => item.key}

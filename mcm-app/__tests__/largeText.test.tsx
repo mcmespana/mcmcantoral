@@ -12,7 +12,6 @@ import React from 'react';
 import { act, create, type ReactTestRenderer } from 'react-test-renderer';
 import { Text } from 'react-native';
 
-import HomeBrand from '@/components/home/HomeBrand';
 import {
   CHROME_MAX_FONT_SCALE,
   LARGE_TEXT_FONT_SCALE,
@@ -23,8 +22,6 @@ import {
   renderSongDocument,
   systemFontScalePercent,
 } from '@/utils/songDocument';
-
-jest.mock('@/components/home/HomeLogo', () => () => null);
 
 describe('isLargeText', () => {
   it('la letra normal y la «grande» de Android no cuentan como grande', () => {
@@ -43,24 +40,6 @@ describe('isLargeText', () => {
 describe('techo de escala del texto de cromo', () => {
   it('no capa por debajo de ×1.3 (design.md §4)', () => {
     expect(CHROME_MAX_FONT_SCALE).toBeGreaterThanOrEqual(1.3);
-  });
-
-  it('el título «MCM App» de la cabecera lo lleva', async () => {
-    let tree!: ReactTestRenderer;
-    await act(async () => {
-      tree = create(
-        <HomeBrand
-          carismoActive={false}
-          isDark={false}
-          onCarismoPress={() => {}}
-        />,
-      );
-    });
-    const title = tree.root
-      .findAllByType(Text)
-      .find((t) => t.props.children === 'MCM App');
-    expect(title).toBeDefined();
-    expect(title!.props.maxFontSizeMultiplier).toBe(CHROME_MAX_FONT_SCALE);
   });
 });
 
