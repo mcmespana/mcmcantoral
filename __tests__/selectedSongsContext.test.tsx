@@ -1,13 +1,15 @@
 /**
  * Tests de `contexts/SelectedSongsContext.tsx` — la playlist en curso.
  *
+ * En MCM Cantoral la «selección» es el REPERTORIO ACTIVO
+ * (`services/repertorios`): la API de siempre lee y escribe ese repertorio.
+ *
  * Lo que se blinda aquí:
  *  - `normalizeOrder`: sin duplicados y con `order` consecutivo desde 0. Los
  *    duplicados se colaban al importar playlists e inflaban el contador.
- *  - La migración desde el formato viejo (`@mcm_selected_songs_v1`, un array
- *    de strings) y su borrado posterior.
- *  - La persistencia en `@mcm_playlist_v2`, que no debe escribirse antes de
- *    hidratar (si no, la playlist guardada se pisa con la vacía al arrancar).
+ *  - La migración, la primera vez, de la selección de MCM App
+ *    (`@mcm_playlist_v2`) a un repertorio.
+ *  - Que lo que se edita queda guardado en el disco del repertorio.
  */
 import React from 'react';
 import { renderHook, act, waitFor } from '@testing-library/react-native';
@@ -17,11 +19,12 @@ import {
   useSelectedSongs,
   type SelectedSong,
 } from '@/contexts/SelectedSongsContext';
+import { repertoriosStore } from '@/services/repertorios';
+import { memoryFiles } from '@/services/catalog/filesTypes';
 
 jest.mock('@/utils/analytics', () => ({ trackEvent: jest.fn() }));
 
 const STORAGE_KEY = '@mcm_playlist_v2';
-const LEGACY_STORAGE_KEY = '@mcm_selected_songs_v1';
 
 const wrapper = ({ children }: { children: React.ReactNode }) => (
   <SelectedSongsProvider>{children}</SelectedSongsProvider>
@@ -37,9 +40,12 @@ function song(filename: string, order: number, extra?: Partial<SelectedSong>) {
   return { filename, transpose: 0, order, addedAt: 1000 + order, ...extra };
 }
 
+let disk: ReturnType<typeof memoryFiles>;
 beforeEach(async () => {
   await AsyncStorage.clear();
   jest.clearAllMocks();
+  disk = memoryFiles();
+  repertoriosStore.__reset(disk);
 });
 
 describe('hidratación', () => {
@@ -85,24 +91,6 @@ describe('hidratación', () => {
 
   it('no revienta con JSON corrupto', async () => {
     await AsyncStorage.setItem(STORAGE_KEY, '{esto no es json');
-    const { result } = await mountHydrated();
-    expect(result.current.selectedSongs).toEqual([]);
-  });
-
-  it('migra el formato viejo (array de filenames) y lo borra', async () => {
-    await AsyncStorage.setItem(
-      LEGACY_STORAGE_KEY,
-      JSON.stringify(['uno.txt', 'dos.txt']),
-    );
-    const { result } = await mountHydrated();
-    expect(result.current.selectedFilenames).toEqual(['uno.txt', 'dos.txt']);
-    await waitFor(async () =>
-      expect(await AsyncStorage.getItem(LEGACY_STORAGE_KEY)).toBeNull(),
-    );
-  });
-
-  it('descarta el formato viejo si no es un array', async () => {
-    await AsyncStorage.setItem(LEGACY_STORAGE_KEY, JSON.stringify({ a: 1 }));
     const { result } = await mountHydrated();
     expect(result.current.selectedSongs).toEqual([]);
   });
@@ -257,18 +245,17 @@ describe('reordenar y reemplazar', () => {
 });
 
 describe('persistencia', () => {
-  it('guarda en @mcm_playlist_v2 tras un cambio', async () => {
+  it('lo editado queda en el fichero del repertorio activo', async () => {
     const { result } = await mountHydrated();
     await act(async () => result.current.addSong('a.txt'));
-    await waitFor(async () => {
-      const raw = await AsyncStorage.getItem(STORAGE_KEY);
-      expect(raw).not.toBeNull();
-      const parsed = JSON.parse(raw!);
-      expect(parsed.version).toBe(2);
-      expect(parsed.songs.map((s: SelectedSong) => s.filename)).toEqual([
-        'a.txt',
-      ]);
-    });
+    await repertoriosStore.flush();
+    const id = result.current.activeRepertorio!.id;
+    const saved = JSON.parse(disk.files.get(`${id}.json`)!);
+    expect(saved.items.map((i: { filename: string }) => i.filename)).toEqual([
+      'a.txt',
+    ]);
+    const index = JSON.parse(disk.files.get('indice.json')!);
+    expect(index.activeId).toBe(id);
   });
 });
 

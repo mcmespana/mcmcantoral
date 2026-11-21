@@ -4,7 +4,7 @@ import { Platform } from 'react-native';
 import * as Linking from 'expo-linking';
 import * as FileSystem from 'expo-file-system/legacy';
 
-type ImportCallback = (songs: string[]) => void;
+type ImportCallback = (filenames: string[], raw?: unknown) => void;
 
 /**
  * Hook that listens for incoming .mcm file URLs (when the app is opened
@@ -46,7 +46,7 @@ export function useIncomingPlaylist(onImport: ImportCallback) {
           .filter(Boolean);
       }
       if (filenames && filenames.length > 0) {
-        onImportRef.current(filenames);
+        onImportRef.current(filenames, parsed);
       }
     } catch (err) {
       logger.error('Error handling incoming playlist file:', err);

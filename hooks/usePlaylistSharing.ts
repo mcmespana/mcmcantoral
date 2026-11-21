@@ -16,6 +16,14 @@
  *     "actualizar la que subí" existe como opción de primera clase en vez de
  *     obligarte a recordar un código de 4 dígitos.
  */
+import {
+  fromShared,
+  newId,
+  toShareFields,
+  newRepertorio,
+  repertoriosStore,
+  type Repertorio,
+} from '@/services/repertorios';
 import { useCallback, useMemo, useState } from 'react';
 import { logger } from '@/utils/logger';
 import { trackEvent } from '@/utils/analytics';
@@ -101,30 +109,47 @@ export function usePlaylistSharing(opts: {
   /* --------------------------------------------------------------- */
 
   /**
-   * Sustituye la selección entera dejando 10 s para volver atrás. Restaura
-   * también el enlace con la nube: deshacer una importación tiene que dejarte
-   * exactamente donde estabas, no a medias.
+   * Lo importado (un código, un QR, el repertorio de un directo…) entra como
+   * REPERTORIO NUEVO y queda activo, con 10 s para deshacer: el que tenías
+   * no se toca y deshacer lo quita y te devuelve al anterior. `shared` es lo
+   * que vino de fuera tal cual: si trae `items` (MCM Cantoral), se conservan
+   * pausas y notas; si no, el `songs` de MCM App.
    */
   const replaceWithUndo = useCallback(
-    (songs: SelectedSong[], label: string, nextLink: PlaylistLink | null) => {
-      const prevSongs = selectedSongs;
-      const prevLink = link;
-      replaceAll(songs);
-      setLink(nextLink);
+    (
+      songs: SelectedSong[],
+      label: string,
+      nextLink: PlaylistLink | null,
+      meta?: {
+        name?: string;
+        shared?: unknown;
+        source?: Repertorio['source'];
+      },
+    ) => {
+      const prevActive = repertoriosStore.getState().activeId;
+      const now = Date.now();
+      const rep =
+        fromShared(meta?.shared ?? { songs }, {
+          id: newId(now),
+          now,
+          source: meta?.source,
+          name: meta?.name ?? nextLink?.name ?? 'Repertorio importado',
+        }) ?? newRepertorio(meta?.name ?? 'Repertorio importado', now);
+      const created = repertoriosStore.create({ ...rep, link: nextLink });
       toast.show({
         label,
         variant: 'success',
         duration: UNDO_MS,
         actionLabel: 'Deshacer',
         onActionPress: ({ hide }) => {
-          replaceAll(prevSongs);
-          setLink(prevLink);
+          repertoriosStore.remove(created.id);
+          if (prevActive) repertoriosStore.setActive(prevActive);
           hide();
-          toast.show({ label: 'Restaurada tu playlist anterior' });
+          toast.show({ label: 'Vuelves a tu repertorio anterior' });
         },
       });
     },
-    [selectedSongs, link, replaceAll, setLink, toast],
+    [toast],
   );
 
   /** Vaciar la lista sin ceremonias: un toque y 10 s para arrepentirse. */
@@ -164,7 +189,7 @@ export function usePlaylistSharing(opts: {
       });
       replaceWithUndo(
         songs,
-        name ? `«${name}» importada` : `Playlist ${code} importada`,
+        name ? `«${name}» importada` : `Repertorio ${code} importado`,
         {
           code,
           name,
@@ -175,6 +200,7 @@ export function usePlaylistSharing(opts: {
           owned:
             !!data.ownerDeviceId && data.ownerDeviceId === identity.deviceId,
         },
+        { name, shared: data, source: { kind: 'cloud', ref: code } },
       );
       // Si la playlist declara coro y todavía no tenías uno elegido, te lo
       // dejamos puesto: has entrado por el enlace de ese coro, es el tuyo.
@@ -227,9 +253,14 @@ export function usePlaylistSharing(opts: {
       createdAt?: number;
     }) => {
       const now = Date.now();
+      const active = repertoriosStore.getActive();
       await uploadCloudPlaylist(args.code, selectedSongs, {
         name: args.name,
         createdAt: args.createdAt,
+        // v3 aditivo: el repertorio entero (pausas, notas, tono del día).
+        ...(active ? { items: toShareFields(active).items } : {}),
+        ...(active?.event ? { event: active.event } : {}),
+        ...(active?.date ? { date: active.date } : {}),
         choirId: args.choir.id,
         choirName: args.choir.name,
         by: identity.name,
@@ -397,6 +428,10 @@ export function usePlaylistSharing(opts: {
           session.playlist ?? [],
           `Sigues a ${session.master?.name || 'el líder'} en ${choir.name}`,
           null,
+          {
+            name: `Directo · ${choir.name}`,
+            source: { kind: 'live', ref: choir.id },
+          },
         );
         await choirSession.joinAsSlave(choir.id);
       } catch (e: any) {

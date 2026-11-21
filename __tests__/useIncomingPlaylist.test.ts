@@ -56,7 +56,10 @@ describe('cold start (getInitialURL)', () => {
     const onImport = jest.fn();
     await renderHook(() => useIncomingPlaylist(onImport));
     await waitFor(() =>
-      expect(onImport).toHaveBeenCalledWith(['a.cho', 'b.cho']),
+      expect(onImport).toHaveBeenCalledWith(
+        ['a.cho', 'b.cho'],
+        expect.anything(),
+      ),
     );
   });
 
@@ -80,7 +83,9 @@ describe('cold start (getInitialURL)', () => {
     );
     const onImport = jest.fn();
     await renderHook(() => useIncomingPlaylist(onImport));
-    await waitFor(() => expect(onImport).toHaveBeenCalledWith(['c.cho']));
+    await waitFor(() =>
+      expect(onImport).toHaveBeenCalledWith(['c.cho'], expect.anything()),
+    );
   });
 
   it('sin URL inicial, no llama a onImport', async () => {
@@ -105,7 +110,10 @@ describe('formatos del fichero', () => {
     const onImport = jest.fn();
     await renderHook(() => useIncomingPlaylist(onImport));
     await waitFor(() =>
-      expect(onImport).toHaveBeenCalledWith(['a.cho', 'b.cho']),
+      expect(onImport).toHaveBeenCalledWith(
+        ['a.cho', 'b.cho'],
+        expect.anything(),
+      ),
     );
   });
 
@@ -152,7 +160,9 @@ describe('warm start (evento "url" en caliente)', () => {
     await renderHook(() => useIncomingPlaylist(onImport));
     await waitFor(() => expect(handler).not.toBeNull());
     await handler!({ url: 'file:///tmp/otra.mcm' });
-    await waitFor(() => expect(onImport).toHaveBeenCalledWith(['x.cho']));
+    await waitFor(() =>
+      expect(onImport).toHaveBeenCalledWith(['x.cho'], expect.anything()),
+    );
   });
 
   it('usa siempre el onImport más reciente, sin volver a suscribirse', async () => {
@@ -174,7 +184,9 @@ describe('warm start (evento "url" en caliente)', () => {
     expect(Linking.addEventListener).toHaveBeenCalledTimes(1);
 
     await handler!({ url: 'file:///tmp/lista.mcm' });
-    await waitFor(() => expect(onImportB).toHaveBeenCalledWith(['y.cho']));
+    await waitFor(() =>
+      expect(onImportB).toHaveBeenCalledWith(['y.cho'], expect.anything()),
+    );
     expect(onImportA).not.toHaveBeenCalled();
   });
 

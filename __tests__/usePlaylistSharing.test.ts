@@ -3,8 +3,9 @@
  * (importar, guardar, dirigir/seguir un coro en vivo). Las reglas de negocio
  * que este hook encierra y que valen la pena blindar:
  *
- *  - Importar SIEMPRE reemplaza con deshacer de 10 s, y deshacer restaura
- *    también el enlace con la nube (no solo las canciones).
+ *  - Importar crea un REPERTORIO NUEVO y activo (el tuyo no se toca), con
+ *    deshacer de 10 s que lo quita y te devuelve al anterior. El enlace con
+ *    la nube va en el repertorio importado.
  *  - Actualizar una playlist ajena pide contraseña; la tuya (mismo código+
  *    owned, o mismo deviceId de origen) se actualiza directo.
  *  - Tomar el mando de un coro sin líder (o siendo tú el líder ya) es
@@ -34,6 +35,8 @@ import {
 } from '@/services/choirDirectoryService';
 import { isSameLeader } from '@/services/choirSessionService';
 import { usePlaylistSharing } from '@/hooks/usePlaylistSharing';
+import { repertoriosStore } from '@/services/repertorios';
+import { memoryFiles } from '@/services/catalog/filesTypes';
 
 jest.mock('@/contexts/AppToastContext', () => ({
   useToast: jest.fn(),
@@ -132,10 +135,17 @@ async function mount() {
   return renderHook(() => usePlaylistSharing({ onShowQr: jest.fn() }));
 }
 
-beforeEach(() => {
+beforeEach(async () => {
   jest.clearAllMocks();
   setup();
+  repertoriosStore.__reset(memoryFiles());
+  await repertoriosStore.init();
 });
+
+const activeFilenames = () =>
+  (repertoriosStore.getActive()?.items ?? []).map((i) =>
+    i.type === 'break' ? '|' : i.filename,
+  );
 
 describe('isSynced', () => {
   it('true cuando el link coincide con la firma actual', async () => {
@@ -157,8 +167,8 @@ describe('isSynced', () => {
 });
 
 describe('replaceWithUndo', () => {
-  it('reemplaza la lista y deshacer restaura canciones + link anteriores', async () => {
-    mockLink = { code: 'old', signature: 'sig-current', owned: true };
+  it('crea un repertorio nuevo y deshacer lo quita y vuelve al anterior', async () => {
+    const before = repertoriosStore.getState().activeId;
     const { result } = await mount();
     const nextLink = {
       code: 'new',
@@ -168,16 +178,38 @@ describe('replaceWithUndo', () => {
     };
 
     await act(async () =>
-      result.current.replaceWithUndo([song('b.cho')], 'Importada', nextLink),
+      result.current.replaceWithUndo([song('b.cho')], 'Importada', nextLink, {
+        name: 'Domingo',
+      }),
     );
-    expect(mockReplaceAll).toHaveBeenCalledWith([song('b.cho')]);
-    expect(mockSetLink).toHaveBeenCalledWith(nextLink);
+    const created = repertoriosStore.getActive()!;
+    expect(created.id).not.toBe(before);
+    expect(created.name).toBe('Domingo');
+    expect(created.link).toEqual(nextLink);
+    expect(activeFilenames()).toEqual(['b.cho']);
+    // El repertorio de antes sigue ahí, sin tocar.
+    expect(repertoriosStore.get(before)).toBeDefined();
 
     const toastCall = mockToastShow.mock.calls[0][0];
     expect(toastCall.actionLabel).toBe('Deshacer');
     toastCall.onActionPress({ hide: jest.fn() });
-    expect(mockReplaceAll).toHaveBeenLastCalledWith(mockSelectedSongs);
-    expect(mockSetLink).toHaveBeenLastCalledWith(mockLink);
+    expect(repertoriosStore.getState().activeId).toBe(before);
+    expect(repertoriosStore.get(created.id)).toBeUndefined();
+  });
+
+  it('si lo importado trae items (MCM Cantoral), conserva pausas y notas', async () => {
+    const { result } = await mount();
+    await act(async () =>
+      result.current.replaceWithUndo([song('b.cho')], 'Importada', null, {
+        shared: {
+          items: [
+            { category: 'x', filename: 'b.cho', notes: '🎺' },
+            { type: 'break', title: 'Homilía' },
+          ],
+        },
+      }),
+    );
+    expect(activeFilenames()).toEqual(['b.cho', '|']);
   });
 });
 
@@ -207,7 +239,9 @@ describe('importByCode', () => {
     });
     const { result } = await mount();
     await act(async () => result.current.importByCode('5678'));
-    expect(mockReplaceAll).toHaveBeenCalledWith([song('c.cho')]);
+    expect(activeFilenames()).toEqual(['c.cho']);
+    expect(repertoriosStore.getActive()?.name).toBe('Domingo');
+    expect(repertoriosStore.getActive()?.link?.code).toBe('5678');
     expect(mockToastShow).toHaveBeenCalledWith(
       expect.objectContaining({ label: '«Domingo» importada' }),
     );
@@ -428,7 +462,7 @@ describe('joinLive / leaveLive', () => {
         master: { name: 'Líder' },
       } as any),
     );
-    expect(mockReplaceAll).toHaveBeenCalledWith([song('e.cho')]);
+    expect(activeFilenames()).toEqual(['e.cho']);
     expect(mockJoinAsSlave).toHaveBeenCalledWith('c1');
   });
 

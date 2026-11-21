@@ -6,6 +6,7 @@
  * Las playlists incluyen `expiresAt` con +6 meses sobre el momento de
  * creación; la purga real se hace por backend más adelante.
  */
+import type { RepertorioItem } from '@/services/repertorios/model';
 import { getDatabase, ref, get, set, remove, update } from 'firebase/database';
 import { getFirebaseApp } from '@/utils/firebaseApp';
 import type { SelectedSong } from '@/contexts/SelectedSongsContext';
@@ -19,8 +20,16 @@ const ROOT = 'playlistShares';
 const SIX_MONTHS_MS = 1000 * 60 * 60 * 24 * 30 * 6;
 
 export interface CloudPlaylist {
-  v: 2;
+  /**
+   * 2 = solo `songs` (MCM App). 3 = además `items` (MCM Cantoral: pausas,
+   * notas, evento). Siempre se escribe `songs`, que es lo que lee MCM App.
+   */
+  v: 2 | 3;
   songs: SelectedSong[];
+  /** Repertorio completo (MCM Cantoral). MCM App lo ignora. */
+  items?: RepertorioItem[];
+  event?: string;
+  date?: string;
   name?: string;
   createdAt: number;
   updatedAt: number;
@@ -85,12 +94,19 @@ export async function uploadCloudPlaylist(
     choirName?: string;
     by?: string;
     ownerDeviceId?: string;
+    /** El repertorio entero (v3): pausas, notas, tono del día. */
+    items?: RepertorioItem[];
+    event?: string;
+    date?: string;
   },
 ): Promise<CloudPlaylist> {
   const now = Date.now();
   const payload: CloudPlaylist = {
-    v: 2,
+    v: opts?.items ? 3 : 2,
     songs,
+    items: opts?.items,
+    event: opts?.event,
+    date: opts?.date,
     name: opts?.name,
     createdAt: opts?.createdAt ?? now,
     updatedAt: now,

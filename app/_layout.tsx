@@ -17,7 +17,7 @@ import { usePathname, Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { useColorScheme } from '@/hooks/useColorScheme';
 import { useStatusBarTheme } from '@/hooks/useStatusBarTheme';
-import { useSelectedSongs } from '@/contexts/SelectedSongsContext';
+import { fromShared, newId, repertoriosStore } from '@/services/repertorios';
 import { useIncomingPlaylist } from '@/hooks/useIncomingPlaylist';
 import { useRegisterServiceWorker } from '@/hooks/useRegisterServiceWorker';
 import { useScreenTracking } from '@/hooks/useScreenTracking';
@@ -93,24 +93,40 @@ function InnerLayout() {
     currentVersion: appVersion,
     minAppVersion,
   } = useVersionGate();
-  const { addSong } = useSelectedSongs();
   const { toast } = useToast();
 
-  // Ficheros .mcm que llegan de fuera (WhatsApp, Archivos…).
+  // Ficheros .mcm que llegan de fuera (WhatsApp, Archivos…): entran como
+  // repertorio NUEVO y activo (con pausas y notas si vienen de MCM Cantoral).
   const handleIncomingPlaylist = useCallback(
-    (songs: string[]) => {
-      songs.forEach((fn) => addSong(fn));
+    (songs: string[], raw?: unknown) => {
+      const now = Date.now();
+      const rep = fromShared(
+        raw ?? {
+          songs: songs.map((filename, order) => ({
+            filename,
+            order,
+            transpose: 0,
+          })),
+        },
+        {
+          id: newId(now),
+          now,
+          source: { kind: 'file', ref: 'mcm' },
+          name: 'Repertorio recibido',
+        },
+      );
+      if (rep) repertoriosStore.create(rep);
       trackEvent('playlist_usada', {
         accion: 'importada',
         tamano: tramoTamano(songs.length),
       });
       toast.show({
-        label: `Repertorio importado (${songs.length} ${songs.length === 1 ? 'canción' : 'canciones'})`,
+        label: `«${rep?.name ?? 'Repertorio'}» importado (${songs.length} ${songs.length === 1 ? 'canción' : 'canciones'})`,
         actionLabel: 'OK',
         onActionPress: ({ hide }) => hide(),
       });
     },
-    [addSong, toast],
+    [toast],
   );
   useIncomingPlaylist(handleIncomingPlaylist);
 

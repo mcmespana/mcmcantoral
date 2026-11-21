@@ -1029,6 +1029,7 @@ export default function SongsListScreen() {
     [
       handleSongPress,
       handleSongLongPress,
+      songsData,
       featuredFor,
       isSearchAll,
       isSongSelected,

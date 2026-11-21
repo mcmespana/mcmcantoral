@@ -5,16 +5,20 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import type { CatalogFiles } from './filesTypes';
 
-const PREFIX = '@catalogo/';
+/** Un «disco» con prefijo `@<dir>/` en el almacén del navegador. */
+export function makeFiles(dir: string): CatalogFiles {
+  const PREFIX = `@${dir}/`;
+  return {
+    read: (name) => AsyncStorage.getItem(PREFIX + name),
+    write: (name, text) => AsyncStorage.setItem(PREFIX + name, text),
+    async move(from, to) {
+      const text = await AsyncStorage.getItem(PREFIX + from);
+      if (text === null) return;
+      await AsyncStorage.setItem(PREFIX + to, text);
+      await AsyncStorage.removeItem(PREFIX + from);
+    },
+    remove: (name) => AsyncStorage.removeItem(PREFIX + name),
+  };
+}
 
-export const catalogFiles: CatalogFiles = {
-  read: (name) => AsyncStorage.getItem(PREFIX + name),
-  write: (name, text) => AsyncStorage.setItem(PREFIX + name, text),
-  async move(from, to) {
-    const text = await AsyncStorage.getItem(PREFIX + from);
-    if (text === null) return;
-    await AsyncStorage.setItem(PREFIX + to, text);
-    await AsyncStorage.removeItem(PREFIX + from);
-  },
-  remove: (name) => AsyncStorage.removeItem(PREFIX + name),
-};
+export const catalogFiles: CatalogFiles = makeFiles('catalogo');

@@ -1,16 +1,19 @@
-import { logger } from '@/utils/logger';
 import { trackEvent } from '@/utils/analytics';
 import React, {
   createContext,
-  useState,
   useContext,
   ReactNode,
   useMemo,
   useCallback,
   useEffect,
-  useRef,
+  useSyncExternalStore,
 } from 'react';
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import {
+  applySelection,
+  repertoriosStore,
+  toSelection,
+  type Repertorio,
+} from '@/services/repertorios';
 
 /**
  * Representa una canción seleccionada por el usuario en su playlist actual.
@@ -38,15 +41,6 @@ export interface SelectedSong {
   addedAt: number;
 }
 
-/** Forma persistida en AsyncStorage. */
-interface StoredPlaylist {
-  version: 2;
-  songs: SelectedSong[];
-}
-
-const STORAGE_KEY = '@mcm_playlist_v2';
-const LEGACY_STORAGE_KEY = '@mcm_selected_songs_v1';
-
 interface SelectedSongsContextType {
   /** Lista de canciones seleccionadas, ya ordenada por `order` ascendente. */
   selectedSongs: SelectedSong[];
@@ -72,6 +66,12 @@ interface SelectedSongsContextType {
   moveSong: (filename: string, toIndex: number) => void;
   /** Reemplaza completamente la playlist (importar, sincronización coro…). */
   replaceAll: (songs: SelectedSong[]) => void;
+  /**
+   * El repertorio activo (MCM Cantoral tiene varios: `services/repertorios`).
+   * Lo que edita esta API es SIEMPRE el activo; sus pausas y notas se
+   * conservan aunque la selección no las vea.
+   */
+  activeRepertorio: Repertorio | null;
 }
 
 const SelectedSongsContext = createContext<
@@ -103,71 +103,37 @@ function normalizeOrder(songs: SelectedSong[]): SelectedSong[] {
 export const SelectedSongsProvider: React.FC<SelectedSongsProviderProps> = ({
   children,
 }) => {
-  const [selectedSongs, setSelectedSongsState] = useState<SelectedSong[]>([]);
-  const [isHydrated, setIsHydrated] = useState(false);
-  const hydrationDone = useRef(false);
-
-  // Hidratar desde AsyncStorage en el primer render.
+  const state = useSyncExternalStore(
+    repertoriosStore.subscribe,
+    repertoriosStore.getState,
+    repertoriosStore.getState,
+  );
   useEffect(() => {
-    let cancelled = false;
-    (async () => {
-      try {
-        const raw = await AsyncStorage.getItem(STORAGE_KEY);
-        if (raw) {
-          const parsed = JSON.parse(raw) as StoredPlaylist;
-          if (parsed && parsed.version === 2 && Array.isArray(parsed.songs)) {
-            if (!cancelled) {
-              setSelectedSongsState(normalizeOrder(parsed.songs));
-            }
-          }
-        } else {
-          // Migración tolerante desde el formato antiguo (array de strings).
-          const legacy = await AsyncStorage.getItem(LEGACY_STORAGE_KEY);
-          if (legacy) {
-            try {
-              const arr = JSON.parse(legacy);
-              if (Array.isArray(arr)) {
-                const now = Date.now();
-                const migrated: SelectedSong[] = arr.map(
-                  (filename: string, i: number) => ({
-                    filename,
-                    transpose: 0,
-                    order: i,
-                    addedAt: now + i,
-                  }),
-                );
-                if (!cancelled) {
-                  setSelectedSongsState(migrated);
-                }
-              }
-            } catch {
-              // ignorar
-            }
-            await AsyncStorage.removeItem(LEGACY_STORAGE_KEY);
-          }
-        }
-      } catch (e) {
-        logger.error('Error hidratando playlist seleccionada', e);
-      } finally {
-        if (!cancelled) {
-          hydrationDone.current = true;
-          setIsHydrated(true);
-        }
-      }
-    })();
-    return () => {
-      cancelled = true;
-    };
+    void repertoriosStore.init();
   }, []);
 
-  // Persistencia tras cada cambio (ya hidratada).
-  useEffect(() => {
-    if (!hydrationDone.current) return;
-    const stored: StoredPlaylist = { version: 2, songs: selectedSongs };
-    AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(stored)).catch((e) => {
-      logger.error('Error guardando playlist seleccionada', e);
-    });
-  }, [selectedSongs]);
+  const activeRepertorio = useMemo(
+    () => state.list.find((r) => r.id === state.activeId) ?? null,
+    [state.list, state.activeId],
+  );
+  const selectedSongs = useMemo(
+    () => (activeRepertorio ? toSelection(activeRepertorio) : []),
+    [activeRepertorio],
+  );
+  const isHydrated = state.ready;
+
+  /**
+   * Cambia la selección del repertorio activo. Se lee SIEMPRE del almacén
+   * (síncrono), no del render: dos cambios seguidos no se pisan.
+   */
+  const mutate = useCallback((fn: (prev: SelectedSong[]) => SelectedSong[]) => {
+    const rep = repertoriosStore.getActive();
+    if (!rep) return;
+    const prev = toSelection(rep);
+    const next = fn(prev);
+    if (next === prev) return;
+    repertoriosStore.update(rep.id, (r) => applySelection(r, next, Date.now()));
+  }, []);
 
   const selectedSongsMap = useMemo(() => {
     const m = new Map<string, SelectedSong>();
@@ -192,7 +158,7 @@ export const SelectedSongsProvider: React.FC<SelectedSongsProviderProps> = ({
 
   const addSong = useCallback<SelectedSongsContextType['addSong']>(
     (filename, opts) => {
-      setSelectedSongsState((prev) => {
+      mutate((prev) => {
         if (prev.some((s) => s.filename === filename)) return prev;
         // "Creada" = la primera canción que entra en una selección vacía. Es el
         // único momento inequívoco: no hay un botón de "crear playlist".
@@ -209,55 +175,67 @@ export const SelectedSongsProvider: React.FC<SelectedSongsProviderProps> = ({
         return [...prev, next];
       });
     },
-    [],
+    [mutate],
   );
 
-  const removeSong = useCallback((filename: string) => {
-    setSelectedSongsState((prev) =>
-      normalizeOrder(prev.filter((s) => s.filename !== filename)),
-    );
-  }, []);
+  const removeSong = useCallback(
+    (filename: string) => {
+      mutate((prev) =>
+        normalizeOrder(prev.filter((s) => s.filename !== filename)),
+      );
+    },
+    [mutate],
+  );
 
   const clearSelection = useCallback(() => {
-    setSelectedSongsState([]);
-  }, []);
+    mutate(() => []);
+  }, [mutate]);
 
-  const setTranspose = useCallback((filename: string, transpose: number) => {
-    // Normalizamos a (-11..+11). Octavas completas no aportan nada.
-    let t = transpose;
-    if (t >= 12 || t <= -12) t = t % 12;
-    setSelectedSongsState((prev) =>
-      prev.map((s) => (s.filename === filename ? { ...s, transpose: t } : s)),
-    );
-  }, []);
+  const setTranspose = useCallback(
+    (filename: string, transpose: number) => {
+      // Normalizamos a (-11..+11). Octavas completas no aportan nada.
+      let t = transpose;
+      if (t >= 12 || t <= -12) t = t % 12;
+      mutate((prev) =>
+        prev.map((s) => (s.filename === filename ? { ...s, transpose: t } : s)),
+      );
+    },
+    [mutate],
+  );
 
   const setCapoOverride = useCallback(
     (filename: string, capo: number | null) => {
-      setSelectedSongsState((prev) =>
+      mutate((prev) =>
         prev.map((s) =>
           s.filename === filename ? { ...s, capoOverride: capo } : s,
         ),
       );
     },
-    [],
+    [mutate],
   );
 
-  const moveSong = useCallback((filename: string, toIndex: number) => {
-    setSelectedSongsState((prev) => {
-      const sorted = [...prev].sort((a, b) => a.order - b.order);
-      const fromIndex = sorted.findIndex((s) => s.filename === filename);
-      if (fromIndex < 0) return prev;
-      const clamped = Math.max(0, Math.min(toIndex, sorted.length - 1));
-      if (clamped === fromIndex) return prev;
-      const [moved] = sorted.splice(fromIndex, 1);
-      sorted.splice(clamped, 0, moved);
-      return sorted.map((s, i) => ({ ...s, order: i }));
-    });
-  }, []);
+  const moveSong = useCallback(
+    (filename: string, toIndex: number) => {
+      mutate((prev) => {
+        const sorted = [...prev].sort((a, b) => a.order - b.order);
+        const fromIndex = sorted.findIndex((s) => s.filename === filename);
+        if (fromIndex < 0) return prev;
+        const clamped = Math.max(0, Math.min(toIndex, sorted.length - 1));
+        if (clamped === fromIndex) return prev;
+        const [moved] = sorted.splice(fromIndex, 1);
+        sorted.splice(clamped, 0, moved);
+        return sorted.map((s, i) => ({ ...s, order: i }));
+      });
+    },
+    [mutate],
+  );
 
-  const replaceAll = useCallback((songs: SelectedSong[]) => {
-    setSelectedSongsState(normalizeOrder(songs));
-  }, []);
+  const replaceAll = useCallback(
+    (songs: SelectedSong[]) => {
+      mutate(() => normalizeOrder(songs));
+    },
+    [mutate],
+  );
 
   const contextValue = useMemo<SelectedSongsContextType>(
     () => ({
@@ -273,6 +251,7 @@ export const SelectedSongsProvider: React.FC<SelectedSongsProviderProps> = ({
       setCapoOverride,
       moveSong,
       replaceAll,
+      activeRepertorio,
     }),
     [
       selectedSongs,
@@ -287,6 +266,7 @@ export const SelectedSongsProvider: React.FC<SelectedSongsProviderProps> = ({
       setCapoOverride,
       moveSong,
       replaceAll,
+      activeRepertorio,
     ],
   );
 

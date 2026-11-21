@@ -1,3 +1,4 @@
+import { repertoriosStore, toShareFields } from '@/services/repertorios';
 import { APP_SCHEME, PLAYLIST_UTI, WEB_BASE_URL } from '@/constants/appLinks';
 import { logger } from '@/utils/logger';
 import { trackEvent } from '@/utils/analytics';
@@ -146,6 +147,17 @@ interface CategorizedSongs {
 }
 
 /** Esquema propio para deep links offline (playlist embebida en la URL). */
+
+/**
+ * Lo que el repertorio activo añade a lo que se comparte (v3: pausas, notas,
+ * tono del día, evento). MCM App lee solo `songs` y lo ignora.
+ */
+function repertorioShareExtras() {
+  const active = repertoriosStore.getActive();
+  if (!active) return {};
+  const { items, event, date } = toShareFields(active);
+  return { items, ...(event ? { event } : {}), ...(date ? { date } : {}) };
+}
 
 const SelectedSongsScreen: React.FC = () => {
   const {
@@ -507,10 +519,16 @@ const SelectedSongsScreen: React.FC = () => {
   const handleConfirmExportFile = useCallback(async () => {
     try {
       const fileName = `${exportFileName}.mcm`;
+      // `.mcm`: `version: 2` + `songs` para MCM App, y el repertorio entero
+      // (`items`, nombre, evento) para MCM Cantoral. MCM App ignora lo demás.
       const payload = JSON.stringify({
         version: 2,
         createdAt: Date.now(),
         songs: selectedSongs,
+        ...repertorioShareExtras(),
+        ...(repertoriosStore.getActive()?.name
+          ? { name: repertoriosStore.getActive()!.name }
+          : {}),
       });
       if (Platform.OS === 'web') {
         const blob = new Blob([payload], { type: 'application/octet-stream' });
@@ -857,6 +875,7 @@ const SelectedSongsScreen: React.FC = () => {
         choirName: existing?.choirName,
         by: sharing.identity.name,
         ownerDeviceId: sharing.identity.deviceId,
+        ...repertorioShareExtras(),
       });
       rememberUpload(code, name);
       setCodeDialog(null);
@@ -880,6 +899,7 @@ const SelectedSongsScreen: React.FC = () => {
         choirName: existing?.choirName,
         by: sharing.identity.name,
         ownerDeviceId: sharing.identity.deviceId,
+        ...repertorioShareExtras(),
       });
       rememberUpload(pending.code, pending.name);
       showUploadSuccess(pending.code, pending.name);
