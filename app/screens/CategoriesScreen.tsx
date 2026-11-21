@@ -22,7 +22,7 @@ import Animated from 'react-native-reanimated';
 import { useTabBarPaddingBottom } from '@/hooks/useTabBarClearance';
 import ListSkeleton from '@/components/ListSkeleton';
 import EmptyState from '@/components/ui/EmptyState';
-import { useFirebaseData } from '@/hooks/useFirebaseData';
+import { useCatalogSongs } from '@/hooks/useCatalog';
 import { useColorScheme } from '@/hooks/useColorScheme';
 import useLargeText, { CHROME_MAX_FONT_SCALE } from '@/hooks/useLargeText';
 import { useResponsiveLayout } from '@/hooks/useResponsiveLayout';
@@ -42,7 +42,6 @@ import ContextMenuSheet, {
   type ContextMenuAction,
 } from '@/components/ContextMenuSheet';
 import { useMyChoir } from '@/hooks/useMyChoir';
-import { filterSongsData } from '@/utils/filterSongsData';
 import { extractTrailingEmoji, stripCategoryPrefix } from '@/utils/songUtils';
 import { useSelectedSongs } from '@/contexts/SelectedSongsContext';
 import { useSongTagIndex } from '@/hooks/useSongTags';
@@ -89,15 +88,7 @@ export default function CategoriesScreen() {
   // Letra del sistema grande: nombres de categoría en más de una línea.
   const large = useLargeText();
   const glyphColor = themeColors(isDark).link;
-  const {
-    data: songsData,
-    loading,
-    offline,
-    refresh,
-  } = useFirebaseData<Record<
-    string,
-    { categoryTitle: string; songs: any[] }
-  > | null>('songs', 'songs', filterSongsData);
+  const { data: songsData, loading, offline, refresh } = useCatalogSongs();
 
   // Pull-to-refresh: la canción que se subió justo antes de misa, sin salir y
   // volver a entrar. Revalida por `updatedAt`: si nada cambió no se descarga

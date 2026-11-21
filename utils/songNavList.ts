@@ -8,7 +8,7 @@
  * ya no caben en la ruta. Lo que viaja:
  *
  *   · `filename` — qué canción. La pantalla la lee del catálogo (`songs`, la
- *     misma caché de `useFirebaseData` que pintan las listas).
+ *     mismo catálogo offline que pintan las listas).
  *   · `list` + `currentIndex` — la lista por la que se navega, guardada AQUÍ,
  *     en memoria, con un id corto. Es también donde viaja una canción que no
  *     está en el catálogo propio (la que publica el líder del coro) o la letra

@@ -26,6 +26,7 @@ import { useCantoralConfig } from '@/hooks/useCantoralConfig';
 import { trackEvent } from '@/utils/analytics';
 import { tramoTamano } from '@/constants/analyticsEvents';
 import AddToHomeBanner from '@/components/AddToHomeBanner';
+import CatalogUpdater from '@/components/CatalogUpdater';
 import CommandPalette from '@/components/CommandPalette';
 import ErrorBoundary from '@/components/ErrorBoundary';
 import MaintenanceScreen from '@/components/MaintenanceScreen';
@@ -158,6 +159,7 @@ function InnerLayout() {
         <Stack.Screen name="cancion" />
       </Stack>
       <StatusBar style={scheme === 'dark' ? 'light' : 'dark'} />
+      <CatalogUpdater />
       <AddToHomeBanner />
       <CommandPalette />
     </NavThemeProvider>

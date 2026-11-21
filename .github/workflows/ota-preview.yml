@@ -119,6 +119,11 @@ jobs:
       - name: Instalar dependencias
         run: npm ci
 
+      - name: Semilla del catálogo offline
+        # La primera vez sin internet la app no sale vacía (02 §3.1). Falla si
+        # el cantoral llega vacío: mejor no publicar que publicar una app vacía.
+        run: npm run snapshot:cantoral
+
       - name: Verificar autenticación
         run: eas whoami
 

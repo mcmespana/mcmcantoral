@@ -12,7 +12,7 @@
  * `loading` es «todavía puede aparecer» (el catálogo aún carga en frío).
  */
 import { useMemo } from 'react';
-import { useFirebaseData } from '@/hooks/useFirebaseData';
+import { useCatalogSongs } from '@/hooks/useCatalog';
 import { useChoirSession } from '@/contexts/ChoirSessionContext';
 import { filterSongsData, type SongsData } from '@/utils/filterSongsData';
 import { extractSongMedia } from '@/types/songMedia';
@@ -38,11 +38,7 @@ export interface RouteSong {
 
 export function useRouteSong(params: Partial<SongRouteParams>): RouteSong {
   const filename = typeof params.filename === 'string' ? params.filename : '';
-  const { data, loading } = useFirebaseData<SongsData>(
-    'songs',
-    'songs',
-    filterSongsData as (data: unknown) => SongsData,
-  );
+  const { data, loading } = useCatalogSongs();
   const choir = useChoirSession();
   const remote = choir.mode === 'slave' ? choir.session?.current : null;
 

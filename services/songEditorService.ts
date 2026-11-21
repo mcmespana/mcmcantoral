@@ -24,7 +24,8 @@ import { get, getDatabase, ref } from 'firebase/database';
 import { getFirebaseApp } from '@/utils/firebaseApp';
 import { getFirebaseAuth } from '@/utils/firebaseAuth';
 import { logger } from '@/utils/logger';
-import { patchCachedNode, revalidateNode } from '@/hooks/useFirebaseData';
+import { catalogStore } from '@/services/catalog';
+import type { SongsData } from '@/utils/filterSongsData';
 import { applyEditToCatalog, type SongSnapshot } from '@/utils/songEditor';
 
 const TIMEOUT_MS = 25_000;
@@ -260,7 +261,8 @@ export function watchPublish(): void {
       publishWatch = null;
       return;
     }
-    void revalidateNode('songs', 'songs').then((changed) => {
+    void catalogStore.refresh({ force: true }).then((r) => {
+      const changed = r.status === 'updated' && r.nodes.includes('songs');
       if (changed && publishWatch) {
         clearInterval(publishWatch);
         publishWatch = null;
@@ -301,9 +303,19 @@ export async function saveSongEdition(args: {
   });
   // En este móvil se ve ya, en todas las pantallas; y en cuanto el cantoral
   // publique, se cambia por la versión de verdad.
-  await patchCachedNode('songs', (data) =>
-    applyEditToCatalog(data, category, filename, fields),
-  ).catch((e) => logger.warn('songEditor: caché', e));
+  try {
+    catalogStore.patchSongs(
+      (data) =>
+        applyEditToCatalog(
+          data as unknown as Parameters<typeof applyEditToCatalog>[0],
+          category,
+          filename,
+          fields,
+        ) as unknown as SongsData | undefined,
+    );
+  } catch (e) {
+    logger.warn('songEditor: catálogo', e);
+  }
   if (result.where === 'sent') watchPublish();
   return result;
 }

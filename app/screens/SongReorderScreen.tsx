@@ -31,10 +31,9 @@ import { radii } from '@/constants/uiStyles';
 import { useToast } from '@/contexts/AppToastContext';
 import { useAdminStatus } from '@/hooks/useAdminStatus';
 import { useColorScheme } from '@/hooks/useColorScheme';
-import { useFirebaseData } from '@/hooks/useFirebaseData';
+import { useCatalogSongs } from '@/hooks/useCatalog';
 import { reorderCategory } from '@/services/songEditorService';
 import { cantoralHeaderTint } from '@/utils/cantoralHeader';
-import type { SongsData } from '@/utils/filterSongsData';
 import { h } from '@/utils/haptics';
 import {
   cleanSongTitle,
@@ -56,7 +55,7 @@ export default function SongReorderScreen() {
   const insets = useSafeAreaInsets();
   const { toast } = useToast();
   const admin = useAdminStatus();
-  const { data } = useFirebaseData<SongsData>('songs', 'songs');
+  const { data } = useCatalogSongs({ raw: true });
 
   const categories = useMemo(
     () =>

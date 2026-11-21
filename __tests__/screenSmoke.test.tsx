@@ -50,6 +50,7 @@ import {
   __setMockSnapshot,
   get as firebaseGet,
 } from '@/__mocks__/firebase';
+import { catalogStore } from '@/services/catalog';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 // ── Mocks de lo que no se puede montar en Node ──────────────────────────────
@@ -184,6 +185,8 @@ afterEach(() => {
 async function prepararDatos(escenario: Escenario) {
   await AsyncStorage.clear();
   __resetMockDb();
+  // Primer arranque sin semilla: el catálogo vacío.
+  catalogStore.__setForTests(null);
 
   if (escenario === 'vacía') {
     // Snapshot que NO existe: es lo que ve la app en un primer arranque.
@@ -199,11 +202,13 @@ async function prepararDatos(escenario: Escenario) {
   if (escenario === 'con datos') {
     __setMockSnapshot(null);
     for (const [path, data] of Object.entries(CACHE)) {
-      // La caché que lee `useFirebaseData` antes de salir a la red.
-      await AsyncStorage.setItem(`${path}_data`, JSON.stringify(data));
-      await AsyncStorage.setItem(`${path}_updatedAt`, '1');
       __setMockNode(path, { updatedAt: '1', data });
     }
+    // Lo que ya tiene el dispositivo: el catálogo offline.
+    catalogStore.__setForTests({
+      v: 1,
+      songs: { updatedAt: 1000, data: CACHE.songs as never },
+    });
   }
 }
 

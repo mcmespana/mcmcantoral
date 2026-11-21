@@ -79,6 +79,7 @@ jest.mock('react-native-webview', () => {
   return { __esModule: true, WebView, default: WebView };
 });
 
+import { catalogStore } from '@/services/catalog';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
@@ -161,6 +162,8 @@ beforeEach(async () => {
   __resetMockDb();
   __setMockSnapshot(null);
   __setMockNode('songs', { updatedAt: 1, data: SONGS });
+  // Las pantallas leen del catálogo offline, no de Firebase.
+  catalogStore.__setForTests({ v: 1, songs: { updatedAt: 1, data: SONGS } });
   // El onboarding del cantoral se abre solo la primera vez y taparía la lista.
   await AsyncStorage.setItem(
     '@mcm_song_settings',

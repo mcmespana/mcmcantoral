@@ -17,8 +17,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useColorScheme } from '@/hooks/useColorScheme';
 import { useResponsiveLayout } from '@/hooks/useResponsiveLayout';
 import ListSkeleton from '@/components/ListSkeleton';
-import { useFirebaseData } from '@/hooks/useFirebaseData';
-import { filterSongsData } from '@/utils/filterSongsData';
+import { useCatalogSongs } from '@/hooks/useCatalog';
 import { useLocalSearchParams } from 'expo-router';
 import { useNavigation } from 'expo-router/react-navigation';
 import { openCantoral } from '@/utils/cantoralNavigation';
@@ -388,11 +387,11 @@ export default function SongsListScreen() {
     data: firebaseSongs,
     loading: loadingSongs,
     offline,
-  } = useFirebaseData<Record<string, SongCategory>>(
-    'songs',
-    'songs',
-    filterSongsData as (data: any) => Record<string, SongCategory>,
-  );
+  } = useCatalogSongs() as {
+    data: Record<string, SongCategory> | null;
+    loading: boolean;
+    offline: boolean;
+  };
   const songsData = useMemo(() => getSongsData(firebaseSongs), [firebaseSongs]);
   const scheme = useColorScheme();
   const insets = useSafeAreaInsets();

@@ -41,7 +41,7 @@ import {
   SelectedSong,
 } from '@/contexts/SelectedSongsContext';
 import { useChoirSession } from '@/contexts/ChoirSessionContext';
-import { useFirebaseData } from '@/hooks/useFirebaseData';
+import { useCatalogSongs } from '@/hooks/useCatalog';
 import { useColorScheme } from '@/hooks/useColorScheme';
 import { useResponsiveLayout } from '@/hooks/useResponsiveLayout';
 import { useTabBarPaddingBottom } from '@/hooks/useTabBarClearance';
@@ -187,9 +187,11 @@ const SelectedSongsScreen: React.FC = () => {
     () => createStyles(scheme, layout.isWide, layout.readableMaxWidth),
     [scheme, layout.isWide, layout.readableMaxWidth],
   );
-  const { data: allSongsData, loading } = useFirebaseData<
-    Record<string, { categoryTitle: string; songs: Song[] }>
-  >('songs', 'songs');
+  const { data: catalogSongs, loading } = useCatalogSongs({ raw: true });
+  const allSongsData = catalogSongs as Record<
+    string,
+    { categoryTitle: string; songs: Song[] }
+  > | null;
   const { toast } = useToast();
 
   // Por defecto "Orden ajustado": es donde se reordena con drag & drop.

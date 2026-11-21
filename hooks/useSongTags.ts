@@ -3,21 +3,20 @@
  *
  * El catálogo de metadatos vive en `songs/tags` (lo publica el generador de
  * `mcmapp-cantoral` junto a `songs/data`). Es OPCIONAL: si el nodo no existe
- * todavía, `useFirebaseData` devuelve `null` sin ruido y las etiquetas se
+ * todavía, el catálogo devuelve `null` sin ruido y las etiquetas se
  * pintan con el slug capitalizado.
  *
  * El índice inverso (etiqueta → canciones) NO se descarga: se construye con un
  * memo sobre los datos de canciones que la pantalla ya tiene.
  */
+import { useCatalogSongs, useCatalogTags } from '@/hooks/useCatalog';
 import { useMemo } from 'react';
-import { useFirebaseData } from '@/hooks/useFirebaseData';
-import { filterSongsData, type SongsData } from '@/utils/filterSongsData';
+import type { SongsData } from '@/utils/filterSongsData';
 import { buildTagIndex, type SongTagIndex } from '@/utils/songTags';
 
 /** Catálogo crudo de `songs/tags`, o `null` si aún no se ha publicado. */
 export function useTagCatalog(): unknown {
-  const { data } = useFirebaseData<unknown>('songs/tags', 'songTags');
-  return data ?? null;
+  return useCatalogTags();
 }
 
 /**
@@ -34,13 +33,9 @@ export function useSongTagIndex(
 /**
  * Índice de etiquetas con descarga propia de las canciones. Para pantallas que
  * no tienen `songsData` a mano (el detalle de canción). No hay coste extra de
- * red: `useFirebaseData` deduplica por `storageKey` a nivel de módulo.
+ * red: sale del catálogo offline, que es uno solo para toda la app.
  */
 export function useSongTags(): SongTagIndex {
-  const { data } = useFirebaseData<SongsData | null>(
-    'songs',
-    'songs',
-    filterSongsData,
-  );
+  const { data } = useCatalogSongs();
   return useSongTagIndex(data);
 }

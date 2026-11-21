@@ -4,7 +4,7 @@
  * Es el enlace corto y estable de una canción (la ruta de verdad,
  * `/cancionero/cancion?filename=…&list=…`, lleva detalles de la navegación
  * que no sirven para compartir). Resuelve el fichero contra el catálogo (la
- * misma caché de `useFirebaseData` que las pantallas del cantoral) y la abre
+ * mismo catálogo offline que las pantallas del cantoral) y la abre
  * en su ruta, sobre las categorías del cantoral. Es lo mismo que hace la
  * paleta ⌘K.
  *
@@ -15,13 +15,12 @@
  * Si el fichero no existe (borrada, renombrada, enlace mal copiado) se llega
  * al cantoral sin más.
  */
+import { useCatalogSongs } from '@/hooks/useCatalog';
 import { useEffect, useRef } from 'react';
 import { ActivityIndicator, StyleSheet, View } from 'react-native';
 import { router, useLocalSearchParams } from 'expo-router';
-import { useFirebaseData } from '@/hooks/useFirebaseData';
 import { useColorScheme } from '@/hooks/useColorScheme';
 import { themeColors } from '@/constants/colors';
-import { filterSongsData, type SongsData } from '@/utils/filterSongsData';
 import {
   buildSongIndex,
   findSongByFilename,
@@ -33,11 +32,7 @@ export default function SongDeepLink() {
   const params = useLocalSearchParams<{ f?: string }>();
   const filename = typeof params.f === 'string' ? params.f : '';
   const isDark = useColorScheme() === 'dark';
-  const { data, loading } = useFirebaseData<SongsData>(
-    'songs',
-    'songs',
-    filterSongsData as (data: unknown) => SongsData,
-  );
+  const { data, loading } = useCatalogSongs();
 
   const done = useRef(false);
   useEffect(() => {

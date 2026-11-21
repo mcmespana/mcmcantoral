@@ -53,7 +53,7 @@ import { useToast } from '@/contexts/AppToastContext';
 import { useSettings } from '@/contexts/SettingsContext';
 import { useAdminStatus } from '@/hooks/useAdminStatus';
 import { useColorScheme } from '@/hooks/useColorScheme';
-import { useFirebaseData } from '@/hooks/useFirebaseData';
+import { useCatalogSongs } from '@/hooks/useCatalog';
 import { useRepeatPress } from '@/hooks/useRepeatPress';
 import { useSongProcessor } from '@/hooks/useSongProcessor';
 import {
@@ -67,7 +67,7 @@ import {
 import { cantoralHeaderTint } from '@/utils/cantoralHeader';
 import { convertChord } from '@/utils/chordNotation';
 import { confirmAsync } from '@/utils/confirmDialog';
-import type { SongEntry, SongsData } from '@/utils/filterSongsData';
+import type { SongEntry } from '@/utils/filterSongsData';
 import { h } from '@/utils/haptics';
 import { logger } from '@/utils/logger';
 import {
@@ -163,7 +163,7 @@ export default function SongEditorScreen() {
   const notation = settings.notation;
   const admin = useAdminStatus();
 
-  const { data } = useFirebaseData<SongsData>('songs', 'songs');
+  const { data } = useCatalogSongs({ raw: true });
   const original = useMemo<SongSnapshot | null>(() => {
     if (isNew) return EMPTY;
     const cat = params.firebaseCategory

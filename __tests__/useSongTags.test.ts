@@ -1,7 +1,7 @@
 /**
  * Tests de `hooks/useSongTags.ts`.
  *
- * Wiring entre `useFirebaseData` y el índice puro de `utils/songTags.ts`
+ * Wiring entre el catálogo offline (`useCatalog`) y el índice puro de `utils/songTags.ts`
  * (ya testeado en `songTags.test.ts`): aquí solo importa que cada hook pida
  * el path correcto y pase los datos al índice sin perder nada por el camino.
  */
@@ -14,8 +14,9 @@ import {
 
 let mockData: Record<string, unknown> = {};
 
-jest.mock('@/hooks/useFirebaseData', () => ({
-  useFirebaseData: (path: string) => ({ data: mockData[path] ?? null }),
+jest.mock('@/hooks/useCatalog', () => ({
+  useCatalogTags: () => mockData['songs/tags'] ?? null,
+  useCatalogSongs: () => ({ data: mockData.songs ?? null }),
 }));
 
 beforeEach(() => {

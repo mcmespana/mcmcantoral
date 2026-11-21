@@ -50,13 +50,14 @@ jest.mock('expo-router', () => ({
 jest.mock('@/hooks/useDailyReadings', () => ({
   useDailyReadings: () => ({ readings: null, isLoading: false, error: null }),
 }));
-jest.mock('@/hooks/useFirebaseData', () => ({
-  useFirebaseData: (path: string) => ({
-    data: path === 'songs' ? mockSongs : null,
+jest.mock('@/hooks/useCatalog', () => ({
+  useCatalogSongs: () => ({
+    data: mockSongs,
     loading: false,
     offline: false,
     refresh: jest.fn(),
   }),
+  useCatalogTags: () => null,
 }));
 jest.mock('@/contexts/SettingsContext', () => ({
   useSettings: () => ({

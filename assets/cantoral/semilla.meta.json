@@ -1,0 +1,4 @@
+{
+  "placeholder": true,
+  "nota": "Semilla vacía de desarrollo. La de verdad la genera `npm run snapshot:cantoral` antes de cada build y OTA (02-datos-offline.md §3.1)."
+}

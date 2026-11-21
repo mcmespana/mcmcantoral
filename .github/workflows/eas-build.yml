@@ -47,6 +47,8 @@ jobs:
       EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }} # yamllint disable-line
       # Proyecto EAS de MCM Cantoral (NUEVO, no el de MCM App: ver app.config.ts).
       EAS_PROJECT_ID: ${{ secrets.EAS_PROJECT_ID }}
+      # Para la semilla del catálogo (lectura pública de `songs`).
+      EXPO_PUBLIC_FIREBASE_DATABASE_URL: ${{ secrets.EXPO_PUBLIC_FIREBASE_DATABASE_URL }}
     steps:
       - name: Checkout código
         uses: actions/checkout@v4
@@ -77,6 +79,11 @@ jobs:
 
       - name: Instalar dependencias
         run: npm ci
+
+      - name: Semilla del catálogo offline
+        # La primera vez sin internet la app no sale vacía (02 §3.1). Falla si
+        # el cantoral llega vacío: mejor no publicar que publicar una app vacía.
+        run: npm run snapshot:cantoral
 
       - name: Verificar autenticación
         run: eas whoami

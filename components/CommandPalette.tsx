@@ -1,3 +1,4 @@
+import { useCatalogSongs } from '@/hooks/useCatalog';
 import React, {
   useCallback,
   useEffect,
@@ -20,13 +21,11 @@ import { router } from 'expo-router';
 import { useKeyboardShortcut } from '@/hooks/useKeyboardShortcut';
 import { useEscapeToClose } from '@/hooks/useEscapeToClose';
 import { useColorScheme } from '@/hooks/useColorScheme';
-import { useFirebaseData } from '@/hooks/useFirebaseData';
 import EmptyState from '@/components/ui/EmptyState';
 import { Colors, StateColors, themeColors } from '@/constants/colors';
 import { radii } from '@/constants/uiStyles';
 import spacing from '@/constants/spacing';
 import typography from '@/constants/typography';
-import { filterSongsData, type SongsData } from '@/utils/filterSongsData';
 import {
   MIN_SONG_QUERY,
   buildSongIndex,
@@ -102,12 +101,8 @@ function PaletteBody({ onClose }: { onClose: () => void }) {
   const [activeIndex, setActiveIndex] = useState(0);
 
   // Mismo nodo y mismo filtro (sin borradores) que las pantallas del
-  // cantoral: sale de la caché de `useFirebaseData`, sin descarga extra.
-  const { data: songsData, loading: songsLoading } = useFirebaseData<SongsData>(
-    'songs',
-    'songs',
-    filterSongsData as (data: unknown) => SongsData,
-  );
+  // cantoral: sale del catálogo offline, sin descarga extra.
+  const { data: songsData, loading: songsLoading } = useCatalogSongs();
   const songIndex = useMemo(() => buildSongIndex(songsData), [songsData]);
 
   const items = useMemo<PaletteItem[]>(() => {

@@ -4,7 +4,7 @@
  * (`@mcm_sunday_songs_v1`, podado a ±60 días al abrir). Así, volver el sábado
  * enseña lo que se dejó el jueves.
  *
- * Las canciones salen de `useFirebaseData('songs')`: la misma caché que pintan
+ * Las canciones salen del catálogo offline (`useCatalogSongs`): lo mismo que pintan
  * las listas del cantoral (deduplica por clave), así que no hay descarga nueva
  * y, si el cantoral se abrió alguna vez, funciona sin conexión. La lógica está
  * en `utils/sundaySongs.ts` (pura); esto solo la conecta.
@@ -13,6 +13,7 @@
  * candidatas: sin ellas (sin red y sin caché) la misa sale igual, solo por
  * tiempo litúrgico.
  */
+import { useCatalogSongs } from '@/hooks/useCatalog';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useFirebaseData } from '@/hooks/useFirebaseData';
@@ -20,7 +21,6 @@ import { useDailyReadings } from '@/hooks/useDailyReadings';
 import { useHiddenTags } from '@/hooks/useHiddenTags';
 import { useSongTagIndex } from '@/hooks/useSongTags';
 import { useSettings } from '@/contexts/SettingsContext';
-import { filterSongsData, type SongsData } from '@/utils/filterSongsData';
 import { isoDateLocal, liturgicalDayOf } from '@/utils/liturgicalDay';
 import { logger } from '@/utils/logger';
 import type { MassMomentId } from '@/constants/massMoments';
@@ -42,7 +42,7 @@ export function useSundaySongs(fecha: string) {
     loading,
     offline,
     refresh,
-  } = useFirebaseData<SongsData | null>('songs', 'songs', filterSongsData);
+  } = useCatalogSongs();
   const tagIndex = useSongTagIndex(songs);
   const { hiddenSlugs } = useHiddenTags();
   const { settings } = useSettings();
