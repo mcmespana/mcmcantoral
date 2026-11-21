@@ -14,7 +14,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { HeroUINativeProvider } from 'heroui-native';
-import SundaySongsScreen from '@/app/screens/SundaySongsScreen';
+import SundaySongsScreen from '@/screens/SundaySongsScreen';
 import type { SongsData } from '@/utils/filterSongsData';
 
 const mockSongs: SongsData = Object.fromEntries(

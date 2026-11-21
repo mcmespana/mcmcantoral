@@ -43,6 +43,11 @@ export interface SongSettings {
   /** Mapa de la canción («1 · E · 2 · E×2») encima de la letra. */
   songMap: boolean;
   /**
+   * Tema del Atril: `auto` sigue al de la app; `stage` = Escenario (negro
+   * real, directo en penumbra); `sun` = Sol (contraste máximo al aire libre).
+   */
+  sheetTheme: 'auto' | 'stage' | 'sun';
+  /**
    * Versión del onboarding del cantoral que ya se ha visto (0 = nunca). Si
    * es menor que `CANTORAL_ONBOARDING_VERSION`, se abre solo una vez al
    * entrar en el cantoral.
@@ -106,6 +111,7 @@ const defaultSettings: SongSettings = {
   airy: false,
   pagedFullscreen: false,
   songMap: false,
+  sheetTheme: 'auto',
   cantoralOnboarding: 0,
   featuredTags: [],
   hideHiddenTagSongs: false,

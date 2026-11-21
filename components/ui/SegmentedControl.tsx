@@ -1,3 +1,4 @@
+import { Palette } from '@/constants/theme';
 import React from 'react';
 import { StyleSheet, Text, View, type ViewStyle } from 'react-native';
 import { PressableFeedback } from 'heroui-native';
@@ -86,7 +87,11 @@ export default function SegmentedControl<T extends string>({
     <View
       style={[
         styles.track,
-        { backgroundColor: isDark ? '#2C2C2E' : '#E5E5EA' },
+        {
+          backgroundColor: isDark
+            ? Palette.dark.cardRaised
+            : Palette.light.backgroundSunken,
+        },
         style,
       ]}
       accessibilityRole="tablist"

@@ -1,16 +1,17 @@
 import React, { useEffect, useRef } from 'react';
 import { Platform, StyleSheet, View } from 'react-native';
 import { Stack, router, useGlobalSearchParams, usePathname } from 'expo-router';
-import { useIsFocused } from 'expo-router/react-navigation';
-import { StatusBar } from 'expo-status-bar';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useColorScheme } from '@/hooks/useColorScheme';
 import { SettingsProvider } from '@/contexts/SettingsContext';
 import { MetronomeProvider } from '@/contexts/MetronomeContext';
 import MetronomeFloating from '@/components/tuner/MetronomeFloating';
 import KeepMetronomePrompt from '@/components/tuner/KeepMetronomePrompt';
-import { TabHeaderColors, themeColors } from '@/constants/colors';
-import { cantoralHeaderTint } from '@/utils/cantoralHeader';
+import { themeColors } from '@/constants/colors';
+import {
+  cantoralHeaderBackground,
+  cantoralHeaderTint,
+} from '@/utils/cantoralHeader';
 import { radii } from '@/constants/uiStyles';
 import { useChoirSession } from '@/contexts/ChoirSessionContext';
 import { extractSongMedia } from '@/types/songMedia';
@@ -43,20 +44,8 @@ export default function CancioneroLayout() {
 
   useChoirFollower();
 
-  // Android: la cabecera del cantoral es una barra amarilla SÓLIDA en los dos
-  // modos, así que los iconos de la barra de estado van oscuros siempre (el
-  // `StatusBar` raíz los ponía blancos en oscuro: ~1,6:1 sobre
-  // amarillo). La pantalla completa no tiene cabecera y es oscura: ahí no.
-  const pathnameForBar = usePathname();
-  const focused = useIsFocused();
-  const darkStatusIcons =
-    Platform.OS === 'android' &&
-    focused &&
-    lastSegment(pathnameForBar) !== CANTORAL_SLUGS.SongFullscreen;
-
   return (
     <SettingsProvider>
-      {darkStatusIcons ? <StatusBar style="dark" animated /> : null}
       {/* El metrónomo vive aquí y no en su hoja: puede seguir sonando al
           cerrarla, con su botón flotante encima de cualquier pantalla del
           cantoral (y la pregunta de si dejarlo sonando). */}
@@ -64,20 +53,23 @@ export default function CancioneroLayout() {
         <View style={layoutStyles.fill}>
           <Stack
             screenOptions={{
+              // La cabecera es la del fondo de la pantalla: vidrio en iOS,
+              // sólida del color del fondo en Android y web (sin barra de
+              // color: aquí no hay territorios).
               headerStyle: isIOS
                 ? { backgroundColor: 'transparent' }
                 : isWeb
                   ? ({
-                      backgroundColor: TabHeaderColors.cancionero,
+                      backgroundColor: cantoralHeaderBackground(isDark),
                       borderBottomWidth: StyleSheet.hairlineWidth,
-                      borderBottomColor: 'rgba(0, 0, 0, 0.08)',
+                      borderBottomColor: themeColors(isDark).separator,
                     } as never)
-                  : { backgroundColor: TabHeaderColors.cancionero },
+                  : { backgroundColor: cantoralHeaderBackground(isDark) },
               headerTintColor: cantoralHeaderTint(isDark),
               headerTitleStyle: {
                 fontWeight: '700' as const,
                 fontSize: 17,
-                color: isIOS ? (isDark ? '#FFFFFF' : '#000000') : '#1a1a1a',
+                color: themeColors(isDark).text,
                 letterSpacing: -0.3,
               } as never,
               ...(isWeb &&
@@ -94,9 +86,9 @@ export default function CancioneroLayout() {
               // Prevents screens from appearing transparent during swipe-back
               // gestures. headerTransparent:true makes the card itself transparent
               // so we must set an explicit background on the content area.
-              contentStyle: isIOS
-                ? { backgroundColor: themeColors(isDark).backgroundSunken }
-                : undefined,
+              contentStyle: {
+                backgroundColor: themeColors(isDark).background,
+              },
             }}
           >
             <Stack.Screen name="index" options={{ title: 'Cantoral' }} />
@@ -118,7 +110,15 @@ export default function CancioneroLayout() {
             />
             <Stack.Screen
               name={CANTORAL_SLUGS.SelectedSongs}
-              options={{ title: 'Tu selección' }}
+              options={{ title: 'Editar repertorio' }}
+            />
+            <Stack.Screen
+              name={CANTORAL_SLUGS.Repertorios}
+              options={{ title: 'Repertorios' }}
+            />
+            <Stack.Screen
+              name={CANTORAL_SLUGS.Repertorio}
+              options={{ title: 'Repertorio' }}
             />
             <Stack.Screen
               name={CANTORAL_SLUGS.SundaySongs}

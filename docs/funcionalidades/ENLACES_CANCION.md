@@ -78,6 +78,6 @@ si viene vacío, la app pone un nombre por defecto («Escuchar en Spotify»,
 | Modelo y normalización    | `types/songMedia.ts` (`songExtraLinks`, `mediaKinds`) |
 | Sección «Enlaces»         | `components/song-media/SongMediaSheet.tsx`            |
 | Visor a pantalla completa | `components/song-media/SongLinkViewer.tsx`            |
-| Enganche en el detalle    | `app/screens/SongDetailScreen.tsx`                    |
+| Enganche en el detalle    | `screens/SongDetailScreen.tsx`                    |
 | Indicador 🔗 en la lista  | `components/SongListItem.tsx`                         |
 | Tests                     | `__tests__/songLinks.test.tsx`                        |

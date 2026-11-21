@@ -219,8 +219,8 @@ pica la curiosidad y se ven las otras 33.
 | Nube de etiquetas | `components/song-tags/TagCloudSheet.tsx` |
 | Fila de refinamiento | `components/song-tags/TagContextBar.tsx` |
 | Ocultar canciones · ★ en las filas | `hooks/useSongListTags.ts` + `components/song-tags/HiddenSongsNote.tsx` |
-| Botón del header | `app/screens/CategoriesScreen.tsx` |
-| Pantalla `__TAG__:` | `app/screens/SongListScreen.tsx` |
+| Botón del header | `screens/CategoriesScreen.tsx` |
+| Pantalla `__TAG__:` | `screens/SongListScreen.tsx` |
 | Chips en la ficha | `components/song-media/SongMediaSheet.tsx` |
 | Tests | `__tests__/songTags.test.ts` |
 

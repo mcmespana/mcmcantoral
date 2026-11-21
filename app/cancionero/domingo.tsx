@@ -1,1 +1,1 @@
-export { default } from '@/app/screens/SundaySongsScreen';
+export { default } from '@/screens/SundaySongsScreen';

@@ -1,5 +1,5 @@
 /**
- * Estilos de `app/screens/SelectedSongsScreen.tsx`.
+ * Estilos de `screens/SelectedSongsScreen.tsx`.
  *
  * Extraídos tal cual (sin tocar ni un valor): eran 250 líneas de las 2.039 de la
  * pantalla, que es la más tocada del repo. Mismo patrón que
@@ -8,6 +8,7 @@
  * Depende del esquema de color y del layout responsive, así que sigue siendo una
  * factoría y la pantalla la memoiza.
  */
+import { Palette } from '@/constants/theme';
 import { Platform, StyleSheet } from 'react-native';
 import colors, { Colors, KeyPillColors, themeColors } from '@/constants/colors';
 import { radii } from '@/constants/uiStyles';
@@ -91,7 +92,9 @@ export const createStyles = (
       paddingVertical: 5,
       paddingHorizontal: 8,
       borderRadius: radii.sm,
-      backgroundColor: isDark ? '#2C2C2E' : '#EFEFF4',
+      backgroundColor: isDark
+        ? Palette.dark.cardRaised
+        : Palette.light.backgroundSunken,
     },
     clearBtnText: {
       ...typography.footnote,
@@ -100,7 +103,9 @@ export const createStyles = (
     },
     viewToggle: {
       flexDirection: 'row',
-      backgroundColor: isDark ? '#2C2C2E' : '#E5E5EA',
+      backgroundColor: isDark
+        ? Palette.dark.cardRaised
+        : Palette.light.backgroundSunken,
       borderRadius: radii.sm,
       padding: 2,
     },

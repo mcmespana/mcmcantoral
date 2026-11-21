@@ -44,7 +44,12 @@ interface Props {
 export type SheetViewPatch = Partial<
   Pick<
     SongSettings,
-    'chorusStyle' | 'chorusLabel' | 'verseNumbers' | 'airy' | 'songMap'
+    | 'chorusStyle'
+    | 'chorusLabel'
+    | 'verseNumbers'
+    | 'airy'
+    | 'songMap'
+    | 'sheetTheme'
   >
 >;
 
@@ -62,8 +67,32 @@ export interface SheetViewOptions {
    * el ajuste no sale (canciones sin estribillo ni puente que ubicar).
    */
   songMap?: { available: boolean; on: boolean };
+  /** Tema del Atril (Sistema / Escenario / Sol). Sin definir, no sale. */
+  sheetTheme?: SongSettings['sheetTheme'];
   onChange: (patch: SheetViewPatch) => void;
 }
+
+/** Temas del Atril (`03-diseno-y-flujos.md` §1: Escenario y Sol a un toque). */
+const SHEET_THEMES: {
+  id: SongSettings['sheetTheme'];
+  name: string;
+  hint: string;
+  icon: keyof typeof MaterialIcons.glyphMap;
+}[] = [
+  {
+    id: 'auto',
+    name: 'Sistema',
+    hint: 'Como la app',
+    icon: 'brightness-auto',
+  },
+  {
+    id: 'stage',
+    name: 'Escenario',
+    hint: 'Negro real, para la penumbra',
+    icon: 'nightlight',
+  },
+  { id: 'sun', name: 'Sol', hint: 'Contraste máximo', icon: 'wb-sunny' },
+];
 
 const MIN_SIZE = 0.6;
 const MAX_SIZE = 2.0;
@@ -389,6 +418,53 @@ function ViewCard({
   }
   return (
     <SheetCard palette={p} label="Vista">
+      {view.sheetTheme !== undefined && (
+        <>
+          <Text style={[styles.subLabel, { color: p.label }]}>Pantalla</Text>
+          <View style={styles.chipWrap} accessibilityRole="radiogroup">
+            {SHEET_THEMES.map((th) => {
+              const isActive = th.id === view.sheetTheme;
+              return (
+                <PressableFeedback
+                  key={th.id}
+                  style={[
+                    styles.fontChip,
+                    styles.gridChip,
+                    valueBoxStyle(p, isActive),
+                  ]}
+                  onPress={() => {
+                    if (isActive) return;
+                    h.select();
+                    view.onChange({ sheetTheme: th.id });
+                  }}
+                  accessibilityRole="radio"
+                  accessibilityState={{ selected: isActive }}
+                  accessibilityLabel={`Pantalla: ${th.name}. ${th.hint}`}
+                >
+                  <PressableFeedback.Highlight />
+                  <MaterialIcons
+                    name={th.icon}
+                    size={22}
+                    color={isActive ? p.active.fg : p.text}
+                  />
+                  <Text
+                    style={[
+                      styles.fontChipLabel,
+                      {
+                        color: isActive ? p.active.fg : p.textSecondary,
+                        fontWeight: isActive ? '700' : '500',
+                      },
+                    ]}
+                    numberOfLines={1}
+                  >
+                    {th.name}
+                  </Text>
+                </PressableFeedback>
+              );
+            })}
+          </View>
+        </>
+      )}
       {view.hasChorus && (
         <>
           <Text style={[styles.subLabel, { color: p.label }]}>Estribillo</Text>

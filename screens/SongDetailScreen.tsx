@@ -1,3 +1,4 @@
+import { BOTTOM_BAR_SPACE } from '@/components/ui/BottomBar';
 import { useSongDuration } from '@/hooks/useSongDuration';
 import { useAdminStatus } from '@/hooks/useAdminStatus';
 import { logger } from '@/utils/logger';
@@ -376,6 +377,9 @@ function SongDetailBody({
     key,
     capo: effectiveCapo,
     duration: songDuration,
+    sheetTheme: settings.sheetTheme,
+    // La barra inferior flota encima: el final de la letra queda por encima.
+    bottomInset: BOTTOM_BAR_SPACE + insets.bottom + 24,
     isDark,
     adminMode: isAdmin,
   });
@@ -681,6 +685,7 @@ function SongDetailBody({
     verseNumbers,
     airy,
     songMap: { available: sheetInfo.hasSongMap, on: songMap },
+    sheetTheme: settings.sheetTheme,
     onChange: (patch) => setSettings(patch),
   };
   const handleSetTranspose = (semitones: number) => {

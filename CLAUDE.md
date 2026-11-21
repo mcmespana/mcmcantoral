@@ -72,7 +72,7 @@ puede caer en MCM App.
 | Qué | Dónde |
 | --- | ----- |
 | Rutas (una pila) | `app/` — `cancionero/` (categorías → lista → canción → pantalla completa), `cancion.tsx`, `coro.tsx`, `playlist.tsx` (puentes de enlaces) |
-| Pantallas | `app/screens/` |
+| Pantallas | `screens/` |
 | Catálogo offline | `services/catalog/` + `hooks/useCatalog.ts` |
 | Repertorios y bloques | `services/repertorios/` |
 | Directo (protocolo, nube, wifi local) | `services/live/` |

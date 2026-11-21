@@ -31,7 +31,7 @@ import { useNavigation } from 'expo-router/react-navigation';
 import { openCantoral } from '@/utils/cantoralNavigation';
 import { songRouteParams } from '@/utils/songNavList';
 import { useSelectedSongs } from '@/contexts/SelectedSongsContext';
-import SongListItem from '../../components/SongListItem';
+import SongListItem from '@/components/SongListItem';
 import BottomSheet from '@/components/BottomSheet';
 import { MaterialIcons } from '@/components/ui/icons';
 import {
@@ -1000,8 +1000,13 @@ export default function SongsListScreen() {
           hideSeparator={row.last}
           featuredTags={featuredFor(item)}
           badge={
-            item.borrowed
-              ? 'También en esta categoría'
+            item.borrowed && item.homeCategory
+              ? `↪ ${stripCategoryPrefix(
+                  extractTrailingEmoji(
+                    songsData[item.homeCategory]?.categoryTitle ??
+                      item.homeCategory,
+                  ).cleanText,
+                )}`
               : isSearchAll && item.subcategory
                 ? subcategoryLabel(songsData, item)
                 : undefined

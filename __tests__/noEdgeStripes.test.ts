@@ -11,7 +11,7 @@ import fs from 'fs';
 import path from 'path';
 
 const ROOT = path.join(__dirname, '..');
-const DIRS = ['app', 'components'];
+const DIRS = ['app', 'screens', 'components'];
 
 const walk = (d: string): string[] =>
   fs.readdirSync(d, { withFileTypes: true }).flatMap((e) => {
@@ -23,7 +23,7 @@ const rel = (f: string) => path.relative(ROOT, f).split(path.sep).join('/');
 
 /** Ficheros donde un borde grueso NO es una raya decorativa. */
 const ALLOWED: Record<string, string> = {
-  'app/screens/WordleScreen.tsx':
+  'screens/WordleScreen.tsx':
     'Wordle está congelado (CLAUDE.md): no se toca',
   'components/SongFontBottomSheet.tsx':
     'la barra del estribillo es notación de la hoja de canción',

@@ -60,6 +60,7 @@ describe('SettingsContext (ajustes del cantoral)', () => {
       airy: false,
       pagedFullscreen: false,
       songMap: false,
+      sheetTheme: 'auto',
       cantoralOnboarding: 0,
       featuredTags: [],
       hideHiddenTagSongs: false,
@@ -161,11 +162,11 @@ describe('AppSettingsContext (fuente y tema)', () => {
     return hook;
   }
 
-  it('arranca con escala 1, tema del sistema y sin nombre', async () => {
+  it('arranca con escala 1, tema oscuro (Escenario) y sin nombre', async () => {
     const { result } = await mount();
     expect(result.current.settings).toEqual({
       fontScale: 1,
-      theme: 'system',
+      theme: 'dark',
       choirName: '',
     });
   });
@@ -174,7 +175,7 @@ describe('AppSettingsContext (fuente y tema)', () => {
     await AsyncStorage.setItem(KEY, JSON.stringify({ fontScale: 1.4 }));
     const { result } = await mount();
     expect(result.current.settings.fontScale).toBe(1.4);
-    expect(result.current.settings.theme).toBe('system');
+    expect(result.current.settings.theme).toBe('dark');
   });
 
   it('guarda el nombre del coro', async () => {
@@ -191,10 +192,10 @@ describe('AppSettingsContext (fuente y tema)', () => {
       .spyOn(Appearance, 'setColorScheme')
       .mockImplementation(() => {});
     const { result } = await mount();
-    // Al terminar la carga ya se aplica el tema guardado ('system').
-    expect(spy).toHaveBeenLastCalledWith('unspecified');
-    await act(async () => result.current.setSettings({ theme: 'dark' }));
+    // Al terminar la carga ya se aplica el tema de serie ('dark').
     expect(spy).toHaveBeenLastCalledWith('dark');
+    await act(async () => result.current.setSettings({ theme: 'system' }));
+    expect(spy).toHaveBeenLastCalledWith('unspecified');
     spy.mockRestore();
   });
 

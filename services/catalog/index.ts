@@ -17,6 +17,12 @@ export type { CatalogState, RefreshResult } from './store';
  * la mete en el bundle; se lee una sola vez y solo si hace falta.
  */
 function loadSeed(): Catalog | null {
+  // Datos de prueba de desarrollo (simulador y capturas): solo con
+  // `EXPO_PUBLIC_FIREBASE_FIXTURES=1`. Sin la variable, esta rama no existe.
+  if (process.env.EXPO_PUBLIC_FIREBASE_FIXTURES === '1') {
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
+    return require('@/utils/devFirebaseFixtures').devCatalogFixture();
+  }
   // eslint-disable-next-line @typescript-eslint/no-require-imports
   const raw = require('@/assets/cantoral/semilla.json') as Catalog | null;
   return raw && typeof raw === 'object' && raw.v === 1 ? raw : null;

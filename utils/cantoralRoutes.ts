@@ -48,6 +48,8 @@ export const CANTORAL_SLUGS = {
   SongEditor: 'editar',
   SongReorder: 'ordenar',
   SundaySongs: 'domingo',
+  Repertorios: 'repertorios',
+  Repertorio: 'repertorio',
 } as const;
 
 export type CantoralScreenName = keyof typeof CANTORAL_SLUGS;

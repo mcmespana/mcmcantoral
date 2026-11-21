@@ -15,7 +15,7 @@ mano en la consola de Firebase).
 | Menú de una canción (botón flotante) → **Editar canción** | El editor con esa canción |
 | Cantoral → **⋯** → **Nueva canción** | El editor en blanco, tras elegir de dónde sale la letra |
 
-Ruta: `/cancionero/editar` (`app/screens/SongEditorScreen.tsx`), a pantalla
+Ruta: `/cancionero/editar` (`screens/SongEditorScreen.tsx`), a pantalla
 completa con su X y su «Guardar».
 
 ## Las cuatro pestañas
@@ -103,7 +103,7 @@ workflow del cantoral, o un segundo camino directo a GitHub) está en
 | `utils/songEditor.ts` | Puro y con tests: línea ↔ letra + acordes, mover/añadir/quitar, partir en filas, cabecera ↔ cuerpo, «Sol7» → `G7`, y la edición (`…Old`/`…New`) |
 | `services/songEditorService.ts` | Las llamadas al NAS y la cola en el móvil (`flushOutbox`) |
 | `components/song-editor/` | `ChordGrid`, `ChordPickerSheet`, `NewSongStart`, `LinksField`, `SavedPanel` |
-| `app/screens/SongReorderScreen.tsx` | Ordenar una categoría |
+| `screens/SongReorderScreen.tsx` | Ordenar una categoría |
 | `mcmapp-cantoral/scripts/admin/server.py` | `/api/app/*` (contrato en su README) |
 
 ## Pendiente

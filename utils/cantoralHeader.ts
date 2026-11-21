@@ -1,25 +1,22 @@
-import { Platform } from 'react-native';
-import { UIColors, themeColors } from '@/constants/colors';
-
 /**
- * Color de los botones (back, iconos de `headerRight`) de la cabecera del
- * cantoral.
+ * Color de los botones e iconos de la cabecera del cantoral.
  *
- * La cabecera NO es la misma en todas las plataformas (`app/cancionero/_layout.tsx`):
- *  - iOS: transparente (glass) sobre el fondo de la pantalla → amarillo del
- *    cantoral en oscuro y azul en claro.
- *  - Android y web: barra amarilla SÓLIDA en los dos modos → siempre el casi
- *    negro de `headerTint` claro, el mismo que el back del stack.
- *
- * Antes cada pantalla lo decidía a su manera y en Android salían iconos
- * amarillos o blancos sobre la barra amarilla (1,0:1 y 1,7:1: invisibles).
+ * En MCM Cantoral la cabecera es la del fondo de la pantalla en las tres
+ * plataformas (transparente con vidrio en iOS, sólida del color del fondo en
+ * Android y web): ya no hay barra amarilla. Los botones van en el ámbar de la
+ * acción — el que se lee como texto en cada modo (`accentText`).
  */
+import { Platform } from 'react-native';
+import { theme } from '@/constants/theme';
+
 export function cantoralHeaderTint(
   isDark: boolean,
-  os: typeof Platform.OS = Platform.OS,
+  _os: typeof Platform.OS = Platform.OS,
 ): string {
-  if (os === 'ios') {
-    return isDark ? UIColors.accentYellow : UIColors.cantoralHeaderTintLight;
-  }
-  return themeColors(false).headerTint;
+  return theme(isDark).accentText;
+}
+
+/** Fondo de la cabecera sólida (Android y web). */
+export function cantoralHeaderBackground(isDark: boolean): string {
+  return theme(isDark).background;
 }

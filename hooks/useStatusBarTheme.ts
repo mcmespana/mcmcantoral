@@ -1,3 +1,4 @@
+import { Palette, SheetPalette } from '@/constants/theme';
 import { useEffect } from 'react';
 import { Platform } from 'react-native';
 
@@ -10,30 +11,15 @@ interface PageThemeConfig {
   [key: string]: StatusBarConfig;
 }
 
-// Configuración de colores por página
+// Color de la barra del navegador (PWA en iOS). MCM Cantoral no tiene
+// colores por sección: la tinta del tema; la pantalla completa, negro real.
 const PAGE_THEMES: PageThemeConfig = {
   '/': {
-    themeColor: '#ffffff',
-    statusBarStyle: 'default',
-  },
-  '/jubileo': {
-    themeColor: '#A3BD31', // Verde COM (color del header de jubileo)
+    themeColor: Palette.dark.background,
     statusBarStyle: 'black-translucent',
   },
-  '/calendario': {
-    themeColor: '#31AADF', // Celeste (color del header de calendario)
-    statusBarStyle: 'black-translucent',
-  },
-  '/cancionero': {
-    themeColor: '#E15C62', // Rojo MIC (color del header de cancionero)
-    statusBarStyle: 'black-translucent',
-  },
-  '/fotos': {
-    themeColor: '#9D1E74', // Morado LC (color del header de fotos)
-    statusBarStyle: 'black-translucent',
-  },
-  '/comunica': {
-    themeColor: '#253883', // Azul primario
+  '/cancionero/pantalla-completa': {
+    themeColor: SheetPalette.stage.bg,
     statusBarStyle: 'black-translucent',
   },
 };

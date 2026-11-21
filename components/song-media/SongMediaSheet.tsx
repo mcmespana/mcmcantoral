@@ -1,3 +1,4 @@
+import { Palette, theme } from '@/constants/theme';
 import React from 'react';
 import { radii } from '@/constants/uiStyles';
 import {
@@ -16,7 +17,7 @@ import { useColorScheme } from '@/hooks/useColorScheme';
 import { useToast } from '@/contexts/AppToastContext';
 import { h } from '@/utils/haptics';
 import BottomSheet from '@/components/BottomSheet';
-import brand, { themeColors } from '@/constants/colors';
+import { themeColors } from '@/constants/colors';
 import { extractDriveFileId, toDrivePreviewUrl } from '@/utils/googleDrive';
 import type { MediaLink, SongMedia } from '@/types/songMedia';
 import { songExtraLinks } from '@/types/songMedia';
@@ -114,6 +115,8 @@ export default function SongMediaSheet({
   const tags = allTags.filter((t) => !hiddenSlugs.has(t.slug));
   const scheme = useColorScheme();
   const isDark = scheme === 'dark';
+  const actionTint = theme(isDark).accentText;
+  const mutedTint = theme(isDark).textMuted;
   const { toast } = useToast();
   const styles = React.useMemo(() => createStyles(isDark), [isDark]);
   const handleTagPress = React.useCallback(
@@ -204,7 +207,7 @@ export default function SongMediaSheet({
         <Text style={styles.mMeta}>YouTube</Text>
       </View>
       <View style={styles.mGo}>
-        <MaterialIcons name="play-arrow" size={20} color={brand.primary} />
+        <MaterialIcons name="play-arrow" size={20} color={actionTint} />
       </View>
     </TouchableOpacity>
   );
@@ -247,7 +250,7 @@ export default function SongMediaSheet({
           <MaterialIcons
             name={playsInApp ? 'play-arrow' : 'open-in-new'}
             size={playsInApp ? 20 : 17}
-            color={playsInApp ? brand.primary : '#8E8E93'}
+            color={playsInApp ? actionTint : mutedTint}
           />
         </View>
       </TouchableOpacity>
@@ -300,7 +303,7 @@ export default function SongMediaSheet({
           <MaterialIcons
             name={entry.external ? 'open-in-new' : 'fullscreen'}
             size={entry.external ? 17 : 20}
-            color={entry.external ? '#8E8E93' : brand.primary}
+            color={entry.external ? mutedTint : actionTint}
           />
         </View>
       </TouchableOpacity>
@@ -397,7 +400,7 @@ export default function SongMediaSheet({
                   activeOpacity={0.7}
                   onPress={() => openExternal(toHref(media.source as string))}
                 >
-                  <MaterialIcons name="link" size={17} color={brand.primary} />
+                  <MaterialIcons name="link" size={17} color={actionTint} />
                   <Text style={styles.fichaSourceText} numberOfLines={1}>
                     {media.source}
                   </Text>
@@ -409,7 +412,7 @@ export default function SongMediaSheet({
                 </TouchableOpacity>
               ) : (
                 <View style={styles.fichaSource}>
-                  <MaterialIcons name="link" size={17} color={brand.primary} />
+                  <MaterialIcons name="link" size={17} color={actionTint} />
                   <Text style={styles.fichaSourceText} numberOfLines={1}>
                     {media.source}
                   </Text>
@@ -423,7 +426,7 @@ export default function SongMediaSheet({
 }
 
 function driveTint(isDark: boolean): string {
-  return isDark ? brand.secondary : brand.primary;
+  return theme(isDark).accentText;
 }
 
 /** Texto del botón cuando quien puso el enlace no le dio etiqueta. */
@@ -458,7 +461,9 @@ const createStyles = (isDark: boolean) =>
       gap: 12,
       paddingVertical: 11,
       paddingHorizontal: 12,
-      backgroundColor: isDark ? '#2C2C2E' : '#F7F7F9',
+      backgroundColor: isDark
+        ? Palette.dark.cardRaised
+        : Palette.light.cardRaised,
       borderRadius: radii.md,
       marginBottom: 8,
     },
@@ -573,6 +578,6 @@ const createStyles = (isDark: boolean) =>
       flex: 1,
       ...typography.caption,
       fontWeight: '600',
-      color: isDark ? '#9FD3F5' : brand.primary,
+      color: isDark ? Palette.dark.accentText : Palette.light.accentText,
     },
   });

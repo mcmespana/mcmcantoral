@@ -32,7 +32,9 @@ interface AppSettingsContextType {
 
 const defaultSettings: AppSettings = {
   fontScale: 1,
-  theme: 'system',
+  // Dirección A, «Escenario»: oscuro primero (`03` §6). Claro y «Sistema»
+  // siguen a un toque en Ajustes.
+  theme: 'dark',
   choirName: '',
 };
 

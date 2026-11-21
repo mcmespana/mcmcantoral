@@ -51,6 +51,8 @@ export interface UseSongProcessorParams {
   capo?: number;
   /** Duración `m:ss` (la publica el cantoral): insignia en la hoja. */
   duration?: string;
+  /** Tema del Atril: Escenario o Sol fuerzan el suyo (`auto` = el de la app). */
+  sheetTheme?: 'auto' | 'stage' | 'sun';
   isFullscreen?: boolean;
   isDark?: boolean;
   /** Padding superior extra (px). Útil en fullscreen para evitar notch / close button. */
@@ -65,6 +67,9 @@ export interface UseSongProcessorParams {
   adminMode?: boolean;
 }
 
+// El detalle pasa su propio `bottomInset` (la barra inferior de vidrio flota
+// encima de la letra, T-05); esto es para quien no lo pasa (la vista previa
+// del admin pinta igual que la web).
 const defaultBottomPadding = (isFullscreen: boolean) =>
   isFullscreen
     ? 110
@@ -96,6 +101,7 @@ export const useSongProcessor = ({
   key,
   capo,
   duration,
+  sheetTheme = 'auto',
   isFullscreen = false,
   isDark = false,
   topInset,
@@ -127,6 +133,7 @@ export const useSongProcessor = ({
       fontSize: currentFontSizeEm,
       fontFamily: currentFontFamily,
       isDark,
+      sheetTheme: sheetTheme === 'auto' ? null : sheetTheme,
       chordsVisible,
       arrangementsVisible,
       compact,
@@ -143,6 +150,7 @@ export const useSongProcessor = ({
       currentFontSizeEm,
       currentFontFamily,
       isDark,
+      sheetTheme,
       chordsVisible,
       arrangementsVisible,
       compact,

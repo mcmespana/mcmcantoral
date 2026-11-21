@@ -164,7 +164,7 @@ un móvil o un iPad, también al lado del editor Raw mientras se escribe.
 
 ## Pantalla completa (2026-10-10)
 
-`app/screens/SongFullscreenScreen.tsx`; qué canción y con qué tono, en
+`screens/SongFullscreenScreen.tsx`; qué canción y con qué tono, en
 `utils/fullscreenSong.ts` (puro, con tests).
 
 - **Se entra** con el botón ⛶ de la cabecera de la canción (antes solo desde

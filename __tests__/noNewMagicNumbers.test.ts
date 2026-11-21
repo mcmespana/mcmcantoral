@@ -91,6 +91,7 @@ const BUDGET = {
   // Y a 5 / 138 el 2026-11-21: la poda de MCM Cantoral (fuera todo lo que
   // no es el cantoral, `01-arranque-y-poda.md` §2.7).
   app: 5,
+  screens: 5,
   components: 138,
 };
 
@@ -138,6 +139,7 @@ describe('no se añaden colores a mano', () => {
 const FONT_SIZE_BUDGET = {
   // 5 / 38 el 2026-11-21, con la poda de MCM Cantoral.
   app: 5,
+  screens: 5,
   components: 38,
 };
 
@@ -195,6 +197,7 @@ const RADIUS_BUDGET = {
   // 300 → 122 al colapsar la escala en agosto de 2026.
   // 0 / 2 el 2026-11-21, con la poda de MCM Cantoral.
   app: 0,
+  screens: 0,
   // 40 el 2026-10-17: radios sueltos de SongMediaSheet y PlaylistRow a la escala.
   // 12 el 2026-11-05: 3/5/6/10/11/13/15 de 20 ficheros a `radii.*` (quedan los
   // decorativos de Carismochito, Wordle, el cargador y el marco del QR).
@@ -246,7 +249,7 @@ describe('los colores de marca no se usan de primer plano', () => {
   it('no crecen los usos de brand como color de texto o icono', () => {
     let total = 0;
     const offenders: string[] = [];
-    for (const dir of ['app', 'components']) {
+    for (const dir of ['app', 'screens', 'components']) {
       for (const file of walk(path.join(ROOT, dir))) {
         const n = [...fs.readFileSync(file, 'utf8').matchAll(BRAND_FOREGROUND)]
           .length;

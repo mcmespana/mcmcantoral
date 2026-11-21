@@ -1190,6 +1190,15 @@ const SelectedSongsScreen: React.FC = () => {
     } else if (params.hoja === 'coro' && sharing.myChoir) {
       sheetParamHandled.current = true;
       sharing.openSheet('home');
+    } else if (params.hoja === 'unirse') {
+      // «Unirse a un directo» desde la barra de Inicio: el código o el QR.
+      sheetParamHandled.current = true;
+      setTimeout(() => setCodeDialog({ variant: 'choir-join' }), 0);
+    } else if (params.hoja === 'importar') {
+      // «Importar» desde Repertorios: el diálogo de código / QR.
+      sheetParamHandled.current = true;
+      // Tras montar: abrir un diálogo dentro del efecto encadena renders.
+      setTimeout(() => setCodeDialog({ variant: 'cloud-download' }), 0);
     } else if (params.hoja === 'guardar-coro' && sharing.myChoir) {
       // «Subir a mi coro» desde «Cantos para el domingo»: directo al paso de
       // guardar, con la misa ya puesta como selección.

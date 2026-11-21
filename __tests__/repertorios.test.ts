@@ -235,3 +235,37 @@ describe('RepertoriosStore', () => {
     ]);
   });
 });
+
+describe('tono del día de los bloques', () => {
+  it('semitonesBetween va por el camino corto y entiende cifrado y latino', () => {
+    const { semitonesBetween, keyRoot } = jest.requireActual(
+      '@/services/repertorios/model',
+    );
+    expect(semitonesBetween('C', 'D')).toBe(2);
+    expect(semitonesBetween('G', 'Am')).toBe(2);
+    expect(semitonesBetween('A', 'G')).toBe(-2);
+    expect(semitonesBetween('Do', 'Sol')).toBe(-5);
+    expect(semitonesBetween('Mib', 'F#m')).toBe(3);
+    expect(semitonesBetween('?', 'C')).toBe(0);
+    expect(keyRoot('Bb')).toBe(10);
+  });
+
+  it('materialize pone el transporte del día y respeta el que ya hubiera', () => {
+    const { materialize } = jest.requireActual('@/services/repertorios/model');
+    const r = materialize(
+      {
+        id: 'p',
+        name: 'Bloque',
+        items: [
+          { category: 'n', filename: 'a.cho', key: 'Am' },
+          { category: 'n', filename: 'b.cho', key: 'C', transpose: 1 },
+          { type: 'break', title: 'Pausa' },
+        ],
+        updatedAt: 0,
+      },
+      () => 'Gm',
+    );
+    expect(r.items[0].transpose).toBe(2);
+    expect(r.items[1].transpose).toBe(1);
+  });
+});

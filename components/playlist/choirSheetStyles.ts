@@ -3,6 +3,7 @@
  * lógica de flujos (la convención del proyecto: nada de componentes de 400+
  * líneas con la hoja de estilos dentro).
  */
+import { Palette } from '@/constants/theme';
 import { StyleSheet } from 'react-native';
 import { radii } from '@/constants/uiStyles';
 import { KeyPillColors, SwipeColors, themeColors } from '@/constants/colors';
@@ -209,7 +210,11 @@ export const createStyles = (isDark: boolean) =>
       justifyContent: 'center',
     },
     btnPrimary: { backgroundColor: accent(isDark) },
-    btnSecondary: { backgroundColor: isDark ? '#2C2C2E' : '#E5E5EA' },
+    btnSecondary: {
+      backgroundColor: isDark
+        ? Palette.dark.cardRaised
+        : Palette.light.backgroundSunken,
+    },
     btnDisabled: { opacity: 0.45 },
     btnPrimaryText: { color: '#fff', fontSize: 15, fontWeight: '700' },
     btnSecondaryText: {

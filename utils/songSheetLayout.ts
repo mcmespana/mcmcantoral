@@ -46,6 +46,8 @@ export const CHORUS_STYLE_CLASSES = CHORUS_STYLES.map((c) => `ch-${c.id}`);
 
 const L = SongSheetColors.light;
 const D = SongSheetColors.dark;
+const ST = SongSheetColors.stage;
+const SU = SongSheetColors.sun;
 
 export const SHEET_CSS = `
   body {
@@ -59,6 +61,19 @@ export const SHEET_CSS = `
     --sh-muted: ${D.muted}; --sh-label: ${D.label};
     --sh-chorus-bar: ${D.chorusBar}; --sh-chorus-bg: ${D.chorusBg};
     --sh-filler: ${D.filler};
+  }
+  /* Atril: «Escenario» (negro real) y «Sol» (contraste máximo). */
+  body.sheet-stage {
+    --sh-text: ${ST.text}; --sh-title: ${ST.title}; --sh-chord: ${ST.chord};
+    --sh-muted: ${ST.muted}; --sh-label: ${ST.label};
+    --sh-chorus-bar: ${ST.chorusBar}; --sh-chorus-bg: ${ST.chorusBg};
+    --sh-filler: ${ST.filler};
+  }
+  body.sheet-sun {
+    --sh-text: ${SU.text}; --sh-title: ${SU.title}; --sh-chord: ${SU.chord};
+    --sh-muted: ${SU.muted}; --sh-label: ${SU.label};
+    --sh-chorus-bar: ${SU.chorusBar}; --sh-chorus-bg: ${SU.chorusBg};
+    --sh-filler: ${SU.filler};
   }
   .sheet {
     font-size: var(--song-font-size);

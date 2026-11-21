@@ -1,3 +1,4 @@
+import { Palette } from '@/constants/theme';
 import React, { useEffect, useRef, useState } from 'react';
 import {
   View,
@@ -89,7 +90,7 @@ export default function ArrangementInputModal({
         <AppTextField
           ref={inputRef}
           accentWhenFilled
-          accentColor="#E15C62"
+          accentColor={Palette.light.accent}
           style={styles.input}
           placeholder="Ej: Intro: solo guitarra (x2)"
           value={text}
@@ -123,7 +124,7 @@ export default function ArrangementInputModal({
           <AppPrimaryButton
             label={saving ? 'Guardando…' : 'Añadir'}
             icon="check"
-            color="#E15C62"
+            color={Palette.light.accentText}
             onPress={() => onSave(text)}
             disabled={!canSave}
             loading={saving}

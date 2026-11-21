@@ -31,13 +31,13 @@ import { useChoirSession } from '@/contexts/ChoirSessionContext';
 import { useSelectedSongs } from '@/contexts/SelectedSongsContext';
 import { h } from '@/utils/haptics';
 import { resolveFullscreenSong } from '@/utils/fullscreenSong';
-import { useSettings } from '../../contexts/SettingsContext';
+import { useSettings } from '@/contexts/SettingsContext';
 import { trackEvent } from '@/utils/analytics';
-import { hasArrangements } from '../../utils/arrangements';
-import { useSongProcessor } from '../../hooks/useSongProcessor';
-import { useColorScheme } from '../../hooks/useColorScheme';
+import { hasArrangements } from '@/utils/arrangements';
+import { useSongProcessor } from '@/hooks/useSongProcessor';
+import { useColorScheme } from '@/hooks/useColorScheme';
 import { CHROME_MAX_FONT_SCALE } from '@/hooks/useLargeText';
-import { Colors } from '../../constants/colors';
+import { Colors } from '@/constants/colors';
 import { useKeyboardShortcut } from '@/hooks/useKeyboardShortcut';
 import {
   AUTO_SCROLL_SPEEDS,
@@ -501,6 +501,8 @@ function SongFullscreenBody({
     notation,
     isFullscreen: true,
     isDark,
+    // En pantalla completa (el atril) se respeta Escenario/Sol.
+    sheetTheme: settings.sheetTheme,
     topInset: Math.max(insets.top, 16) + 56,
     bottomInset: Math.max(insets.bottom, 16) + 96,
   });

@@ -1,3 +1,6 @@
+import AjustesSheet from '@/components/AjustesSheet';
+import BottomBar, { BOTTOM_BAR_SPACE } from '@/components/ui/BottomBar';
+import HomeSections from '@/components/home/HomeSections';
 import { songsForCategory, sortCategoryKeys } from '@/utils/songCategories';
 import { useCantoralConfig } from '@/hooks/useCantoralConfig';
 import { useAdminStatus } from '@/hooks/useAdminStatus';
@@ -45,7 +48,6 @@ import ContextMenuSheet, {
 } from '@/components/ContextMenuSheet';
 import { useMyChoir } from '@/hooks/useMyChoir';
 import { extractTrailingEmoji, stripCategoryPrefix } from '@/utils/songUtils';
-import { useSelectedSongs } from '@/contexts/SelectedSongsContext';
 import { useSongTagIndex } from '@/hooks/useSongTags';
 import TagCloudSheet from '@/components/song-tags/TagCloudSheet';
 import TagChip from '@/components/song-tags/TagChip';
@@ -68,7 +70,6 @@ import spacing from '@/constants/spacing';
 
 const ALL_SONGS_CATEGORY_ID = '__ALL__';
 const ALL_SONGS_CATEGORY_NAME = 'Buscar una canción';
-const SELECTED_SONGS_CATEGORY_ID = '__SELECTED_SONGS__';
 
 const isIOS = Platform.OS === 'ios';
 /** Respiro tras elegir en el menú nativo, antes de abrir una hoja. */
@@ -81,7 +82,8 @@ export default function CategoriesScreen() {
   // Pantalla raíz del tab Cantoral: colapsa la barra flotante al scrollear y
   // reserva su hueco al final de la lista.
   const listRef = useRef<FlatList>(null);
-  const contentPaddingBottom = useTabBarPaddingBottom();
+  // La barra inferior flota: la lista deja su hueco.
+  const contentPaddingBottom = useTabBarPaddingBottom(BOTTOM_BAR_SPACE);
   const styles = useMemo(
     () => createStyles(scheme, layout.isWide, layout.contentMaxWidth),
     [scheme, layout.isWide, layout.contentMaxWidth],
@@ -89,7 +91,6 @@ export default function CategoriesScreen() {
   const isDark = scheme === 'dark';
   // Letra del sistema grande: nombres de categoría en más de una línea.
   const large = useLargeText();
-  const glyphColor = themeColors(isDark).link;
   const { data: songsData, loading, offline, refresh } = useCatalogSongs();
 
   // Pull-to-refresh: la canción que se subió justo antes de misa, sin salir y
@@ -102,11 +103,7 @@ export default function CategoriesScreen() {
     h.tap();
     setRefreshing(false);
   }, [refresh]);
-  const { selectedSongs } = useSelectedSongs();
   const config = useCantoralConfig();
-  // ⚡ Bolt Optimization:
-  // Split the useMemo to prevent re-sorting and re-mapping all categories
-  // every time `selectedSongs.length` changes (O(N log N) -> O(1) on selection change).
   const { sortedCategories, baseCategoryItems } = useMemo(() => {
     // Orden: `order` del generador si lo trae, si no la letra del título; en
     // modo Navidad la categoría destacada va la primera (`02` §7).
@@ -131,16 +128,9 @@ export default function CategoriesScreen() {
     return { sortedCategories: sortedCats, baseCategoryItems: mappedCats };
   }, [songsData, config.effectiveMode, config.featuredCategory]);
 
-  const displayCategories = useMemo(() => {
-    return [
-      {
-        id: SELECTED_SONGS_CATEGORY_ID,
-        name: 'Tu selección',
-        songCount: selectedSongs.length,
-      },
-      ...baseCategoryItems,
-    ];
-  }, [baseCategoryItems, selectedSongs.length]);
+  // «Tu selección» ya no es una fila: los repertorios van arriba, en Inicio
+  // (`components/home/HomeSections.tsx`).
+  const displayCategories = baseCategoryItems;
 
   const [showForm, setShowForm] = useState(false);
   const { toast } = useToast();
@@ -239,6 +229,8 @@ export default function CategoriesScreen() {
   // para que iOS 26 les ponga su cápsula liquid-glass (una por lado).
   const { choir: myChoir, isHydrated: choirHydrated } = useMyChoir();
   const [showMenu, setShowMenu] = useState(false);
+  const [showAdd, setShowAdd] = useState(false);
+  const [showSettings, setShowSettings] = useState(false);
   const { isAdmin } = useAdminStatus();
   const hasSongs = sortedCategories.length > 0;
   const headerIconColor = cantoralHeaderTint(isDark);
@@ -259,6 +251,13 @@ export default function CategoriesScreen() {
 
   const menuActions = useMemo<(ContextMenuAction & { sfSymbol: string })[]>(
     () => [
+      {
+        key: 'settings',
+        label: 'Ajustes',
+        icon: 'settings',
+        sfSymbol: 'gearshape',
+        onPress: () => setShowSettings(true),
+      },
       {
         key: 'tuner',
         label: 'Afinador',
@@ -356,17 +355,6 @@ export default function CategoriesScreen() {
           </Stack.Toolbar.MenuAction>
         ))}
       </Stack.Toolbar.Menu>
-      <Stack.Toolbar.Button
-        icon="magnifyingglass"
-        tintColor={headerIconColor}
-        accessibilityLabel="Buscar canción"
-        onPress={() =>
-          openCantoral('SongsList', {
-            categoryId: ALL_SONGS_CATEGORY_ID,
-            categoryName: ALL_SONGS_CATEGORY_NAME,
-          })
-        }
-      />
     </Stack.Toolbar>
   ) : null;
 
@@ -418,24 +406,6 @@ export default function CategoriesScreen() {
                   color={headerIconColor}
                 />
               </PressableFeedback>
-              <PressableFeedback
-                onPress={() =>
-                  openCantoral('SongsList', {
-                    categoryId: ALL_SONGS_CATEGORY_ID,
-                    categoryName: ALL_SONGS_CATEGORY_NAME,
-                  })
-                }
-                style={styles.headerNativeButton}
-                hitSlop={10}
-                accessibilityRole="button"
-                accessibilityLabel="Buscar canción"
-              >
-                <MaterialIcons
-                  name="search"
-                  size={24}
-                  color={headerIconColor}
-                />
-              </PressableFeedback>
             </View>
           ),
     });
@@ -446,12 +416,7 @@ export default function CategoriesScreen() {
   // según ancho (3 cols en iPad landscape / desktop, 2 cols en iPad portrait).
   const isWideLayout = layout.isWide;
   const numColumns = layout.gridColumns;
-  const gridData = useMemo(() => {
-    if (!isWideLayout) return displayCategories;
-    // En grid, la primera card ("Tu selección") la rendirizamos a parte
-    // como hero/banner, así que la sacamos de los items del grid.
-    return displayCategories.slice(1);
-  }, [displayCategories, isWideLayout]);
+  const gridData = displayCategories;
 
   const lastIndex = gridData.length - 1;
   const renderItem = useCallback(
@@ -462,26 +427,16 @@ export default function CategoriesScreen() {
       item: (typeof displayCategories)[0];
       index: number;
     }) => {
-      const isSpecial = item.id === SELECTED_SONGS_CATEGORY_ID;
-      const { emoji, cleanText } = isSpecial
-        ? { emoji: '', cleanText: item.name }
-        : extractTrailingEmoji(item.name);
-      const displayName = isSpecial
-        ? cleanText
-        : stripCategoryPrefix(cleanText);
-      const onPress = () => {
-        if (item.id === SELECTED_SONGS_CATEGORY_ID) {
-          openCantoral('SelectedSongs');
-        } else {
-          openCantoral('SongsList', {
-            categoryId: item.id,
-            categoryName: item.name,
-          });
-        }
-      };
+      const { emoji, cleanText } = extractTrailingEmoji(item.name);
+      const displayName = stripCategoryPrefix(cleanText);
+      const onPress = () =>
+        openCantoral('SongsList', {
+          categoryId: item.id,
+          categoryName: item.name,
+        });
 
       // ── Layout iPad: tarjeta cuadrada tipo dashboard ────────────────
-      if (isWideLayout && !isSpecial) {
+      if (isWideLayout) {
         return (
           <PressableFeedback onPress={onPress} style={styles.gridCard}>
             <PressableFeedback.Highlight />
@@ -500,59 +455,8 @@ export default function CategoriesScreen() {
         );
       }
 
-      // ── Layout móvil ──────────────────────────────────────────────────
-      // «Tu selección» va suelta y destacada; las categorías, en UNA lista
-      // agrupada con separadores finos, como agrupa iOS sus ajustes. Antes
-      // eran 16 tarjetas con su sombra cada una: más alto, más ruido y
-      // ninguna jerarquía entre lo tuyo y el catálogo.
-      if (isSpecial) {
-        const count = item.songCount;
-        return (
-          <View>
-            <PressableFeedback
-              onPress={onPress}
-              style={[styles.row, styles.selectionRow]}
-              accessibilityRole="button"
-              accessibilityLabel={`Tu selección, ${
-                count === 0
-                  ? 'vacía'
-                  : `${count} ${count === 1 ? 'canción' : 'canciones'}`
-              }`}
-            >
-              <PressableFeedback.Highlight />
-              <View style={[styles.rowIcon, styles.selectionIcon]}>
-                {emoji ? (
-                  <Text style={styles.emojiText}>{emoji}</Text>
-                ) : (
-                  <MaterialIcons
-                    name="queue-music"
-                    size={22}
-                    color={glyphColor}
-                  />
-                )}
-              </View>
-              <View style={styles.selectionContent}>
-                <Text style={[styles.rowTitle, styles.selectionTitle]}>
-                  {displayName}
-                </Text>
-                <Text style={styles.selectionSubtitle} numberOfLines={1}>
-                  {count === 0
-                    ? 'Añade canciones desde el cantoral'
-                    : `${count} ${count === 1 ? 'canción' : 'canciones'}`}
-                </Text>
-              </View>
-              <MaterialIcons
-                name="chevron-right"
-                size={20}
-                color={themeColors(isDark).link}
-              />
-            </PressableFeedback>
-          </View>
-        );
-      }
-
-      // `index` cuenta «Tu selección» (posición 0): la primera categoría es 1.
-      const isFirst = index === 1;
+      // ── Layout móvil: UNA lista agrupada con separadores finos ─────────
+      const isFirst = index === 0;
       const isLast = index === lastIndex;
       const row = (
         <PressableFeedback
@@ -603,43 +507,8 @@ export default function CategoriesScreen() {
         </View>
       );
     },
-    [isDark, isWideLayout, styles, lastIndex, glyphColor, large],
+    [isDark, isWideLayout, styles, lastIndex, large],
   );
-
-  // ── Hero "Tu selección" para iPad ────────────────────────────────────
-  const renderSelectionHero = useCallback(() => {
-    if (!isWideLayout) return null;
-    const selectionItem = displayCategories[0];
-    if (!selectionItem) return null;
-    return (
-      <View>
-        <PressableFeedback
-          onPress={() => openCantoral('SelectedSongs')}
-          style={styles.heroCard}
-        >
-          <PressableFeedback.Highlight />
-          <View style={styles.heroEmojiWrap}>
-            <MaterialIcons name="queue-music" size={30} color={glyphColor} />
-          </View>
-          <View style={styles.heroContent}>
-            <Text style={styles.heroTitle}>Tu selección</Text>
-            <Text style={styles.heroSubtitle}>
-              {selectionItem.songCount === 0
-                ? 'Añade canciones para tenerlas a mano'
-                : `${selectionItem.songCount} ${
-                    selectionItem.songCount === 1 ? 'canción' : 'canciones'
-                  }`}
-            </Text>
-          </View>
-          <MaterialIcons
-            name="chevron-right"
-            size={24}
-            color={themeColors(isDark).link}
-          />
-        </PressableFeedback>
-      </View>
-    );
-  }, [isWideLayout, displayCategories, isDark, styles, glyphColor]);
 
   const sectionLabel = useCallback(() => {
     if (!isWideLayout) return null;
@@ -661,11 +530,11 @@ export default function CategoriesScreen() {
             ))}
           </View>
         )}
-        {renderSelectionHero()}
+        <HomeSections />
         {sectionLabel()}
       </View>
     ),
-    [renderSelectionHero, sectionLabel, featuredTags, isDark, openTag, styles],
+    [sectionLabel, featuredTags, isDark, openTag, styles],
   );
 
   if (loading && sortedCategories.length === 0) {
@@ -753,6 +622,65 @@ export default function CategoriesScreen() {
 
       {nativeMenu}
       {menuSheet}
+
+      <BottomBar
+        items={[
+          {
+            key: 'search',
+            icon: 'search',
+            label: 'Buscar canción, letra o autor…',
+            grow: true,
+            onPress: () =>
+              openCantoral('SongsList', {
+                categoryId: ALL_SONGS_CATEGORY_ID,
+                categoryName: ALL_SONGS_CATEGORY_NAME,
+              }),
+          },
+          {
+            key: 'tuner',
+            icon: 'graphic-eq',
+            label: 'Afinador y metrónomo',
+            onPress: () => openCantoral('Tuner'),
+          },
+          {
+            key: 'add',
+            icon: 'add',
+            label: 'Nuevo repertorio, unirse a un directo o escanear',
+            primary: true,
+            onPress: () => setShowAdd(true),
+          },
+        ]}
+      />
+      <ContextMenuSheet
+        visible={showAdd}
+        onClose={() => setShowAdd(false)}
+        title="Añadir"
+        actions={[
+          {
+            key: 'new',
+            label: 'Nuevo repertorio',
+            icon: 'queue-music',
+            onPress: () => openCantoral('Repertorios'),
+          },
+          {
+            key: 'join',
+            label: 'Unirme a un directo',
+            icon: 'sensors',
+            onPress: () => openCantoral('SelectedSongs', { hoja: 'unirse' }),
+          },
+          {
+            key: 'scan',
+            label: 'Importar un repertorio (código o QR)',
+            icon: 'qr-code-scanner',
+            onPress: () => openCantoral('SelectedSongs', { hoja: 'importar' }),
+          },
+        ]}
+      />
+
+      <AjustesSheet
+        visible={showSettings}
+        onClose={() => setShowSettings(false)}
+      />
 
       <SuggestSongModal
         visible={showForm}

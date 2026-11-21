@@ -6,153 +6,146 @@
 @source './node_modules/heroui-native/lib';
 
 /*
- * HeroUI Native currently exposes several web theme tokens as `oklch()` /
- * `color-mix()`. Some runtime color helpers still expect RGB-compatible input,
- * which breaks outline/ghost buttons on web. We override the relevant tokens
- * with stable RGB/hex values and also expose an explicit app-controlled theme.
+ * Tema de HeroUI para MCM Cantoral (dirección A, «Escenario»: tinta casi
+ * negra y ámbar de vela). HeroUI Native expone algunos tokens como `oklch()` /
+ * `color-mix()` y hay ayudantes de color que esperan RGB, así que se dan
+ * valores hex estables.
  *
- * ⚠️ ESTO NO ES UNA SEGUNDA PALETA DE MCM. Los nombres de estas variables son
- * el CONTRATO DE HEROUI, no nuestro vocabulario, y no significan lo mismo que
- * los tokens de `constants/colors.ts`:
+ * ⚠️ ESTO NO ES UNA SEGUNDA PALETA. Los NOMBRES son el contrato de HeroUI; los
+ * VALORES salen de `constants/theme.ts` (y lo comprueba
+ * `__tests__/designTokens.test.ts`):
  *
- *   --accent  = brand.primary (#253883, el azul MCM)   ← NO es brand.accent
- *   --danger  = brand.accent  (#E15C62, el rojo MIC)   ← NO es un morado
- *   --success = brand.green   (#A3BD31)
- *   --warning = brand.yellow  (#FCD200)
- *   --border  = brand.border  (#E0E0E0)
- *   --focus / --link = brand.primary (claro) · brand.secondary (oscuro)
- *   --background/--foreground/--surface* = Colors.light / Colors.dark
- *
- * Regla: los VALORES salen de `constants/colors.ts` y hay un test que lo
- * comprueba (`__tests__/designTokens.test.ts`). Los NOMBRES no se tocan: son
- * de HeroUI. Si estás escribiendo `className="bg-danger"` estás pidiendo el
- * rojo; si escribes `colors.purple` estás pidiendo el morado. No son lo mismo.
+ *   --accent / --focus      = Palette.*.accent  (el ámbar, relleno)
+ *   --accent-foreground     = Palette.*.onAccent (tinta sobre ámbar)
+ *   --link                  = Palette.*.accentText
+ *   --danger / --success    = Palette.*.danger / .success
+ *   --background/--foreground/--surface/--separator = Palette.*
  */
 :root,
 :root[data-theme='light'],
 [data-theme='light'] {
-  --background: #ffffff;
-  --foreground: #11181c;
+  --background: #faf7f0;
+  --foreground: #17140f;
   --surface: #ffffff;
-  --surface-foreground: #11181c;
-  --surface-secondary: #f5f5f7;
-  --surface-secondary-foreground: #11181c;
-  --surface-tertiary: #ececf0;
-  --surface-tertiary-foreground: #11181c;
+  --surface-foreground: #17140f;
+  --surface-secondary: #f5f0e4;
+  --surface-secondary-foreground: #17140f;
+  --surface-tertiary: #efe9dc;
+  --surface-tertiary-foreground: #17140f;
   --overlay: #ffffff;
-  --overlay-foreground: #11181c;
-  --muted: #687076;
-  --default: #f2f2f7;
-  --default-foreground: #11181c;
-  --accent: #253883;
-  --accent-foreground: #ffffff;
-  --success: #a3bd31;
-  --success-foreground: #11181c;
-  --warning: #fcd200;
-  --warning-foreground: #11181c;
-  --danger: #e15c62;
+  --overlay-foreground: #17140f;
+  --muted: #6b6354;
+  --default: #efe9dc;
+  --default-foreground: #17140f;
+  --accent: #ffbe2e;
+  --accent-foreground: #1a1404;
+  --success: #1e8a4c;
+  --success-foreground: #ffffff;
+  --warning: #ffbe2e;
+  --warning-foreground: #1a1404;
+  --danger: #c62e23;
   --danger-foreground: #ffffff;
   --segment: #ffffff;
-  --segment-foreground: #11181c;
-  --border: #e0e0e0;
-  --separator: #d6d6da;
-  --focus: #253883;
-  --link: #253883;
+  --segment-foreground: #17140f;
+  --border: #e3dbcb;
+  --separator: #e3dbcb;
+  --focus: #ffbe2e;
+  --link: #8a5800;
   --field-background: #ffffff;
-  --field-foreground: #11181c;
-  --field-placeholder: #687076;
-  --field-border: #e0e0e0;
+  --field-foreground: #17140f;
+  --field-placeholder: #6b6354;
+  --field-border: #e3dbcb;
   --surface-shadow:
-    0 2px 4px 0 rgba(0, 0, 0, 0.04), 0 1px 2px 0 rgba(0, 0, 0, 0.06),
-    0 0 1px 0 rgba(0, 0, 0, 0.06);
+    0 2px 4px 0 rgba(23, 20, 15, 0.04), 0 1px 2px 0 rgba(23, 20, 15, 0.06),
+    0 0 1px 0 rgba(23, 20, 15, 0.06);
   --overlay-shadow:
-    0 2px 8px 0 rgba(0, 0, 0, 0.02), 0 -6px 12px 0 rgba(0, 0, 0, 0.01),
-    0 14px 28px 0 rgba(0, 0, 0, 0.03);
+    0 2px 8px 0 rgba(23, 20, 15, 0.02), 0 -6px 12px 0 rgba(23, 20, 15, 0.01),
+    0 14px 28px 0 rgba(23, 20, 15, 0.03);
   --field-shadow:
-    0 2px 4px 0 rgba(0, 0, 0, 0.04), 0 1px 2px 0 rgba(0, 0, 0, 0.06),
-    0 0 1px 0 rgba(0, 0, 0, 0.06);
+    0 2px 4px 0 rgba(23, 20, 15, 0.04), 0 1px 2px 0 rgba(23, 20, 15, 0.06),
+    0 0 1px 0 rgba(23, 20, 15, 0.06);
 
-  --color-surface-hover: rgba(17, 24, 28, 0.04);
-  --color-default-hover: rgba(17, 24, 28, 0.08);
-  --color-accent-hover: #31489f;
-  --color-success-hover: #92ab28;
-  --color-warning-hover: #e4bd00;
-  --color-danger-hover: #cf5056;
-  --color-field-hover: rgba(17, 24, 28, 0.03);
+  --color-surface-hover: rgba(23, 20, 15, 0.04);
+  --color-default-hover: rgba(23, 20, 15, 0.08);
+  --color-accent-hover: #ffc94f;
+  --color-success-hover: #23a057;
+  --color-warning-hover: #ffc94f;
+  --color-danger-hover: #d63a2f;
+  --color-field-hover: rgba(23, 20, 15, 0.03);
   --color-field-focus: #ffffff;
-  --color-field-border-hover: #cfcfd4;
-  --color-field-border-focus: #9aa4c9;
-  --color-accent-soft: rgba(37, 56, 131, 0.15);
-  --color-accent-soft-foreground: #253883;
-  --color-accent-soft-hover: rgba(37, 56, 131, 0.2);
-  --color-danger-soft: rgba(225, 92, 98, 0.15);
-  --color-danger-soft-foreground: #e15c62;
-  --color-danger-soft-hover: rgba(225, 92, 98, 0.2);
-  --color-warning-soft: rgba(252, 210, 0, 0.18);
-  --color-warning-soft-foreground: #7b5c00;
-  --color-warning-soft-hover: rgba(252, 210, 0, 0.24);
-  --color-success-soft: rgba(163, 189, 49, 0.18);
-  --color-success-soft-foreground: #4e6110;
-  --color-success-soft-hover: rgba(163, 189, 49, 0.24);
+  --color-field-border-hover: #d2c8b4;
+  --color-field-border-focus: #e8a317;
+  --color-accent-soft: rgba(255, 190, 46, 0.22);
+  --color-accent-soft-foreground: #8a5800;
+  --color-accent-soft-hover: rgba(255, 190, 46, 0.3);
+  --color-danger-soft: rgba(198, 46, 35, 0.12);
+  --color-danger-soft-foreground: #c62e23;
+  --color-danger-soft-hover: rgba(198, 46, 35, 0.18);
+  --color-warning-soft: rgba(255, 190, 46, 0.22);
+  --color-warning-soft-foreground: #6e4700;
+  --color-warning-soft-hover: rgba(255, 190, 46, 0.3);
+  --color-success-soft: rgba(30, 138, 76, 0.14);
+  --color-success-soft-foreground: #1e8a4c;
+  --color-success-soft-hover: rgba(30, 138, 76, 0.2);
 }
 
 :root[data-theme='dark'],
 [data-theme='dark'] {
-  --background: #2c2c2e;
-  --foreground: #ffffff;
-  --surface: #2c2c2e;
-  --surface-foreground: #ffffff;
-  --surface-secondary: #343437;
-  --surface-secondary-foreground: #ffffff;
-  --surface-tertiary: #3a3a3c;
-  --surface-tertiary-foreground: #ffffff;
-  --overlay: #2c2c2e;
-  --overlay-foreground: #ffffff;
-  --muted: #c5c5c7;
-  --default: #3a3a3c;
-  --default-foreground: #ffffff;
-  --accent: #4b67d1;
-  --accent-foreground: #ffffff;
-  --success: #a3bd31;
-  --success-foreground: #11181c;
-  --warning: #fcd200;
-  --warning-foreground: #11181c;
-  --danger: #ff6b6b;
-  --danger-foreground: #ffffff;
-  --segment: #3a3a3c;
-  --segment-foreground: #ffffff;
-  --border: #4a4a4d;
-  --separator: #5a5a5f;
-  --focus: #95d2f2;
-  --link: #95d2f2;
-  --field-background: #3a3a3c;
-  --field-foreground: #ffffff;
-  --field-placeholder: #c5c5c7;
-  --field-border: #4a4a4d;
+  --background: #0d0c0a;
+  --foreground: #f5f0e6;
+  --surface: #1b1915;
+  --surface-foreground: #f5f0e6;
+  --surface-secondary: #26231d;
+  --surface-secondary-foreground: #f5f0e6;
+  --surface-tertiary: #2c2822;
+  --surface-tertiary-foreground: #f5f0e6;
+  --overlay: #1b1915;
+  --overlay-foreground: #f5f0e6;
+  --muted: #958c7c;
+  --default: #26231d;
+  --default-foreground: #f5f0e6;
+  --accent: #ffbe2e;
+  --accent-foreground: #1a1404;
+  --success: #4cd685;
+  --success-foreground: #0d0c0a;
+  --warning: #ffbe2e;
+  --warning-foreground: #1a1404;
+  --danger: #ff6b5e;
+  --danger-foreground: #0d0c0a;
+  --segment: #26231d;
+  --segment-foreground: #f5f0e6;
+  --border: #2c2822;
+  --separator: #2c2822;
+  --focus: #ffbe2e;
+  --link: #ffbe2e;
+  --field-background: #1b1915;
+  --field-foreground: #f5f0e6;
+  --field-placeholder: #958c7c;
+  --field-border: #2c2822;
   --surface-shadow: 0 0 0 0 transparent;
-  --overlay-shadow: 0 0 1px 0 rgba(255, 255, 255, 0.2) inset;
+  --overlay-shadow: 0 0 1px 0 rgba(245, 240, 230, 0.2) inset;
   --field-shadow: 0 0 0 0 transparent;
 
-  --color-surface-hover: rgba(255, 255, 255, 0.05);
-  --color-default-hover: rgba(255, 255, 255, 0.1);
-  --color-accent-hover: #5f7bf0;
-  --color-success-hover: #b1ca40;
-  --color-warning-hover: #ffe14d;
-  --color-danger-hover: #ff7f7f;
-  --color-field-hover: rgba(255, 255, 255, 0.04);
-  --color-field-focus: #3a3a3c;
-  --color-field-border-hover: #66666b;
-  --color-field-border-focus: #95d2f2;
-  --color-accent-soft: rgba(149, 210, 242, 0.18);
-  --color-accent-soft-foreground: #95d2f2;
-  --color-accent-soft-hover: rgba(149, 210, 242, 0.24);
-  --color-danger-soft: rgba(255, 107, 107, 0.18);
-  --color-danger-soft-foreground: #ff9d9d;
-  --color-danger-soft-hover: rgba(255, 107, 107, 0.24);
-  --color-warning-soft: rgba(252, 210, 0, 0.2);
-  --color-warning-soft-foreground: #ffe14d;
-  --color-warning-soft-hover: rgba(252, 210, 0, 0.26);
-  --color-success-soft: rgba(163, 189, 49, 0.2);
-  --color-success-soft-foreground: #c7dd68;
-  --color-success-soft-hover: rgba(163, 189, 49, 0.26);
+  --color-surface-hover: rgba(245, 240, 230, 0.05);
+  --color-default-hover: rgba(245, 240, 230, 0.1);
+  --color-accent-hover: #ffc94f;
+  --color-success-hover: #62e095;
+  --color-warning-hover: #ffc94f;
+  --color-danger-hover: #ff8177;
+  --color-field-hover: rgba(245, 240, 230, 0.04);
+  --color-field-focus: #1b1915;
+  --color-field-border-hover: #4a443a;
+  --color-field-border-focus: #ffbe2e;
+  --color-accent-soft: rgba(255, 190, 46, 0.14);
+  --color-accent-soft-foreground: #ffbe2e;
+  --color-accent-soft-hover: rgba(255, 190, 46, 0.2);
+  --color-danger-soft: rgba(255, 107, 94, 0.16);
+  --color-danger-soft-foreground: #ff8177;
+  --color-danger-soft-hover: rgba(255, 107, 94, 0.22);
+  --color-warning-soft: rgba(255, 190, 46, 0.16);
+  --color-warning-soft-foreground: #ffbe2e;
+  --color-warning-soft-hover: rgba(255, 190, 46, 0.22);
+  --color-success-soft: rgba(76, 214, 133, 0.16);
+  --color-success-soft-foreground: #4cd685;
+  --color-success-soft-hover: rgba(76, 214, 133, 0.22);
 }

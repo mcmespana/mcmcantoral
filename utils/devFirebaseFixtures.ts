@@ -68,9 +68,100 @@ const SONGS = {
   },
 };
 
+/** Navidad de prueba: una categoría con subcategorías y un préstamo. */
+const SONGS_NAVIDAD = {
+  ...SONGS,
+  navidad: {
+    categoryTitle: 'N. Navidad 🎄',
+    subcategories: {
+      populares: { title: 'Populares', order: 1, emoji: '🔔' },
+      nuevas: { title: 'Nuevas', order: 2 },
+    },
+    songs: [
+      {
+        title: 'Campana sobre campana',
+        filename: 'campana.cho',
+        author: 'Popular',
+        key: 'G',
+        subcategory: 'populares',
+        duration: '2:40',
+        content:
+          '{title: Campana sobre campana}\n{key: G}\n\n{start_of_verse}\n[G]Campana sobre cam[D]pana,\ny sobre campana [G]una,\n<i>asómate a la ven[D]tana</i>\n[*CLAP]verás al niño en la [G]cuna.\n{end_of_verse}\n\n{start_of_chorus}\n[C]Belén, campanas de Be[G]lén,\nque los [D]ángeles tocan, ¿qué nuevas me [G]traéis?\n{end_of_chorus}',
+      },
+      {
+        title: 'Noche de paz',
+        filename: 'noche_de_paz.cho',
+        author: 'F. X. Gruber',
+        key: 'C',
+        subcategory: 'populares',
+        duration: '3:20',
+        content:
+          '{title: Noche de paz}\n{key: C}\n\n{start_of_verse}\n[C]Noche de paz, noche de a[C7]mor,\n[F]todo duerme en derre[C]dor.\n{end_of_verse}',
+      },
+    ],
+  },
+};
+SONGS_NAVIDAD.entrada = {
+  ...SONGS.entrada,
+  songs: SONGS.entrada.songs.map((s, i) =>
+    i === 0 ? { ...s, alsoIn: ['navidad/nuevas'] } : s,
+  ),
+};
+
+const PACKS = {
+  'hucha-manana-1': {
+    title: 'Mañana 1',
+    event: 'Villancicos Solidarios',
+    date: '2026-12-19',
+    targetMinutes: 60,
+    items: [
+      {
+        category: 'navidad',
+        filename: 'campana.cho',
+        key: 'A',
+        notes: '🎺 entra la trompeta',
+      },
+      { type: 'break', title: 'Presentación de la hucha', minutes: 3 },
+      { category: 'navidad', filename: 'noche_de_paz.cho', capo: 2 },
+    ],
+  },
+  'hucha-manana-2': {
+    title: 'Mañana 2',
+    event: 'Villancicos Solidarios',
+    date: '2026-12-19',
+    items: [{ category: 'navidad', filename: 'noche_de_paz.cho' }],
+  },
+};
+
+const CONFIG_NAVIDAD = {
+  mode: 'navidad',
+  featuredCategory: 'navidad',
+  event: {
+    title: 'Villancicos Solidarios',
+    place: 'Cuatro Esquinas',
+    date: '2026-12-19',
+    packs: ['hucha-manana-1', 'hucha-manana-2'],
+    liveKey: 'villancicos-prueba',
+  },
+};
+
 const FIXTURES: Record<string, unknown> = {
   songs: SONGS,
 };
+
+/**
+ * Catálogo offline de prueba (semilla) para capturas y simulador: canciones,
+ * Navidad con subcategorías, bloques del evento y modo Navidad encendido.
+ */
+export function devCatalogFixture() {
+  const at = 1_700_000_000_000;
+  return {
+    v: 1 as const,
+    songs: { updatedAt: at, data: SONGS_NAVIDAD },
+    packs: { updatedAt: at, data: PACKS },
+    cantoralConfig: { updatedAt: at, data: CONFIG_NAVIDAD },
+  };
+}
 
 /** `undefined` = no hay dato de prueba para ese nodo (se va a Firebase). */
 export function devFixtureFor(path: string): unknown {

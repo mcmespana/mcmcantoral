@@ -50,7 +50,7 @@ import fs from 'fs';
 import path from 'path';
 
 const ROOT = path.join(__dirname, '..');
-const DIRS = ['app', 'components', 'hooks', 'contexts'];
+const DIRS = ['app', 'screens', 'components', 'hooks', 'contexts'];
 
 function isExcluded(rel: string): boolean {
   return (

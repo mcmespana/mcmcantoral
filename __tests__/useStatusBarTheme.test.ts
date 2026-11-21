@@ -59,7 +59,7 @@ afterEach(() => {
 
 describe('getPageThemeColor', () => {
   it('devuelve el color configurado para una ruta conocida', () => {
-    expect(getPageThemeColor('/calendario')).toBe('#31AADF');
+    expect(getPageThemeColor('/cancionero/pantalla-completa')).toBe('#000000');
   });
 
   it('cae al color de "/" para rutas desconocidas', () => {
@@ -83,30 +83,34 @@ describe('useStatusBarTheme', () => {
   });
 
   it('crea y actualiza los meta tags para la ruta actual', async () => {
-    await renderHook(() => useStatusBarTheme('/jubileo'));
-    expect(fakeDocument.__metas['theme-color'].content).toBe('#A3BD31');
+    await renderHook(() =>
+      useStatusBarTheme('/cancionero/pantalla-completa'),
+    );
+    expect(fakeDocument.__metas['theme-color'].content).toBe('#000000');
     expect(
       fakeDocument.__metas['apple-mobile-web-app-status-bar-style'].content,
     ).toBe('black-translucent');
     expect(fakeDocument.__metas['msapplication-navbutton-color'].content).toBe(
-      '#A3BD31',
+      '#000000',
     );
   });
 
   it('cae a la config de "/" para rutas sin config específica', async () => {
     await renderHook(() => useStatusBarTheme('/ruta-rara'));
-    expect(fakeDocument.__metas['theme-color'].content).toBe('#ffffff');
+    expect(fakeDocument.__metas['theme-color'].content).toBe(
+      getPageThemeColor('/'),
+    );
   });
 
   it('reutiliza el meta tag existente en vez de crear uno nuevo', async () => {
     const { rerender } = await renderHook(
       ({ pathname }: { pathname: string }) => useStatusBarTheme(pathname),
-      { initialProps: { pathname: '/jubileo' } },
+      { initialProps: { pathname: '/cancionero' } },
     );
     const metaRef = fakeDocument.__metas['theme-color'];
-    await rerender({ pathname: '/calendario' });
+    await rerender({ pathname: '/cancionero/pantalla-completa' });
     expect(fakeDocument.__metas['theme-color']).toBe(metaRef);
-    expect(metaRef.content).toBe('#31AADF');
+    expect(metaRef.content).toBe('#000000');
   });
 });
 

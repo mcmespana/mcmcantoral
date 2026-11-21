@@ -14,15 +14,13 @@ const LIGHT = '#FFFFFF';
 
 describe('onColor', () => {
   it.each([
-    ['amarillo de marca', brand.yellow, DARK],
-    ['verde de marca', brand.green, DARK],
-    ['celeste', brand.info, DARK],
-    ['azul MCM', brand.primary, LIGHT],
-    ['morado LC', brand.purple, LIGHT],
-    ['azul de texto', brand.text, LIGHT],
-    // Ojo: sobre el rojo MIC gana el texto OSCURO (4,79:1 frente a 3,55 del
-    // blanco). Es contraintuitivo y es justo lo que un umbral a ojo fallaba.
-    ['rojo MIC', brand.accent, DARK],
+    ['ámbar de la vela', brand.primary, DARK],
+    ['amarillo llama', brand.yellow, DARK],
+    ['ámbar profundo', brand.info, DARK],
+    ['oro viejo', brand.green, DARK],
+    ['brasa', brand.accent, DARK],
+    ['tinta', brand.text, LIGHT],
+    ['negro', brand.black, LIGHT],
   ])('sobre el %s elige el legible', (_label, bg, expected) => {
     expect(onColor(bg)).toBe(expected);
   });

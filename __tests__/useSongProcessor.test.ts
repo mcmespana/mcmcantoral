@@ -268,7 +268,7 @@ describe('useSongProcessor — ChordPro con error de sintaxis', () => {
       originalChordPro: BROKEN,
       isDark: true,
     });
-    expect(result.current.songHtml).toContain('#1F1F21');
+    expect(result.current.songHtml).toContain('#0D0C0A');
   });
 
   it('no marca isLoadingSong colgado tras el error', async () => {

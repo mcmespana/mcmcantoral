@@ -353,3 +353,87 @@ export function fromShared(
     updatedAt: opts.now,
   };
 }
+
+// ─── Tono del día ────────────────────────────────────────────────────────────
+
+const NOTE_INDEX: Record<string, number> = {
+  C: 0,
+  'C#': 1,
+  DB: 1,
+  D: 2,
+  'D#': 3,
+  EB: 3,
+  E: 4,
+  F: 5,
+  'F#': 6,
+  GB: 6,
+  G: 7,
+  'G#': 8,
+  AB: 8,
+  A: 9,
+  'A#': 10,
+  BB: 10,
+  B: 11,
+  DO: 0,
+  'DO#': 1,
+  REB: 1,
+  RE: 2,
+  'RE#': 3,
+  MIB: 3,
+  MI: 4,
+  FA: 5,
+  'FA#': 6,
+  SOLB: 6,
+  SOL: 7,
+  'SOL#': 8,
+  LAB: 8,
+  LA: 9,
+  'LA#': 10,
+  SIB: 10,
+  SI: 11,
+};
+
+/** Nota raíz de una tonalidad («Am», «F#m», «Sol», «Mib») → 0-11, o null. */
+export function keyRoot(key: string | undefined | null): number | null {
+  if (!key) return null;
+  const m = key
+    .trim()
+    .toUpperCase()
+    .match(/^(DO|RE|MI|FA|SOL|LA|SI|[A-G])([#B♯♭]?)/);
+  if (!m) return null;
+  const acc = m[2] === '♯' ? '#' : m[2] === '♭' ? 'B' : m[2];
+  return NOTE_INDEX[m[1] + acc] ?? NOTE_INDEX[m[1]] ?? null;
+}
+
+/**
+ * Semitonos para pasar de `from` a `to` (de −5 a +6: el camino corto). Lo usan
+ * los bloques, que dicen el tono del día («Am») y no cuánto transportar.
+ */
+export function semitonesBetween(
+  from: string | undefined | null,
+  to: string | undefined | null,
+): number {
+  const a = keyRoot(from);
+  const b = keyRoot(to);
+  if (a === null || b === null) return 0;
+  const d = (b - a + 12) % 12;
+  return d > 6 ? d - 12 : d;
+}
+
+/**
+ * Un bloque listo para tocarse: a cada canción se le calcula el transporte
+ * desde su tono original (`originalKey`) hasta el del día (`key`).
+ */
+export function materialize(
+  rep: Repertorio,
+  originalKey: (item: RepertorioSongItem) => string | undefined,
+): Repertorio {
+  return {
+    ...rep,
+    items: rep.items.map((it) => {
+      if (isBreak(it) || !it.key || it.transpose) return it;
+      const t = semitonesBetween(originalKey(it), it.key);
+      return t ? { ...it, transpose: t } : it;
+    }),
+  };
+}

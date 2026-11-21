@@ -1,3 +1,4 @@
+import BottomBar, { BOTTOM_BAR_SPACE } from '@/components/ui/BottomBar';
 import React, { useState, useEffect, useCallback } from 'react';
 import {
   View,
@@ -5,24 +6,18 @@ import {
   StyleSheet,
   Platform,
   Pressable,
-  TouchableOpacity,
   BackHandler,
   ScrollView,
   useWindowDimensions,
 } from 'react-native';
 import { useFocusEffect } from 'expo-router/react-navigation';
 import Animated, {
-  FadeOut,
-  ZoomIn,
-  interpolate,
   useAnimatedStyle,
   useSharedValue,
-  withSpring,
   withTiming,
 } from 'react-native-reanimated';
 import { h } from '@/utils/haptics';
 import { PressableFeedback } from 'heroui-native';
-import GlassSurface from '@/components/ui/GlassSurface';
 import { useToast } from '@/contexts/AppToastContext';
 import { MaterialIcons } from '@/components/ui/icons';
 import { DEFAULT_FONT_SIZE_EM } from '../contexts/SettingsContext';
@@ -47,11 +42,10 @@ import {
   SystemGray,
   themeColors,
 } from '@/constants/colors';
-import { onColor } from '@/utils/colorUtils';
 import { radii } from '@/constants/uiStyles';
 import typography from '@/constants/typography';
 import spacing from '@/constants/spacing';
-import { durations, motionEasings, springs } from '@/constants/animations';
+import { durations, motionEasings } from '@/constants/animations';
 
 interface FontOption {
   name: string;
@@ -215,7 +209,6 @@ const SongControls: React.FC<SongControlsProps> = ({
     windowHeight - insets.top - 56 - (tabBarClearance + 8) - 56 - 12 - 16,
   );
   const layout = useResponsiveLayout();
-  const rotateAnim = useSharedValue(0);
   // Visibilidad del menú (0 cerrado → 1 abierto). El menú se queda MONTADO y
   // solo se desvanece: antes se montaba y desmontaba con `entering`/`exiting`,
   // y al cerrarse el contenedor (pegado abajo y con la altura del menú) se
@@ -259,7 +252,6 @@ const SongControls: React.FC<SongControlsProps> = ({
       // Muelle con `dampingRatio` explícito: el `{ damping: 6, mass: 1 }` de
       // antes, con los defaults de Reanimated 4 (stiffness 900), oscilaba con
       // ζ≈0,1 — el «+» se pasaba de 45° a casi 80° y tardaba un segundo.
-      rotateAnim.set(withSpring(toOpen ? 1 : 0, springs.snap));
       menuAnim.set(
         withTiming(toOpen ? 1 : 0, {
           duration: durations.quick,
@@ -267,7 +259,7 @@ const SongControls: React.FC<SongControlsProps> = ({
         }),
       );
     },
-    [rotateAnim, menuAnim],
+    [menuAnim],
   );
   const toggleMenu = () => setMenuOpen(!showActionButtons);
 
@@ -299,24 +291,6 @@ const SongControls: React.FC<SongControlsProps> = ({
     }, [showActionButtons, setMenuOpen]),
   );
 
-  // El icono hace un morph: el «ajustes» gira y se va mientras entra el «+»
-  // girando hasta quedarse en «×». Antes era UN icono que cambiaba de glifo
-  // de golpe a mitad del giro, así que al cerrar el de ajustes aparecía ya
-  // torcido 45° y volvía a su sitio dando un latigazo.
-  const fabTuneIconStyle = useAnimatedStyle(() => {
-    const p = rotateAnim.get();
-    return {
-      opacity: interpolate(p, [0, 0.6], [1, 0], 'clamp'),
-      transform: [{ rotate: `${p * -90}deg` }],
-    };
-  });
-  const fabCloseIconStyle = useAnimatedStyle(() => {
-    const p = rotateAnim.get();
-    return {
-      opacity: interpolate(p, [0.4, 1], [0, 1], 'clamp'),
-      transform: [{ rotate: `${p * 45}deg` }],
-    };
-  });
   // Opacidad y un desplazamiento corto desde el botón. Sin entradas
   // encadenadas por ítem: el menú no salta de la nada encima del dedo.
   const menuStyle = useAnimatedStyle(() => {
@@ -374,7 +348,7 @@ const SongControls: React.FC<SongControlsProps> = ({
         style={[
           styles.fabContainer,
           {
-            bottom: tabBarClearance + 8,
+            bottom: tabBarClearance + BOTTOM_BAR_SPACE + 4,
             right: fabRightOffset,
           },
         ]}
@@ -552,68 +526,44 @@ const SongControls: React.FC<SongControlsProps> = ({
             />
           </ScrollView>
         </Animated.View>
-        <View style={{ position: 'relative' }}>
-          {!!songBadge && !showActionButtons && (
-            // Es la única señal de que la canción va transportada: entra con
-            // un zoom corto (sin rebote) para que se vea al cerrar la hoja.
-            <Animated.View
-              entering={ZoomIn.duration(durations.base).easing(
-                motionEasings.out,
-              )}
-              exiting={FadeOut.duration(durations.quick)}
-              style={[styles.badge, isDark && styles.badgeDark]}
-              pointerEvents="none"
-            >
-              <Text
-                style={[
-                  styles.badgeText,
-                  { color: onColor(themeColors(isDark).link) },
-                ]}
-                numberOfLines={1}
-              >
-                {songBadge}
-              </Text>
-            </Animated.View>
-          )}
-          <TouchableOpacity
-            style={[
-              styles.fabMain,
-              Platform.OS !== 'ios' && isDark && styles.fabMainDark,
-              Platform.OS !== 'ios' && showActionButtons && styles.fabMainOpen,
-            ]}
-            onPress={toggleMenu}
-            activeOpacity={0.75}
-            accessibilityLabel={
-              showActionButtons
-                ? 'Cerrar opciones de la canción'
-                : songBadge
-                  ? `Opciones de la canción. Tono cambiado: ${songBadge}`
-                  : 'Opciones de la canción'
-            }
-          >
-            {Platform.OS === 'ios' && (
-              <GlassSurface
-                variant="regular"
-                tintColor={showActionButtons ? SwipeColors.remove : undefined}
-              />
-            )}
-            <Animated.View style={fabTuneIconStyle}>
-              <MaterialIcons
-                name="tune"
-                size={22}
-                color={themeColors(isDark).text}
-              />
-            </Animated.View>
-            <Animated.View style={[styles.fabIconOverlay, fabCloseIconStyle]}>
-              <MaterialIcons
-                name="add"
-                size={22}
-                color={themeColors(isDark).text}
-              />
-            </Animated.View>
-          </TouchableOpacity>
-        </View>
       </View>
+
+      {/* Barra inferior (T-05: sin FAB). Lo frecuente, a un toque: tono,
+          letra y vista y afinador; la pantalla completa está en la cabecera
+          y el resto en «⋯». */}
+      <BottomBar
+        items={[
+          {
+            key: 'transpose',
+            icon: 'swap-vert',
+            label: songBadge
+              ? `Tono y cejilla · ${songBadge}`
+              : 'Tono y cejilla',
+            showLabel: !!songBadge,
+            onPress: handleOpenTransposeBottomSheet,
+          },
+          {
+            key: 'font',
+            icon: 'text-fields',
+            label: 'Letra y vista',
+            onPress: handleOpenFontPanel,
+          },
+          {
+            key: 'tuner',
+            icon: 'graphic-eq',
+            label: 'Afinador',
+            onPress: () => openCantoral('Tuner'),
+          },
+          {
+            key: 'more',
+            icon: showActionButtons ? 'close' : 'more-horiz',
+            label: showActionButtons
+              ? 'Cerrar opciones de la canción'
+              : 'Más opciones de la canción',
+            onPress: toggleMenu,
+          },
+        ]}
+      />
 
       <SongFontBottomSheet
         visible={showFontPanel}

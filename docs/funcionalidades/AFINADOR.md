@@ -36,7 +36,7 @@ pantalla normal con su flecha de volver.
 
 ```
 micrófono ──► FrameAnalyzer (pitchy) ──► PitchTracker ──► pantalla
-services/tuner/   utils/tuner/detectPitch   utils/tuner/pitchTracker   app/screens/TunerScreen
+services/tuner/   utils/tuner/detectPitch   utils/tuner/pitchTracker   screens/TunerScreen
                         hooks/useTuner.ts (ritmo, permisos, ciclo de vida)
 ```
 

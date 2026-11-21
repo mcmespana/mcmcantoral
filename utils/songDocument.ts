@@ -7,10 +7,10 @@
  * `npm run build:sheet-bundle` (entrada: `utils/songDocumentBundle.ts`).
  * Así lo que se maqueta en el admin es lo que se verá en el móvil.
  */
+import { SheetPalette, type SheetThemeId } from '@/constants/theme';
 import { formatDuration, parseDuration } from './songCategories';
 import { ChordProParser, Song } from 'chordsheetjs';
 import { logger } from '@/utils/logger';
-import { UIColors } from '@/constants/colors';
 import { convertChord, Notation } from './chordNotation';
 import { transposeKey } from './transposeKey';
 import { preprocessArrangements } from './arrangements';
@@ -36,6 +36,12 @@ export interface SongStyleState {
   fontSize: number;
   fontFamily: string;
   isDark: boolean;
+  /**
+   * Tema forzado del Atril (MCM Cantoral): `stage` = Escenario (negro real,
+   * directo en penumbra), `sun` = Sol (contraste máximo). `null`/ausente =
+   * claro u oscuro según `isDark`.
+   */
+  sheetTheme?: 'stage' | 'sun' | null;
   chordsVisible: boolean;
   arrangementsVisible: boolean;
   compact: boolean;
@@ -196,22 +202,23 @@ export function buildErrorHtml(
   isDark: boolean,
   fontFamily: string,
 ): string {
-  // Paleta cálida alrededor del rojo MCM (#E15C62) para que el error se sienta
-  // amable y no alarmante.
-  const pageBg = isDark ? '#1F1F21' : '#FBF7F6';
-  const cardBg = isDark ? '#2C2C2E' : '#FFFFFF';
-  const cardBorder = isDark ? 'rgba(255,255,255,0.06)' : 'rgba(225,92,98,0.10)';
+  // Paleta cálida (el ámbar de la vela) para que el error se sienta amable y
+  // no alarmante.
+  const p = SheetPalette[isDark ? 'dark' : 'light'];
+  const pageBg = p.bg;
+  const cardBg = isDark ? '#1B1915' : '#FFFFFF';
+  const cardBorder = isDark ? 'rgba(255,190,46,0.10)' : 'rgba(154,91,0,0.12)';
   const cardShadow = isDark
     ? '0 18px 50px rgba(0,0,0,0.45)'
-    : '0 18px 50px rgba(225,92,98,0.12)';
-  const text = isDark ? '#F2F2F4' : '#1F2430';
-  const subtle = isDark ? '#9A9AA0' : '#9A8F8F';
-  const accent = isDark ? '#FF8A80' : '#E15C62';
-  const accentSoft = isDark ? '#FFB3AC' : '#EE7E83';
-  const haloGlow = isDark ? 'rgba(255,138,128,0.22)' : 'rgba(225,92,98,0.16)';
-  const codeBg = isDark ? 'rgba(255,138,128,0.08)' : 'rgba(225,92,98,0.05)';
-  const codeBorder = isDark ? 'rgba(255,138,128,0.24)' : 'rgba(225,92,98,0.18)';
-  const codeText = isDark ? '#E8E8EC' : '#43484F';
+    : '0 18px 50px rgba(154,91,0,0.12)';
+  const text = p.title;
+  const subtle = p.muted;
+  const accent = p.chord;
+  const accentSoft = isDark ? '#FFD98A' : '#C98A1A';
+  const haloGlow = isDark ? 'rgba(255,190,46,0.22)' : 'rgba(255,190,46,0.18)';
+  const codeBg = isDark ? 'rgba(255,190,46,0.08)' : 'rgba(255,190,46,0.08)';
+  const codeBorder = isDark ? 'rgba(255,190,46,0.24)' : 'rgba(154,91,0,0.18)';
+  const codeText = p.text;
 
   const lineInfo =
     error?.line != null
@@ -450,25 +457,50 @@ export function buildErrorHtml(
   </body></html>`;
 }
 
-const themeVarsFor = (isDark: boolean) => ({
-  bodyBg: isDark ? '#2C2C2E' : '#ffffff',
-  bodyText: isDark ? '#E5E5EA' : '#212529',
-  titleText: isDark ? '#F5F5F7' : '#1C1C1E',
-  authorText: isDark ? '#98989D' : '#8E8E93',
-  chordColor: isDark ? '#64B5F6' : UIColors.chordBlue,
-  commentText: isDark ? '#98989D' : UIColors.chordSecondaryText,
-  badgeBg: isDark ? 'rgba(244, 193, 30, 0.12)' : 'rgba(37, 56, 131, 0.06)',
-  badgeText: isDark ? '#F4C11E' : '#253883',
-  badgeAccentBg: isDark ? 'rgba(225, 92, 98, 0.15)' : 'rgba(225, 92, 98, 0.08)',
-  badgeAccentText: isDark ? '#FF8A80' : '#C62828',
-  fsBgTop: isDark ? 'rgba(44,44,46,0.97)' : 'rgba(255,255,255,0.97)',
-  fsBgMid: isDark ? 'rgba(44,44,46,0.88)' : 'rgba(255,255,255,0.88)',
-});
+const themeVarsFor = (isDark: boolean, forced?: 'stage' | 'sun' | null) => {
+  const p = SheetPalette[forced ?? (isDark ? 'dark' : 'light')];
+  return {
+    bodyBg: p.bg,
+    bodyText: p.text,
+    titleText: p.title,
+    authorText: p.muted,
+    chordColor: p.chord,
+    commentText: p.muted,
+    badgeBg: p.badgeBg,
+    badgeText: p.badgeText,
+    badgeAccentBg: p.badgeBg,
+    badgeAccentText: p.arrangement,
+    fsBgTop: hexToRgba(p.bg, 0.97),
+    fsBgMid: hexToRgba(p.bg, 0.88),
+  };
+};
+
+/** `#RRGGBB` + opacidad → `rgba(…)` (para los degradados de pantalla completa). */
+function hexToRgba(hex: string, alpha: number): string {
+  const h = hex.replace('#', '');
+  const n = parseInt(h.length === 3 ? h.replace(/(.)/g, '$1$1') : h, 16);
+  return `rgba(${(n >> 16) & 255},${(n >> 8) & 255},${n & 255},${alpha})`;
+}
+
+/** CSS de un tema de la hoja, para `body.<clase>` (los cambia el puente en vivo). */
+function sheetThemeCss(selector: string, id: SheetThemeId): string {
+  const p = SheetPalette[id];
+  return `
+        ${selector} { background-color: ${p.bg}; color: ${p.text}; }
+        ${selector} h1 { color: ${p.title}; }
+        ${selector} .song-meta-author { color: ${p.muted}; }
+        ${selector} .arrangement { color: ${p.arrangement}; }
+        ${selector} .meta-badge { background: ${p.badgeBg}; color: ${p.badgeText}; }
+        ${selector} .meta-badge-accent { background: ${p.badgeBg}; color: ${p.arrangement}; }`;
+}
 
 /** Clases del `<body>` al pintar: las mismas que luego cambia el puente. */
 export const bodyClasses = (s: SongStyleState): string =>
   [
-    s.isDark && 'theme-dark',
+    (s.sheetTheme === 'stage' || (s.isDark && s.sheetTheme !== 'sun')) &&
+      'theme-dark',
+    s.sheetTheme === 'stage' && 'sheet-stage',
+    s.sheetTheme === 'sun' && 'sheet-sun',
     !s.chordsVisible && 'chords-hidden',
     !s.arrangementsVisible && 'arr-hidden',
     s.compact && 'compact',
@@ -555,7 +587,7 @@ export function buildSongDocument(
     systemFontScale,
   } = opts;
   const s = opts.style;
-  const c = themeVarsFor(s.isDark);
+  const c = themeVarsFor(s.isDark, s.sheetTheme);
 
   const songForFormatting: Song =
     currentTranspose !== 0 ? baseSong.transpose(currentTranspose) : baseSong;
@@ -660,8 +692,14 @@ export function buildSongDocument(
         if (typeof s.fontFamily === 'string') r.setProperty('--song-font-family', s.fontFamily);
         if (typeof s.topPadding === 'number') r.setProperty('--song-pad-top', s.topPadding + 'px');
         if (typeof s.bottomPadding === 'number') r.setProperty('--song-pad-bottom', s.bottomPadding + 'px');
-        if (typeof s.isDark === 'boolean') {
-          document.body.classList.toggle('theme-dark', s.isDark);
+        if (typeof s.isDark === 'boolean' || 'sheetTheme' in s) {
+          var forced = s.sheetTheme || null;
+          var dark = typeof s.isDark === 'boolean'
+            ? s.isDark
+            : document.body.classList.contains('theme-dark');
+          document.body.classList.toggle('theme-dark', forced === 'stage' || (dark && forced !== 'sun'));
+          document.body.classList.toggle('sheet-stage', forced === 'stage');
+          document.body.classList.toggle('sheet-sun', forced === 'sun');
         }
         if (typeof s.chordsVisible === 'boolean') {
           document.body.classList.toggle('chords-hidden', !s.chordsVisible);
@@ -818,36 +856,10 @@ export function buildSongDocument(
         /* Dark theme — toggled live via .theme-dark on <body>. The default
            above is whichever the page was rendered with; flipping the
            class swaps the palette without reload. */
-        body.theme-dark {
-          background-color: #2C2C2E;
-          color: #E5E5EA;
-        }
-        body.theme-dark h1 { color: #F5F5F7; }
-        body.theme-dark .song-meta-author { color: #98989D; }
-        body.theme-dark .arrangement { color: #FF8A80; }
-        body.theme-dark .meta-badge {
-          background: rgba(244, 193, 30, 0.12);
-          color: #F4C11E;
-        }
-        body.theme-dark .meta-badge-accent {
-          background: rgba(225, 92, 98, 0.15);
-          color: #FF8A80;
-        }
-        body:not(.theme-dark) {
-          background-color: #ffffff;
-          color: #212529;
-        }
-        body:not(.theme-dark) h1 { color: #1C1C1E; }
-        body:not(.theme-dark) .song-meta-author { color: #8E8E93; }
-        body:not(.theme-dark) .arrangement { color: #E15C62; }
-        body:not(.theme-dark) .meta-badge {
-          background: rgba(37, 56, 131, 0.06);
-          color: #253883;
-        }
-        body:not(.theme-dark) .meta-badge-accent {
-          background: rgba(225, 92, 98, 0.08);
-          color: #C62828;
-        }
+${sheetThemeCss('body.theme-dark', 'dark')}
+${sheetThemeCss('body:not(.theme-dark)', 'light')}
+${sheetThemeCss('body.sheet-stage', 'stage')}
+${sheetThemeCss('body.sheet-sun', 'sun')}
         /* Anotaciones de arreglo {arr:} — sutiles y alineadas a la derecha
            como rasgo distintivo. Toggle en vivo con .arr-hidden. */
         .arrangement {

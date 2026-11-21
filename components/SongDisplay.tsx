@@ -1,3 +1,4 @@
+import { Palette, SheetPalette } from '@/constants/theme';
 import React, { useEffect, useRef, useState } from 'react';
 import { View, StyleSheet, Platform } from 'react-native';
 import { WebView } from 'react-native-webview';
@@ -103,6 +104,11 @@ const SongDisplay: React.FC<SongDisplayProps> = ({
   // Tracks whether the document is loaded so we can flush queued style updates.
   const readyRef = useRef(false);
   // Latest style we tried to apply (to re-flush on (re)load).
+  // Fondo de detrás de la hoja: el de su tema (Escenario y Sol mandan sobre
+  // el de la app), para que no asome otro color al hacer scroll.
+  const sheetBg = styleState?.sheetTheme
+    ? SheetPalette[styleState.sheetTheme].bg
+    : themeColors(isDark).background;
   const pendingStyleRef = useRef<SongStyleState | undefined>(styleState);
   pendingStyleRef.current = styleState;
   // Latest onMessage in a ref so the web listener stays stable.
@@ -238,7 +244,7 @@ const SongDisplay: React.FC<SongDisplayProps> = ({
           wideRadiusStyle,
         ]}
       >
-        <Spinner size="lg" color="#f4c11e" />
+        <Spinner size="lg" color={Palette.dark.accent} />
       </View>
     );
   }
@@ -282,7 +288,7 @@ const SongDisplay: React.FC<SongDisplayProps> = ({
             height: '100%',
             border: 'none',
             display: 'block',
-            backgroundColor: themeColors(isDark).background,
+            backgroundColor: sheetBg,
           }}
           title="Letra de la canción"
         />
@@ -298,7 +304,7 @@ const SongDisplay: React.FC<SongDisplayProps> = ({
               styles.fullBleedContainer,
               // Mismo color que el bodyBg del HTML (useSongProcessor) → un único
               // fondo continuo bajo el header transparente.
-              { backgroundColor: themeColors(isDark).background },
+              { backgroundColor: sheetBg },
             ]
           : [
               styles.cardContainer,
@@ -321,10 +327,7 @@ const SongDisplay: React.FC<SongDisplayProps> = ({
         // La escala de letra del sistema la pone la hoja en su CSS (igual en iOS
         // y Android); sin esto Android la aplicaba OTRA vez por su cuenta.
         textZoom={100}
-        style={[
-          styles.webView,
-          fullBleed && { backgroundColor: themeColors(isDark).background },
-        ]}
+        style={[styles.webView, fullBleed && { backgroundColor: sheetBg }]}
         showsVerticalScrollIndicator={false}
         {...(useInset
           ? {
@@ -390,7 +393,7 @@ const styles = StyleSheet.create({
     }),
   },
   cardContainerDark: {
-    backgroundColor: '#2C2C2E',
+    backgroundColor: Palette.dark.background,
     ...Platform.select({
       web: {
         boxShadow: '0 1px 4px rgba(0,0,0,0.2)',

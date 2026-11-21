@@ -4,10 +4,11 @@
 > clasificados abajo uno a uno. La mayoría son falsos positivos estructurales:
 > perseguirlos empeora el código.
 >
-> Estado: **35 warnings, 0 errores** (2026-11-17, `npm run lint`). Es el
-> **techo**: es lo que hay y no debe subir. Historial: 111 (2026-08-15) → 51 →
-> 39 (2026-08-19, la migración de `.value` a `.get()`/`.set()` en los shared
-> values de Reanimated se llevó los falsos positivos) → 38 → 36 → 35 (2026-11-17).
+> Estado en MCM Cantoral: **14 warnings, 0 errores** (2026-11-22, `npm run
+> lint`). Es el **techo**: es lo que hay y no debe subir. Historial (MCM App):
+> 111 (2026-08-15) → 51 → 39 → 38 → 36 → 35 (2026-11-17); en el fork, 19 tras
+> la poda y 14 al quitar el FAB de la canción. Las fichas de abajo que hablan
+> de pantallas que ya no existen (Comunica, Contigo…) son historia.
 
 ## Contexto
 
@@ -27,7 +28,7 @@ qué se queda.
 npm run lint 2>&1 | tail -3                       # total
 # Reparto por regla (el grep sobre la salida de texto cuenta también las pistas
 # de cada mensaje; es más fiable el JSON, limitado a lo que lintea `expo lint`):
-npx eslint app components -f json | node -e "const c={};JSON.parse(require('fs').readFileSync(0)).forEach(f=>f.messages.forEach(m=>c[m.ruleId]=(c[m.ruleId]||0)+1));console.log(c)"
+npx eslint app screens components -f json | node -e "const c={};JSON.parse(require('fs').readFileSync(0)).forEach(f=>f.messages.forEach(m=>c[m.ruleId]=(c[m.ruleId]||0)+1));console.log(c)"
 ```
 
 > `expo lint` **solo recorre `app/` y `components/`**. `hooks/`, `contexts/` y
@@ -55,7 +56,7 @@ npx eslint app components -f json | node -e "const c={};JSON.parse(require('fs')
 Antes eran 12 falsos positivos de Reanimated (`sharedValue.value = withTiming(...)`).
 La migración a `.get()`/`.set()` los eliminó. Quedan cinco:
 `components/contigo/BreathingPhase.tsx`, `components/tabs/useTabScroll.ts` (2),
-`components/NotificationsBottomSheet.tsx` y `app/screens/SelectedSongsScreen.tsx`
+`components/NotificationsBottomSheet.tsx` y `screens/SelectedSongsScreen.tsx`
 ("usada antes de declararse" y escrituras sobre refs). Ninguno ha dado problema
 observable y todos están en código con tests. **Si tocas uno de esos ficheros
 por otro motivo, míralo de paso**; no merecen una sesión dedicada.
@@ -90,7 +91,7 @@ nosotros.
 ## 3. `max-lines` (3) — exentos por decisión
 
 `app/onboarding.tsx`, `app/(tabs)/index.tsx` y
-`app/screens/SelectedSongsScreen.tsx` (los tres por encima de 1.000 líneas).
+`screens/SelectedSongsScreen.tsx` (los tres por encima de 1.000 líneas).
 
 El usuario decidió el 2026-08-15 que **los gigantes se quedan gigantes**: quien
 edita este código es siempre una IA, que lee el archivo entero de una vez, y
@@ -110,7 +111,7 @@ apuntarlo aquí.
 
 ## 4. Código congelado (3) — no se toca por definición
 
-`app/screens/WordleScreen.tsx` (2 × `set-state-in-effect`, 1 × `purity`).
+`screens/WordleScreen.tsx` (2 × `set-state-in-effect`, 1 × `purity`).
 El Wordle está congelado a propósito como código de referencia (ver
 `CLAUDE.md`): no se refactoriza, no se le añade nada.
 
@@ -125,7 +126,7 @@ al cuerpo del componente lo arregla gratis. No merece un cambio dedicado.
 
 `components/AddToHomeBanner.tsx`, `components/BottomSheet.tsx`,
 `components/playlist/ChoirSheet.tsx`, `app/notifications.tsx`,
-`app/screens/SelectedSongsScreen.tsx` (y la memoización de `notifications.tsx` y
+`screens/SelectedSongsScreen.tsx` (y la memoización de `notifications.tsx` y
 `NotificationsBottomSheet.tsx`). Son efectos que sincronizan con algo externo
 (abrir/cerrar una hoja, leer `localStorage`); funcionan. **Si tocas uno de esos
 ficheros por otro motivo, míralo de paso.**

@@ -136,10 +136,10 @@ jest.mock('expo-router/react-navigation', () => {
 // abre y las que han dado guerra. Las rutas de `app/cancionero/*` son navegadores
 // de expo-router, no pantallas, y montarlas aquí probaría el router y no el
 // código de la casa.
-import CategoriesScreen from '@/app/screens/CategoriesScreen';
-import SelectedSongsScreen from '@/app/screens/SelectedSongsScreen';
-import SongListScreen from '@/app/screens/SongListScreen';
-import SundaySongsScreen from '@/app/screens/SundaySongsScreen';
+import CategoriesScreen from '@/screens/CategoriesScreen';
+import SelectedSongsScreen from '@/screens/SelectedSongsScreen';
+import SongListScreen from '@/screens/SongListScreen';
+import SundaySongsScreen from '@/screens/SundaySongsScreen';
 
 const INITIAL_METRICS = {
   frame: { x: 0, y: 0, width: 390, height: 844 },

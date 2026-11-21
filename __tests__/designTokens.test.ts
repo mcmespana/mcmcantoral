@@ -1,30 +1,28 @@
 /**
- * Invariantes del sistema de diseño.
+ * Guardarraíles del sistema de diseño de MCM Cantoral (`design.md`,
+ * `constants/theme.ts`). Lo que se blinda:
  *
- * Estas reglas están escritas en `design.md` (raíz del monorepo). Un documento
- * no impide que nadie las rompa; este test sí. Cubre lo que es mecánicamente
- * comprobable:
- *
- *  1. `global.css` (tema de HeroUI) usa los MISMOS valores que
- *     `constants/colors.ts`. Es la incoherencia que ya mordió: dos capas con
- *     los mismos nombres y distintos colores.
- *  2. Los tokens no se duplican entre familias con nombres distintos.
- *  3. La escala de sombras es monótona: el nombre dice la intensidad.
+ *  1. `global.css` (tema de HeroUI en web) y `constants/theme.ts` dicen lo
+ *     mismo: dos capas con los mismos nombres y distintos colores ya mordió.
+ *  2. Contraste: interfaz ≥ 4,5:1; la letra del Atril ≥ 7:1 (AAA) en los
+ *     cuatro temas, también al sol y en el escenario (`03` §6).
+ *  3. Los acordes se distinguen también SIN color (peso), por daltonismo.
+ *  4. Escalas ordenadas (espaciado, radios, sombras).
  *
  * Si añades un token, añade aquí su comprobación.
  */
 import fs from 'fs';
 import path from 'path';
 
-import brand, { Colors, TabHeaderColors, UIColors } from '@/constants/colors';
+import { Colors } from '@/constants/colors';
+import { Palette, SheetPalette } from '@/constants/theme';
 import { radii, shadows } from '@/constants/uiStyles';
-import { onColor, readableOn } from '@/utils/colorUtils';
+import { SHEET_CSS } from '@/utils/songSheetLayout';
+import { onColor } from '@/utils/colorUtils';
 import spacing from '@/constants/spacing';
 
-const cssPath = path.join(__dirname, '..', 'global.css');
-const css = fs.readFileSync(cssPath, 'utf8');
+const css = fs.readFileSync(path.join(__dirname, '..', 'global.css'), 'utf8');
 
-/** `#fff` y `#ffffff` son el mismo color; el test no debe opinar de la forma. */
 function normalizeHex(value: string): string {
   const v = value.trim().toLowerCase();
   return /^#[0-9a-f]{3}$/.test(v)
@@ -32,72 +30,110 @@ function normalizeHex(value: string): string {
     : v;
 }
 
-/** Lee `--nombre: valor;` del primer bloque (`:root`, tema claro) o del oscuro. */
-function cssVar(name: string, theme: 'light' | 'dark'): string {
+function cssVar(name: string, mode: 'light' | 'dark'): string {
   const block =
-    theme === 'light'
+    mode === 'light'
       ? css.slice(0, css.indexOf(":root[data-theme='dark']"))
       : css.slice(css.indexOf(":root[data-theme='dark']"));
   const match = block.match(new RegExp(`--${name}:\\s*([^;]+);`));
-  if (!match) throw new Error(`No existe --${name} en global.css (${theme})`);
+  if (!match) throw new Error(`No existe --${name} en global.css (${mode})`);
   return normalizeHex(match[1]);
 }
 
-describe('global.css deriva de constants/colors.ts', () => {
-  // El nombre de la variable es de HeroUI; el valor es nuestro. Ver la
-  // cabecera de `global.css`.
-  const mapping: [string, string][] = [
-    ['accent', brand.primary],
-    ['danger', brand.accent],
-    ['success', brand.green],
-    ['warning', brand.yellow],
-    ['border', brand.border],
-    ['focus', brand.primary],
-    ['link', brand.primary],
-    ['background', Colors.light.background],
-    ['foreground', Colors.light.text],
-    ['surface', Colors.light.card],
-  ];
+describe('global.css deriva de constants/theme.ts', () => {
+  for (const mode of ['light', 'dark'] as const) {
+    const p = Palette[mode];
+    const mapping: [string, string][] = [
+      ['background', p.background],
+      ['foreground', p.text],
+      ['surface', p.card],
+      ['muted', p.textMuted],
+      ['accent', p.accent],
+      ['accent-foreground', p.onAccent],
+      ['focus', p.accent],
+      ['link', p.accentText],
+      ['danger', p.danger],
+      ['success', p.success],
+      ['separator', p.separator],
+    ];
+    it.each(mapping)(`${mode}: --%s cuadra`, (name, value) => {
+      expect(cssVar(name, mode)).toBe(normalizeHex(value));
+    });
+  }
 
-  it.each(mapping)('--%s vale lo que dice el token de marca', (name, value) => {
-    expect(cssVar(name, 'light')).toBe(normalizeHex(value));
-  });
-
-  const darkMapping: [string, string][] = [
-    ['background', Colors.dark.background],
-    ['foreground', Colors.dark.text],
-    ['surface', Colors.dark.background],
-    ['muted', Colors.dark.icon],
-    ['focus', brand.secondary],
-    ['link', brand.secondary],
-  ];
-
-  it.each(darkMapping)('modo oscuro: --%s cuadra', (name, value) => {
-    expect(cssVar(name, 'dark')).toBe(normalizeHex(value));
+  it('constants/colors.ts sale de theme.ts (no es otra paleta)', () => {
+    expect(Colors.dark.background).toBe(Palette.dark.background);
+    expect(Colors.light.link).toBe(Palette.light.accentText);
   });
 });
 
-describe('la paleta de marca no se pisa a sí misma', () => {
-  it('no hay dos tokens de marca con el mismo hex y distinto nombre', () => {
-    // `background` y `white` comparten `#ffffff` a propósito: uno es rol de
-    // superficie y el otro es el color puro.
-    const exempt = new Set(['background', 'white']);
-    const seen = new Map<string, string>();
-    for (const [name, value] of Object.entries(brand)) {
-      if (exempt.has(name)) continue;
-      const hex = normalizeHex(String(value));
-      expect(seen.has(hex)).toBe(false);
-      seen.set(hex, name);
-    }
+function luminance(hex: string): number {
+  const h = hex.replace('#', '');
+  const [r, g, b] = [0, 2, 4]
+    .map((i) => parseInt(h.slice(i, i + 2), 16) / 255)
+    .map((c) => (c <= 0.03928 ? c / 12.92 : ((c + 0.055) / 1.055) ** 2.4));
+  return 0.2126 * r + 0.7152 * g + 0.0722 * b;
+}
+
+function contrast(a: string, b: string): number {
+  const [hi, lo] = [luminance(a), luminance(b)].sort((x, y) => y - x);
+  return (hi + 0.05) / (lo + 0.05);
+}
+
+describe('contraste de la interfaz (≥ 4,5:1)', () => {
+  for (const mode of ['light', 'dark'] as const) {
+    const p = Palette[mode];
+    const cases: [string, string, string][] = [
+      ['text / fondo', p.text, p.background],
+      ['textSecondary / fondo', p.textSecondary, p.background],
+      ['textMuted / fondo', p.textMuted, p.background],
+      ['textMuted / card', p.textMuted, p.card],
+      ['textMuted / hundido', p.textMuted, p.backgroundSunken],
+      ['accentText / fondo', p.accentText, p.background],
+      ['accentText / card', p.accentText, p.card],
+      ['onAccent / accent', p.onAccent, p.accent],
+    ];
+    it.each(cases)(`${mode}: %s`, (_l, fg, bg) => {
+      expect(contrast(fg, bg)).toBeGreaterThanOrEqual(4.5);
+    });
+  }
+
+  it('el ámbar como relleno NO vale como texto sobre claro (por eso accentText)', () => {
+    expect(contrast(Palette.light.accent, Palette.light.background)).toBeLessThan(
+      4.5,
+    );
   });
 
-  it('los nombres de marca son cromáticos, no de estado', () => {
-    // Un token de marca que se llame como un estado vuelve a abrir la trampa
-    // de `success`/`warning`/`danger`: se acaba usando por su nombre y pintando
-    // lo que no es. El estado vive en ToastColors/SwipeColors.
-    for (const forbidden of ['success', 'warning', 'danger', 'error']) {
-      expect(Object.keys(brand)).not.toContain(forbidden);
-    }
+  it('onColor elige una tinta legible sobre el ámbar', () => {
+    expect(
+      contrast(onColor(Palette.light.accent), Palette.light.accent),
+    ).toBeGreaterThanOrEqual(4.5);
+  });
+});
+
+describe('Atril: la letra ≥ 7:1 (AAA) en los cuatro temas', () => {
+  it.each(Object.keys(SheetPalette) as (keyof typeof SheetPalette)[])(
+    '%s',
+    (id) => {
+      const p = SheetPalette[id];
+      expect(contrast(p.text, p.bg)).toBeGreaterThanOrEqual(7);
+      expect(contrast(p.title, p.bg)).toBeGreaterThanOrEqual(7);
+      // Acordes y etiquetas se leen (texto normal, 4,5:1).
+      expect(contrast(p.chord, p.bg)).toBeGreaterThanOrEqual(4.5);
+      expect(contrast(p.label, p.bg)).toBeGreaterThanOrEqual(4.5);
+      expect(contrast(p.muted, p.bg)).toBeGreaterThanOrEqual(4.5);
+    },
+  );
+
+  it('Escenario es negro real (OLED) y Sol, blanco y negro', () => {
+    expect(SheetPalette.stage.bg).toBe('#000000');
+    expect(SheetPalette.sun.bg).toBe('#FFFFFF');
+    expect(SheetPalette.sun.text).toBe('#000000');
+  });
+
+  it('los acordes se distinguen también sin color: van en negrita', () => {
+    const rule = SHEET_CSS.match(/\n\s*\.c \{[^}]*\}/)?.[0] ?? '';
+    expect(rule).toMatch(/font-weight:\s*700/);
   });
 });
 
@@ -123,148 +159,14 @@ describe('escalas ordenadas', () => {
   });
 
   it('el nombre de la sombra dice su intensidad', () => {
-    // `shadows.lg` (0.3) era MÁS fuerte que `shadows.xl` (0.18): quien pedía
-    // "la más marcada" se equivocaba de token. Ahora las sombras se llaman por
-    // su función y este test impide que el orden se vuelva a romper.
     const elevation = (s: unknown) =>
       (s as { elevation?: number }).elevation ?? 0;
-    const ladder = [
+    const values = [
       shadows.card,
       shadows.raised,
       shadows.hero,
       shadows.overlay,
-    ];
-    const values = ladder.map(elevation);
+    ].map(elevation);
     expect(values).toEqual([...values].sort((a, b) => a - b));
-  });
-});
-
-/**
- * Contraste mínimo de los roles de texto.
- *
- * Esto no es celo normativo: el gris terciario estaba en 2,9:1 sobre el gris de
- * los campos y en 2,2:1 en la leyenda del cantoral —la pantalla más usada de la
- * app— y ahí es donde la gente lee, a menudo a contraluz. `design.md` §1 pone
- * la legibilidad la primera y dice que no se sacrifica; esto lo hace cumplir.
- *
- * Ojo con "arreglar" un par claro/oscuro comparando sus dos hex entre sí: son
- * deliberadamente distintos porque cada uno se mide contra SU fondo. Lo que
- * importa es la razón de contraste, que es lo que comprueba este test.
- */
-function relativeLuminance(hex: string): number {
-  const h = hex.replace('#', '');
-  const channels = [0, 2, 4].map((i) => parseInt(h.slice(i, i + 2), 16) / 255);
-  const [r, g, b] = channels.map((c) =>
-    c <= 0.03928 ? c / 12.92 : ((c + 0.055) / 1.055) ** 2.4,
-  );
-  return 0.2126 * r + 0.7152 * g + 0.0722 * b;
-}
-
-function contrast(a: string, b: string): number {
-  const [hi, lo] = [relativeLuminance(a), relativeLuminance(b)].sort(
-    (x, y) => y - x,
-  );
-  return (hi + 0.05) / (lo + 0.05);
-}
-
-describe('contraste de los roles de texto', () => {
-  // 4.5:1 es el mínimo de texto normal. Los roles de texto se miden contra las
-  // superficies sobre las que se pintan de verdad.
-  const cases: [string, string, string][] = [
-    ['claro · text sobre fondo', Colors.light.text, Colors.light.background],
-    [
-      'claro · textSecondary sobre fondo',
-      Colors.light.textSecondary,
-      Colors.light.background,
-    ],
-    [
-      'claro · textMuted sobre fondo',
-      Colors.light.textMuted,
-      Colors.light.background,
-    ],
-    [
-      'claro · textMuted sobre hundido',
-      Colors.light.textMuted,
-      Colors.light.backgroundSunken,
-    ],
-    ['claro · textMuted sobre card', Colors.light.textMuted, Colors.light.card],
-    ['claro · link sobre fondo', Colors.light.link, Colors.light.background],
-    ['oscuro · text sobre fondo', Colors.dark.text, Colors.dark.background],
-    [
-      'oscuro · textSecondary sobre fondo',
-      Colors.dark.textSecondary,
-      Colors.dark.background,
-    ],
-    [
-      'oscuro · textMuted sobre hundido',
-      Colors.dark.textMuted,
-      Colors.dark.backgroundSunken,
-    ],
-    ['oscuro · link sobre fondo', Colors.dark.link, Colors.dark.background],
-  ];
-
-  it.each(cases)('%s llega a 4.5:1', (_label, fg, bg) => {
-    expect(contrast(fg, bg)).toBeGreaterThanOrEqual(4.5);
-  });
-
-  it('el terciario oscuro sobre el fondo queda por encima de 4:1', () => {
-    // 4,27:1 — la leyenda del cantoral en modo oscuro, que se pinta sobre el
-    // fondo. Por debajo de 4,5 por poco, y muy por encima del 2,2 que tenía.
-    // Subirlo más lo convertiría en un secundario y perdería el papel de
-    // "leyenda tenue".
-    expect(
-      contrast(Colors.dark.textMuted, Colors.dark.background),
-    ).toBeGreaterThan(4);
-  });
-
-  it('onColor da una tinta legible sobre todos los acentos que se usan', () => {
-    // `SegmentedControl` recibe el acento por props (celeste de marca en el
-    // calendario, azul en Ajustes, dorado en el lector de Contigo) y la tinta
-    // del segmento activo la decide `onColor`. Antes era `#FFFFFF` fijo: con
-    // el celeste —que es el DEFECTO— daba 2,64:1 y con el dorado 2,80:1.
-    // Este test cubre el contrato: para cualquier acento de la casa, la tinta
-    // elegida se lee.
-    const acentos = [
-      brand.info,
-      brand.primary,
-      brand.accent,
-      brand.green,
-      brand.purple,
-    ];
-    for (const acento of acentos) {
-      expect(contrast(onColor(acento), acento)).toBeGreaterThanOrEqual(4.5);
-    }
-  });
-
-  it('la tinta del CTA se lee sobre cualquier relleno de la casa', () => {
-    // `AppPrimaryButton` recibe el color por props: el azul de acción, el
-    // acento de Contigo, el tint del evento en la encuesta… Antes el texto era
-    // `#fff` fijo, que sobre el amarillo del Vaticano (#FCD200) da 1,25:1.
-    // Ahora se queda en blanco solo si llega al 3:1 que pide un texto de ese
-    // tamaño y peso, y si no, lo decide `onColor`. Este test recorre los
-    // rellenos que se usan de verdad.
-    const rellenos = [
-      UIColors.iosBlue,
-      brand.primary,
-      brand.info,
-      brand.accent,
-      brand.yellow,
-      brand.green,
-      brand.purple,
-    ];
-    for (const relleno of rellenos) {
-      const tinta =
-        contrast('#FFFFFF', relleno) >= 3 ? '#FFFFFF' : onColor(relleno);
-      expect(contrast(tinta, relleno)).toBeGreaterThanOrEqual(3);
-    }
-  });
-
-  it('avisa de que el terciario NO vale sobre una card oscura', () => {
-    // 3,48:1. Hoy no pasa nada porque en oscuro las cards se pintan con el
-    // color de FONDO (ver PLAN_DISENO §H8): si algún día se les da su color
-    // propio (#3A3A3C), este texto se queda corto y hay que subirlo a
-    // `textSecondary`. Este test está aquí para que eso salte entonces, no
-    // para que alguien lo "arregle" ahora.
-    expect(contrast(Colors.dark.textMuted, Colors.dark.card)).toBeLessThan(4.5);
   });
 });
