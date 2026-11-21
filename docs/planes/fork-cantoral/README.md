@@ -1,18 +1,25 @@
 # Plan — MCM Cantoral (fork de MCM App solo con el cantoral)
 
 > **Estado:** 📝 plan cerrado el 21/11/2026 con **todas las decisiones
-> contestadas** (§4) y mergeado en `main` de `mcmapp`. **Sin empezar.**
-> **Maqueta A/B hecha** (21/11): <https://claude.ai/artifact/TBGfc98GLHTma1vhY1wqHa>
-> — elegir dirección e Izan cierra el estilo (`03` §8). Siguiente: **el repo
-> `mcmespana/mcmcantoral`** (copia con historia, no fork de GitHub: `01` §0). Los bugs del cantoral de MCM App
-> (§3, 4-5, y los dos menores) **ya están arreglados en `main`** (21/11);
-> la Fase 1 de Navidad sigue sin hacer (`mcm-app/TODO.md`).
+> contestadas** (§4). **Repo creado el 21/11/2026:** este es
+> `mcmespana/mcmcantoral`, copia con toda la historia de `mcmapp`
+> (`main` @ `d4338986`); `01` §0 hecho salvo dar acceso a Izan
+> (ver abajo). **Siguiente: Fase 0** (`01`), empezando por el spike de wifi
+> local. **Maqueta A/B hecha** (21/11):
+> <https://claude.ai/artifact/TBGfc98GLHTma1vhY1wqHa> — elegir dirección e
+> Izan cierra el estilo (`03` §8). Los bugs del cantoral de MCM App (§3, 4-5,
+> y los dos menores) **ya están arreglados en `main`** (21/11); la Fase 1 de
+> Navidad sigue sin hacer (`mcm-app/TODO.md`).
+>
+> **Pendiente del usuario antes de la Fase 0** (`01` §0.3-§0.4): añadir a
+> Izan como colaborador del repo (la app de GitHub de Claude ya llega a
+> `mcmcantoral`); tener a mano Expo, Apple Developer y Play Console.
+>
 > **Respuestas originales:** página
 > <https://claude.ai/artifact/KDnnYJnwrYgxQB5zSPcakn> (colección `decisiones`).
-> **Dónde vivirá:** al crear el fork, esta carpeta se copia entera a
-> `docs/planes/` del repo nuevo y allí sigue viva. En `mcmapp` se queda como
-> registro de por qué existe el fork y del **Paquete MCM App** (§5): lo que
-> hay que hacer **aquí**.
+> **Dónde vive:** **aquí** (`mcmcantoral`), y es la copia viva. La de
+> `mcmapp` se queda como registro de por qué existe el fork y del **Paquete
+> MCM App** (§5).
 
 ---
 

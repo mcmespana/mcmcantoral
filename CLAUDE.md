@@ -1,3 +1,43 @@
+# CLAUDE.md — MCM Cantoral (repo recién copiado de MCM App)
+
+> ## ⚠️ Lee esto primero
+>
+> Este repo es **`mcmespana/mcmcantoral`**: la futura app **MCM Cantoral**
+> (solo el cantoral, wifi local y modo Navidad para Villancicos Solidarios
+> del **19/12/2026**). Se creó el 21/11/2026 como **copia con toda la
+> historia** de `mcmespana/mcmapp` (`main` @ `d4338986`), no como fork de
+> GitHub.
+>
+> **Todavía no se ha ejecutado nada del plan**: todo lo que hay debajo de
+> este aviso (y el código, y `mcm-app/`) es aún MCM App tal cual. No
+> trabajes en este repo como si fuera MCM App.
+>
+> **Por dónde se empieza:**
+>
+> 1. [`docs/planes/fork-cantoral/README.md`](docs/planes/fork-cantoral/README.md)
+>    entero — qué es, decisiones ya contestadas (D-01…D-23), fases y
+>    calendario. Todo está decidido: no se re-pregunta.
+> 2. [`docs/planes/fork-cantoral/01-arranque-y-poda.md`](docs/planes/fork-cantoral/01-arranque-y-poda.md)
+>    — **Fase 0**. El §0 (crear el repo y empujar la historia) **ya está
+>    hecho**. Se empieza por el **spike de wifi local** (§2.10) y la
+>    identidad nueva (§2.1).
+> 3. [`docs/DIVERGENCIAS.md`](docs/DIVERGENCIAS.md) — ya creado con el sha
+>    de origen; se mantiene vivo desde aquí.
+>
+> **Ya hecho al crear el repo:** fuera `scraper-lecturas.yml` y
+> `deploy-firebase-rules.yml` (el scraper y las reglas de Firebase son de
+> `mcmapp`: dos repos desplegándolas se pisarían; `01` §2.9).
+>
+> **Para traer cambios de MCM App:** `git remote add upstream
+> https://github.com/mcmespana/mcmapp` (la historia es común, así que
+> `merge-base` y `cherry-pick` funcionan; tras mover la app a la raíz, con
+> parches: `docs/DIVERGENCIAS.md` §4).
+>
+> En la Fase 0 (§2.8 bis) este fichero se sustituye por un `CLAUDE.md`
+> único y corto de MCM Cantoral, y este aviso desaparece.
+
+---
+
 # CLAUDE.md — MCM App Monorepo
 
 > Archivo de orientación para agentes IA. El código de la app está en `mcm-app/`.
