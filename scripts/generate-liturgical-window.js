@@ -3,7 +3,7 @@
  * Recorta `assets/calendario-liturgico-completo.json` (318 KB, años
  * 2025-2100) a una ventana rodante de 5 años (año actual −1 … actual +3) y la
  * escribe en `assets/calendario-liturgico.json` — el fichero que SÍ importa
- * `components/contigo/LiturgicalBadge.tsx` (Metro lo inlinea en el bundle
+ * `utils/liturgicalDay.ts` (Metro lo inlinea en el bundle
  * JS; el `-completo` no tiene ningún import, así que no pesa nada).
  *
  * El año anterior se incluye porque en enero se consultan fechas de

@@ -19,8 +19,6 @@
     "constants/**/*.tsx",
     "hooks/**/*.ts",
     "hooks/**/*.tsx",
-    "notifications/**/*.ts",
-    "notifications/**/*.tsx",
     ".expo/types/**/*.ts",
     "expo-env.d.ts"
   ],

@@ -86,11 +86,6 @@ jobs:
       # Aptabase: idéntico razonamiento — si falta aquí, la primera OTA apaga
       # la analítica en toda la base instalada.
       EXPO_PUBLIC_APTABASE_KEY: ${{ secrets.EXPO_PUBLIC_APTABASE_KEY }}
-      # Área privada nativa de Comunica: el middleware de verdad (comunicaMiddleware).
-      # La MISMA URL que eas.json (preview y production) y ota-production.yml: una
-      # OTA sin ella apagaría el área en las builds que la llevan. Quién la ve lo
-      # decide el Laboratorio Alpha y `global.comunicaNativa` (utils/comunica/router.ts).
-      # Con datos inventados: el perfil `production-comunica-falso`.
     steps:
       - name: Checkout código
         uses: actions/checkout@v4

@@ -17,10 +17,10 @@ describe('matchCommand', () => {
   });
 
   it('busca en título, subtítulo y sinónimos, sin tildes', () => {
-    expect(matchCommand(byId('fotos'), 'galeria')).toBe(true);
-    expect(matchCommand(byId('mas'), 'MAS')).toBe(true);
+    expect(matchCommand(byId('domingo'), 'liturgia')).toBe(true);
+    expect(matchCommand(byId('seleccion'), 'SELECCION')).toBe(true);
     expect(matchCommand(byId('cancionero'), 'acordes')).toBe(true);
-    expect(matchCommand(byId('calendario'), 'acordes')).toBe(false);
+    expect(matchCommand(byId('afinador'), 'acordes')).toBe(false);
   });
 });
 

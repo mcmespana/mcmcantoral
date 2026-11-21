@@ -4,11 +4,11 @@
 #
 # Requisitos que este workflow NO puede resolver por ti:
 #   - `EXPO_TOKEN` en los secrets del repo (ya existe: lo usan las OTA).
-#   - Credenciales de iOS GUARDADAS en EAS para los DOS targets: la app y la
-#     extensión `MCMNotificationService`. La primera vez EAS las crea
+#   - `EAS_PROJECT_ID`: el proyecto EAS NUEVO de MCM Cantoral (`eas init`).
+#   - Credenciales de iOS GUARDADAS en EAS. La primera vez EAS las crea
 #     preguntando por terminal, y en `--non-interactive` no puede: hay que
 #     hacer ese primer paso a mano (`npx eas-cli credentials -p ios`, o un
-#     primer build desde tu terminal). Ver docs/desarrollo/BUILD_AGOSTO_2026.md §2.5.
+#     primer build desde tu terminal).
 #   - Para `submit` en iOS: una API key de App Store Connect guardada en EAS
 #     (la crea `eas submit` la primera vez, o `eas credentials` → App Store
 #     Connect API Key). Sin ella el build termina bien pero el envío falla.
