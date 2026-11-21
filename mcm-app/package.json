@@ -1,10 +1,9 @@
 {
-  "name": "mcm-app",
+  "name": "mcm-cantoral",
   "main": "expo-router/entry",
   "version": "1.0.0",
   "scripts": {
     "build:sheet-bundle": "node scripts/build-sheet-bundle.js",
-    "build:panuelo": "node scripts/build-panuelo-viewer.js",
     "start": "expo start",
     "android": "expo run:android",
     "ios": "expo run:ios",
@@ -18,24 +17,16 @@
     "eas:build": "npx rimraf .agent .agents && cross-env GIT_CLONE_PROTECTION_ACTIVE=false npx eas-cli@latest build",
     "eas:build:ios": "npx rimraf .agent .agents && cross-env GIT_CLONE_PROTECTION_ACTIVE=false npx eas-cli@latest build -p ios",
     "eas:build:android": "npx rimraf .agent .agents && cross-env GIT_CLONE_PROTECTION_ACTIVE=false npx eas-cli@latest build -p android",
-    "icons:tabs": "node scripts/generate-tab-icons.js",
-    "icons:alt": "node scripts/generate-alt-icons.js",
     "liturgical:window": "node scripts/generate-liturgical-window.js",
     "postinstall": "patch-package"
   },
   "dependencies": {
     "@aptabase/react-native": "^0.6.0",
     "@expo/vector-icons": "^15.1.1",
-    "@gorhom/bottom-sheet": "^5.2.14",
     "@react-native-async-storage/async-storage": "2.2.0",
-    "@react-native-community/datetimepicker": "9.2.1",
-    "@react-native-google-signin/google-signin": "^16.2.0",
     "@sentry/react-native": "~8.28.0",
-    "@tanstack/react-query": "^5.104.5",
     "chordsheetjs": "^18.0.0",
     "expo": "~58.0.22",
-    "expo-alternate-app-icons": "^8.0.0",
-    "expo-apple-authentication": "~58.0.2",
     "expo-asset": "~58.0.19",
     "expo-blur": "~58.0.5",
     "expo-build-properties": "~58.0.12",
@@ -46,28 +37,18 @@
     "expo-document-picker": "~58.0.4",
     "expo-file-system": "~58.0.13",
     "expo-font": "~58.0.11",
-    "expo-gl": "~58.0.4",
     "expo-glass-effect": "~58.0.5",
     "expo-haptics": "~58.0.7",
-    "expo-image": "~58.0.18",
     "expo-image-manipulator": "~58.0.16",
     "expo-image-picker": "~58.0.10",
-    "expo-insights": "~58.0.11",
-    "expo-intent-launcher": "~58.0.3",
+    "expo-keep-awake": "~58.0.3",
     "expo-linear-gradient": "~58.0.3",
     "expo-linking": "~58.0.15",
-    "expo-local-authentication": "~58.0.2",
-    "expo-native-compact-tabs": "0.2.1",
     "expo-network": "~58.0.4",
-    "expo-notifications": "~58.1.7",
-    "expo-observe": "~58.0.17",
     "expo-print": "~58.0.8",
     "expo-router": "~58.0.29",
-    "expo-secure-store": "~58.0.2",
-    "expo-sensors": "~58.0.4",
     "expo-sharing": "~58.0.21",
     "expo-splash-screen": "~58.0.12",
-    "expo-sqlite": "~58.0.15",
     "expo-status-bar": "~58.0.4",
     "expo-symbols": "~58.0.4",
     "expo-updates": "~58.0.20",
@@ -79,13 +60,9 @@
     "react-dom": "19.3.0",
     "react-native": "0.88.1",
     "react-native-audio-api": "~1.0.0",
-    "react-native-calendars": "^1.1314.0",
-    "react-native-confetti-cannon": "^1.5.2",
     "react-native-gesture-handler": "~3.3.0",
-    "react-native-nfc-manager": "^4.2.0",
     "react-native-qrcode-svg": "^6.3.49",
     "react-native-reanimated": "4.7.1",
-    "react-native-render-html": "^6.3.4",
     "react-native-reorderable-list": "^0.18.2",
     "react-native-safe-area-context": "~5.10.1",
     "react-native-screens": "~4.30.0",
@@ -94,8 +71,7 @@
     "react-native-webview": "14.0.1",
     "react-native-worklets": "0.13.0",
     "tailwindcss": "^4.3.3",
-    "uniwind": "^1.13.1",
-    "zod": "^4.6.7"
+    "uniwind": "^1.13.1"
   },
   "devDependencies": {
     "@babel/core": "^7.25.2",
@@ -106,7 +82,6 @@
     "@types/jest": "^30.0.0",
     "@types/node": "^26.6.6",
     "@types/react": "~19.3.0",
-    "@types/three": "0.180.0",
     "babel-plugin-react-compiler": "^1.0.0",
     "babel-preset-expo": "~58.0.22",
     "cross-env": "^10.1.0",
@@ -117,29 +92,21 @@
     "eslint-plugin-prettier": "^5.5.7",
     "jest": "~30.5.2",
     "jest-expo": "~58.0.13",
-    "opentype.js": "^2.0.0",
     "patch-package": "^8.0.1",
     "prettier": "^3.9.10",
     "react-test-renderer": "^19.3.0",
     "sharp": "^0.35.5",
-    "three": "0.180.0",
     "typescript": "~6.0.3"
   },
   "private": true,
   "overrides": {
-    "react-native-calendars": {
-      "react-native-safe-area-context": "~5.6.0"
-    },
     "unrs-resolver": "1.11.1"
   },
   "expo": {
     "doctor": {
       "reactNativeDirectoryCheck": {
         "listUnknownPackages": false,
-        "exclude": [
-          "react-native-confetti-cannon",
-          "react-native-render-html"
-        ]
+        "exclude": []
       }
     }
   },

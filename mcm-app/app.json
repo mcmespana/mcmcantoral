@@ -1,19 +1,18 @@
 {
   "expo": {
-    "name": "MCM App",
-    "slug": "mcm-app",
-    "version": "2.5.1",
-    "runtimeVersion": "2.5.1",
+    "name": "MCM Cantoral",
+    "slug": "mcm-cantoral",
+    "version": "1.0.0",
+    "runtimeVersion": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
-    "scheme": "mcmapp",
+    "scheme": "mcmcantoral",
     "userInterfaceStyle": "automatic",
     "ios": {
       "supportsTablet": true,
-      "usesAppleSignIn": true,
-      "bundleIdentifier": "com.familiaconsolacion.mcmapp",
+      "bundleIdentifier": "com.familiaconsolacion.mcmcantoral",
       "infoPlist": {
-        "CFBundleDisplayName": "MCM App",
+        "CFBundleDisplayName": "MCM Cantoral",
         "UISupportedInterfaceOrientations~ipad": [
           "UIInterfaceOrientationPortrait",
           "UIInterfaceOrientationPortraitUpsideDown",
@@ -21,53 +20,90 @@
           "UIInterfaceOrientationLandscapeRight"
         ],
         "ITSAppUsesNonExemptEncryption": false,
-        "LSApplicationQueriesSchemes": ["webcal"],
-        "NSLocationWhenInUseUsageDescription": "La app puede usar tu ubicación para habilitar funciones basadas en ubicación cuando estén disponibles (por ejemplo, mostrar información relevante cerca de ti).",
         "LSSupportsOpeningDocumentsInPlace": true,
         "CFBundleDocumentTypes": [
           {
-            "CFBundleTypeName": "MCM Playlist",
+            "CFBundleTypeName": "Repertorio MCM",
             "CFBundleTypeRole": "Editor",
             "LSHandlerRank": "Owner",
-            "LSItemContentTypes": ["com.mcmespana.mcmapp.playlist"]
+            "LSItemContentTypes": [
+              "com.mcmespana.mcmcantoral.playlist",
+              "com.mcmespana.mcmapp.playlist"
+            ]
           }
         ],
         "UTExportedTypeDeclarations": [
           {
+            "UTTypeIdentifier": "com.mcmespana.mcmcantoral.playlist",
+            "UTTypeDescription": "Repertorio MCM",
+            "UTTypeConformsTo": [
+              "public.data",
+              "public.json"
+            ],
+            "UTTypeTagSpecification": {
+              "public.filename-extension": [
+                "mcm"
+              ],
+              "public.mime-type": [
+                "application/octet-stream"
+              ]
+            }
+          }
+        ],
+        "NSLocalNetworkUsageDescription": "MCM Cantoral usa la red local para seguir al maestro por la wifi del coro: así las canciones pasan solas aunque no haya internet.",
+        "NSBonjourServices": [
+          "_mcmcantoral._tcp"
+        ],
+        "UTImportedTypeDeclarations": [
+          {
             "UTTypeIdentifier": "com.mcmespana.mcmapp.playlist",
             "UTTypeDescription": "MCM Playlist",
-            "UTTypeConformsTo": ["public.data", "public.json"],
+            "UTTypeConformsTo": [
+              "public.data",
+              "public.json"
+            ],
             "UTTypeTagSpecification": {
-              "public.filename-extension": ["mcm"],
-              "public.mime-type": ["application/octet-stream"]
+              "public.filename-extension": [
+                "mcm"
+              ],
+              "public.mime-type": [
+                "application/octet-stream"
+              ]
             }
           }
         ]
       },
       "appleTeamId": "5P53S6QB23",
       "associatedDomains": [
-        "applinks:mcm.expo.app",
-        "applinks:comunica.movimientoconsolacion.com"
+        "applinks:mcm-cantoral.expo.app"
       ]
     },
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/images/adaptive-icon.png",
         "monochromeImage": "./assets/images/monochrome-icon.png",
-        "backgroundColor": "#ffffff"
+        "backgroundColor": "#0B0B0C"
       },
-      "package": "com.mcmespana.mcmapp",
-      "blockedPermissions": ["android.permission.ACTIVITY_RECOGNITION"],
-      "googleServicesFile": "./google-services.json",
+      "package": "com.mcmespana.mcmcantoral",
       "intentFilters": [
         {
           "action": "VIEW",
-          "category": ["DEFAULT", "BROWSABLE"],
-          "data": [{ "scheme": "mcmapp" }]
+          "category": [
+            "DEFAULT",
+            "BROWSABLE"
+          ],
+          "data": [
+            {
+              "scheme": "mcmcantoral"
+            }
+          ]
         },
         {
           "action": "VIEW",
-          "category": ["DEFAULT", "BROWSABLE"],
+          "category": [
+            "DEFAULT",
+            "BROWSABLE"
+          ],
           "data": [
             {
               "scheme": "file",
@@ -84,49 +120,25 @@
         {
           "autoVerify": true,
           "action": "VIEW",
-          "category": ["DEFAULT", "BROWSABLE"],
+          "category": [
+            "DEFAULT",
+            "BROWSABLE"
+          ],
           "data": [
             {
               "scheme": "https",
-              "host": "mcm.expo.app",
+              "host": "mcm-cantoral.expo.app",
               "pathPrefix": "/playlist"
             },
             {
               "scheme": "https",
-              "host": "mcm.expo.app",
+              "host": "mcm-cantoral.expo.app",
               "pathPrefix": "/coro"
-            }
-          ]
-        },
-        {
-          "autoVerify": true,
-          "action": "VIEW",
-          "category": ["DEFAULT", "BROWSABLE"],
-          "data": [
-            {
-              "scheme": "https",
-              "host": "comunica.movimientoconsolacion.com",
-              "pathPrefix": "/ap"
             },
             {
               "scheme": "https",
-              "host": "comunica.movimientoconsolacion.com",
-              "pathPrefix": "/app"
-            },
-            {
-              "scheme": "https",
-              "host": "comunica.movimientoconsolacion.com",
-              "pathPrefix": "/area-privada"
-            },
-            {
-              "scheme": "https",
-              "host": "comunica.movimientoconsolacion.com",
-              "pathPrefix": "/actividades"
-            },
-            {
-              "scheme": "https",
-              "host": "comunica.movimientoconsolacion.com",
-              "path": "/"
+              "host": "mcm-cantoral.expo.app",
+              "pathPrefix": "/cancion"
             }
           ]
         }
@@ -149,35 +161,13 @@
           },
           "imageWidth": 200,
           "resizeMode": "contain",
-          "backgroundColor": "#ffffff"
-        }
-      ],
-      [
-        "expo-notifications",
-        {
-          "icon": "./assets/images/notification-icon.png",
-          "color": "#253883",
-          "sounds": [],
-          "mode": "production"
+          "backgroundColor": "#0B0B0C"
         }
       ],
       "expo-asset",
-      "./plugins/withNotificationServiceExtension",
       [
-        "expo-alternate-app-icons",
-        [
-          {
-            "name": "Carismochito",
-            "ios": "./assets/app-icons/carismochito.png",
-            "android": {
-              "foregroundImage": "./assets/app-icons/carismochito-foreground.png",
-              "backgroundColor": "#A3BD31"
-            }
-          }
-        ]
+        "expo-build-properties"
       ],
-      ["expo-build-properties"],
-      "@react-native-community/datetimepicker",
       [
         "expo-font",
         {
@@ -187,47 +177,23 @@
           ]
         }
       ],
-      "expo-image",
       "expo-sharing",
       "expo-web-browser",
       [
         "expo-camera",
         {
-          "cameraPermission": "MCM App usa la cámara para escanear los códigos QR de playlists y sesiones de coro, y para hacer tu foto de perfil y fotos de títulos y documentos en tu área privada.",
+          "cameraPermission": "MCM Cantoral usa la cámara para escanear los códigos QR de repertorios y directos.",
           "recordAudioAndroid": false
-        }
-      ],
-      [
-        "react-native-nfc-manager",
-        {
-          "nfcPermission": "MCM App usa NFC para leer tarjetas y pegatinas del movimiento.",
-          "includeNdefEntitlement": false
-        }
-      ],
-      [
-        "expo-secure-store",
-        {
-          "faceIDPermission": "MCM App usa Face ID para proteger el acceso a tu área privada."
-        }
-      ],
-      [
-        "expo-sqlite",
-        {
-          "useSQLCipher": true
-        }
-      ],
-      [
-        "expo-local-authentication",
-        {
-          "faceIDPermission": "MCM App usa Face ID para proteger el acceso a tu área privada."
         }
       ],
       [
         "react-native-audio-api",
         {
-          "iosMicrophonePermission": "MCM App usa el micrófono para el afinador del cantoral: escucha tu guitarra para decirte si está afinada. El sonido se analiza en el móvil y no se guarda ni se envía.",
+          "iosMicrophonePermission": "MCM Cantoral usa el micrófono para el afinador: escucha tu instrumento para decirte si está afinado. El sonido se analiza en el móvil y no se guarda ni se envía.",
           "iosBackgroundMode": false,
-          "androidPermissions": ["android.permission.RECORD_AUDIO"],
+          "androidPermissions": [
+            "android.permission.RECORD_AUDIO"
+          ],
           "androidForegroundService": false,
           "enableFFmpeg": false
         }
@@ -235,9 +201,9 @@
       [
         "expo-image-picker",
         {
-          "photosPermission": "MCM App usa tus fotos para subir tu foto de perfil, títulos, certificados y documentos a tu área privada.",
-          "cameraPermission": "MCM App usa la cámara para escanear los códigos QR de playlists y sesiones de coro, y para hacer tu foto de perfil y fotos de títulos y documentos en tu área privada.",
-          "microphonePermission": "MCM App usa el micrófono para el afinador del cantoral: escucha tu guitarra para decirte si está afinada. El sonido se analiza en el móvil y no se guarda ni se envía."
+          "photosPermission": "MCM Cantoral usa tus fotos para leer la letra de una canción desde una foto en el editor del cantoral.",
+          "cameraPermission": "MCM Cantoral usa la cámara para escanear los códigos QR de repertorios y directos, y para fotografiar la letra de una canción en el editor.",
+          "microphonePermission": "MCM Cantoral usa el micrófono para el afinador: escucha tu instrumento para decirte si está afinado. El sonido se analiza en el móvil y no se guarda ni se envía."
         }
       ]
     ],
@@ -246,27 +212,7 @@
       "reactCompiler": true
     },
     "extra": {
-      "router": {},
-      "eas": {
-        "projectId": "aa9f2d3a-b74a-4169-bad4-e851015e30c6",
-        "build": {
-          "experimental": {
-            "ios": {
-              "appExtensions": [
-                {
-                  "targetName": "MCMNotificationService",
-                  "bundleIdentifier": "com.familiaconsolacion.mcmapp.MCMNotificationService"
-                }
-              ]
-            }
-          }
-        }
-      }
-    },
-    "updates": {
-      "url": "https://u.expo.dev/aa9f2d3a-b74a-4169-bad4-e851015e30c6",
-      "fallbackToCacheTimeout": 0,
-      "checkAutomatically": "ON_LOAD"
+      "router": {}
     }
   }
 }

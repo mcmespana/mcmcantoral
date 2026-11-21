@@ -2,14 +2,20 @@ import { Linking, Platform } from 'react-native';
 import { logger } from '@/utils/logger';
 
 // El id de App Store Connect con el que se publica (`ascAppId` de eas.json).
-// Hasta 2026-11-07 aquí había 6745557177, que no existe: «Actualizar en la
-// tienda» llevaba a «no disponible en tu país». Lo vigila storeLinks.test.ts.
-const IOS_APP_ID = '6753905393';
-const ANDROID_PACKAGE = 'com.mcmespana.mcmapp';
+// MCM Cantoral es una app NUEVA: hasta que exista en App Store Connect el id
+// va vacío y «Actualizar en la tienda» busca la app por su nombre. Cuando se
+// cree, se pone aquí Y en eas.json (lo vigila storeLinks.test.ts).
+const IOS_APP_ID = '';
+const ANDROID_PACKAGE = 'com.mcmespana.mcmcantoral';
+const IOS_SEARCH = 'apps.apple.com/es/search?term=MCM%20Cantoral';
 
-const STORE_URLS = {
-  ios: `https://apps.apple.com/app/id${IOS_APP_ID}`,
-  iosNative: `itms-apps://apps.apple.com/app/id${IOS_APP_ID}`,
+export const STORE_URLS = {
+  ios: IOS_APP_ID
+    ? `https://apps.apple.com/app/id${IOS_APP_ID}`
+    : `https://${IOS_SEARCH}`,
+  iosNative: IOS_APP_ID
+    ? `itms-apps://apps.apple.com/app/id${IOS_APP_ID}`
+    : `itms-apps://${IOS_SEARCH}`,
   android: `https://play.google.com/store/apps/details?id=${ANDROID_PACKAGE}`,
   androidNative: `market://details?id=${ANDROID_PACKAGE}`,
 } as const;

@@ -28,7 +28,7 @@ export default function FirebaseConfigErrorScreen({ error }: Props) {
 
   const handleCopy = () => {
     Clipboard.setString(
-      `[MCM App] Firebase config error\n\n${error}\n\nPasos:\n` +
+      `[MCM Cantoral] Firebase config error\n\n${error}\n\nPasos:\n` +
         `1. npx eas-cli secret:list\n` +
         `2. Compara con Firebase Console → ⚙️ → Configuración del proyecto → app web\n` +
         `3. npx eas-cli secret:create --name EXPO_PUBLIC_FIREBASE_API_KEY --value "..." --scope project\n` +

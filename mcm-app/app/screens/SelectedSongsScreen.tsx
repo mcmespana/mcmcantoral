@@ -1,3 +1,4 @@
+import { APP_SCHEME, PLAYLIST_UTI, WEB_BASE_URL } from '@/constants/appLinks';
 import { logger } from '@/utils/logger';
 import { trackEvent } from '@/utils/analytics';
 import { tramoTamano } from '@/constants/analyticsEvents';
@@ -144,9 +145,7 @@ interface CategorizedSongs {
   })[];
 }
 
-const WEB_BASE_URL = 'https://mcm.expo.app';
 /** Esquema propio para deep links offline (playlist embebida en la URL). */
-const APP_SCHEME = 'mcmapp://';
 
 const SelectedSongsScreen: React.FC = () => {
   const {
@@ -529,7 +528,7 @@ const SelectedSongsScreen: React.FC = () => {
         await Sharing.shareAsync(path, {
           mimeType: 'application/octet-stream',
           dialogTitle: 'Compartir playlist',
-          UTI: 'com.mcmespana.mcmapp.playlist',
+          UTI: PLAYLIST_UTI,
         });
       }
       setShowExportFileModal(false);

@@ -33,20 +33,20 @@ export default function Root({ children }: { children: React.ReactNode }) {
         />
 
         {/* Título inicial de la pestaña. Luego lo pone la app por pantalla
-            (`hooks/useDocumentTitle.ts`): «Cantoral · MCM», la canción… */}
+            (`hooks/useDocumentTitle.ts`): «Repertorio · MCM Cantoral», la canción… */}
         <title>{APP_TITLE}</title>
 
         {/* SEO */}
         <meta
           name="description"
-          content="MCM España — cantoral, eventos, calendario, materiales y mucho más."
+          content="MCM Cantoral — letras y acordes sin conexión, repertorios y directo para coros."
         />
         <meta name="color-scheme" content="light dark" />
         <meta name="referrer" content="strict-origin-when-cross-origin" />
 
         {/* PWA — generic */}
         <meta name="mobile-web-app-capable" content="yes" />
-        <meta name="application-name" content="MCM España" />
+        <meta name="application-name" content="MCM Cantoral" />
 
         {/* iOS Safari standalone PWA */}
         <meta name="apple-mobile-web-app-capable" content="yes" />
@@ -54,7 +54,7 @@ export default function Root({ children }: { children: React.ReactNode }) {
           name="apple-mobile-web-app-status-bar-style"
           content="black-translucent"
         />
-        <meta name="apple-mobile-web-app-title" content="MCM España" />
+        <meta name="apple-mobile-web-app-title" content="MCM Cantoral" />
 
         {/* Prevent automatic phone-number detection */}
         <meta name="format-detection" content="telephone=no" />
@@ -62,7 +62,7 @@ export default function Root({ children }: { children: React.ReactNode }) {
         {/* Theme Colors — separate light/dark for browser chrome */}
         <meta
           name="theme-color"
-          content="#253883"
+          content="#0B0B0C"
           media="(prefers-color-scheme: light)"
         />
         <meta
@@ -77,19 +77,19 @@ export default function Root({ children }: { children: React.ReactNode }) {
             og:url/canonical — pendiente de fijar el dominio público
             definitivo del deploy web (EAS Hosting). */}
         <meta property="og:type" content="website" />
-        <meta property="og:site_name" content="MCM España" />
+        <meta property="og:site_name" content="MCM Cantoral" />
         <meta property="og:locale" content="es_ES" />
-        <meta property="og:title" content="MCM España" />
+        <meta property="og:title" content="MCM Cantoral" />
         <meta
           property="og:description"
-          content="Aplicación de MCM España: cantoral, eventos, calendario, materiales y mucho más."
+          content="El cantoral de MCM: letras y acordes sin conexión, repertorios y directo para coros."
         />
         <meta property="og:image" content="/icons/icon-512.png" />
         <meta name="twitter:card" content="summary" />
-        <meta name="twitter:title" content="MCM España" />
+        <meta name="twitter:title" content="MCM Cantoral" />
         <meta
           name="twitter:description"
-          content="Aplicación de MCM España: cantoral, eventos, calendario, materiales y mucho más."
+          content="El cantoral de MCM: letras y acordes sin conexión, repertorios y directo para coros."
         />
         <meta name="twitter:image" content="/icons/icon-512.png" />
 

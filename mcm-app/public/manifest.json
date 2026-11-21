@@ -1,18 +1,25 @@
 {
-  "name": "MCM España",
-  "short_name": "MCM",
-  "description": "Aplicación de MCM España: cantoral, eventos, calendario, materiales y mucho más.",
+  "name": "MCM Cantoral",
+  "short_name": "Cantoral",
+  "description": "El cantoral de MCM: letras y acordes sin conexión, repertorios y directo para coros.",
   "lang": "es",
   "dir": "ltr",
   "start_url": "/",
   "scope": "/",
   "id": "/",
   "display": "standalone",
-  "display_override": ["standalone", "minimal-ui", "browser"],
+  "display_override": [
+    "standalone",
+    "minimal-ui",
+    "browser"
+  ],
   "orientation": "any",
-  "background_color": "#ffffff",
-  "theme_color": "#253883",
-  "categories": ["lifestyle", "music", "education"],
+  "background_color": "#0B0B0C",
+  "theme_color": "#0B0B0C",
+  "categories": [
+    "music",
+    "education"
+  ],
   "icons": [
     {
       "src": "/icons/icon-192.png",

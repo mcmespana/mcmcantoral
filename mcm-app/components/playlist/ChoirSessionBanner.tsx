@@ -7,6 +7,7 @@
  *   - botón "Usar mi tono" para que el esclavo se desincronice del tono,
  *   - botón "Salir" / "Cerrar sesión".
  */
+import { WEB_BASE_URL } from '@/constants/appLinks';
 import React, { useMemo, useState } from 'react';
 import {
   View,
@@ -52,7 +53,7 @@ const ChoirSessionBanner: React.FC<Props> = ({ floating, topOffset = 0 }) => {
   if (mode === 'off' || !code) return null;
 
   const handleShare = () => {
-    const url = `https://mcm.expo.app/coro?c=${code}`;
+    const url = `${WEB_BASE_URL}/coro?c=${code}`;
     const desktopLike =
       Platform.OS === 'web' ||
       Platform.OS === 'windows' ||
@@ -167,7 +168,7 @@ const ChoirSessionBanner: React.FC<Props> = ({ floating, topOffset = 0 }) => {
       <ShareQrModal
         visible={showQr}
         title="QR del coro"
-        url={`https://mcm.expo.app/coro?c=${code}`}
+        url={`${WEB_BASE_URL}/coro?c=${code}`}
         code={code}
         onClose={() => setShowQr(false)}
       />

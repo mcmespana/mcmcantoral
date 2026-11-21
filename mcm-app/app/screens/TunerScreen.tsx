@@ -452,7 +452,7 @@ function PermissionCard({
     : denied
       ? isWeb
         ? 'El navegador tiene bloqueado el micrófono para esta web. Actívalo en el candado de la barra de direcciones.'
-        : 'El micrófono está desactivado para MCM App. Actívalo en Ajustes y vuelve.'
+        : 'El micrófono está desactivado para MCM Cantoral. Actívalo en Ajustes y vuelve.'
       : 'Para afinar, la app tiene que oír tu guitarra. El sonido se analiza en el móvil y no se guarda ni se envía.';
   return (
     <View

@@ -1,4 +1,4 @@
-// Service Worker — MCM App PWA
+// Service Worker — MCM Cantoral PWA
 // Estrategia minimalista de runtime caching. NO precachea nada (los nombres
 // de los bundles llevan hash y cambian por build, así que un precache list
 // fijo se rompería en cada despliegue).

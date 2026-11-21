@@ -10,7 +10,7 @@ import { execSync } from 'child_process';
 import fs from 'fs';
 import path from 'path';
 import { Linking, Platform } from 'react-native';
-import { openAppStore } from '@/utils/storeLinks';
+import { openAppStore, STORE_URLS } from '@/utils/storeLinks';
 
 jest.mock('@/utils/logger', () => ({
   logger: {
@@ -43,9 +43,7 @@ describe('openAppStore en nativo', () => {
     setPlatform('ios');
     await openAppStore();
     expect(openURL).toHaveBeenCalledTimes(1);
-    expect(openURL).toHaveBeenCalledWith(
-      'itms-apps://apps.apple.com/app/id6753905393',
-    );
+    expect(openURL).toHaveBeenCalledWith(STORE_URLS.iosNative);
   });
 
   it('cae al enlace https si el esquema de iOS falla', async () => {
@@ -55,7 +53,7 @@ describe('openAppStore en nativo', () => {
       .mockResolvedValueOnce(true);
     await openAppStore();
     expect(openURL).toHaveBeenLastCalledWith(
-      'https://apps.apple.com/app/id6753905393',
+      STORE_URLS.ios,
     );
   });
 
@@ -63,7 +61,7 @@ describe('openAppStore en nativo', () => {
     setPlatform('android');
     await openAppStore();
     expect(openURL).toHaveBeenCalledWith(
-      'market://details?id=com.mcmespana.mcmapp',
+      'market://details?id=com.mcmespana.mcmcantoral',
     );
   });
 
@@ -74,7 +72,7 @@ describe('openAppStore en nativo', () => {
       .mockResolvedValueOnce(true);
     await openAppStore();
     expect(openURL).toHaveBeenLastCalledWith(
-      'https://play.google.com/store/apps/details?id=com.mcmespana.mcmapp',
+      'https://play.google.com/store/apps/details?id=com.mcmespana.mcmcantoral',
     );
   });
 
@@ -124,7 +122,7 @@ describe('openAppStore en web (PWA)', () => {
     setUserAgent('Mozilla/5.0 (iPhone; CPU iPhone OS 17_0)');
     await openAppStore();
     expect(openURL).toHaveBeenCalledWith(
-      'https://apps.apple.com/app/id6753905393',
+      STORE_URLS.ios,
     );
   });
 
@@ -133,7 +131,7 @@ describe('openAppStore en web (PWA)', () => {
     setUserAgent('Mozilla/5.0 (Linux; Android 14; Pixel 8)');
     await openAppStore();
     expect(openURL).toHaveBeenCalledWith(
-      'https://play.google.com/store/apps/details?id=com.mcmespana.mcmapp',
+      'https://play.google.com/store/apps/details?id=com.mcmespana.mcmcantoral',
     );
   });
 
@@ -142,7 +140,7 @@ describe('openAppStore en web (PWA)', () => {
     setUserAgent('Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7)');
     await openAppStore();
     expect(openURL).toHaveBeenCalledWith(
-      'https://apps.apple.com/app/id6753905393',
+      STORE_URLS.ios,
     );
   });
 });
