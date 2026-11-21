@@ -213,16 +213,16 @@ pica la curiosidad y se ven las otras 33.
 
 | Pieza | Fichero |
 | ----- | ------- |
-| Modelo y utilidades puras | `mcm-app/utils/songTags.ts` |
-| Catálogo + índice inverso | `mcm-app/hooks/useSongTags.ts` |
-| Chip (3 variantes) | `mcm-app/components/song-tags/TagChip.tsx` |
-| Nube de etiquetas | `mcm-app/components/song-tags/TagCloudSheet.tsx` |
-| Fila de refinamiento | `mcm-app/components/song-tags/TagContextBar.tsx` |
-| Ocultar canciones · ★ en las filas | `mcm-app/hooks/useSongListTags.ts` + `components/song-tags/HiddenSongsNote.tsx` |
-| Botón del header | `mcm-app/app/screens/CategoriesScreen.tsx` |
-| Pantalla `__TAG__:` | `mcm-app/app/screens/SongListScreen.tsx` |
-| Chips en la ficha | `mcm-app/components/song-media/SongMediaSheet.tsx` |
-| Tests | `mcm-app/__tests__/songTags.test.ts` |
+| Modelo y utilidades puras | `utils/songTags.ts` |
+| Catálogo + índice inverso | `hooks/useSongTags.ts` |
+| Chip (3 variantes) | `components/song-tags/TagChip.tsx` |
+| Nube de etiquetas | `components/song-tags/TagCloudSheet.tsx` |
+| Fila de refinamiento | `components/song-tags/TagContextBar.tsx` |
+| Ocultar canciones · ★ en las filas | `hooks/useSongListTags.ts` + `components/song-tags/HiddenSongsNote.tsx` |
+| Botón del header | `app/screens/CategoriesScreen.tsx` |
+| Pantalla `__TAG__:` | `app/screens/SongListScreen.tsx` |
+| Chips en la ficha | `components/song-media/SongMediaSheet.tsx` |
+| Tests | `__tests__/songTags.test.ts` |
 
 Notas:
 

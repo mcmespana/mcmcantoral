@@ -6,7 +6,7 @@
 > abajo tal cual, de arriba abajo.
 >
 > Es una tarea **mecánica y segura**: solo se añaden ficheros a
-> `mcm-app/__tests__/`. Está pensada para Sonnet.
+> `__tests__/`. Está pensada para Sonnet.
 
 ---
 
@@ -27,7 +27,6 @@ en la respuesta al usuario y sigue con el siguiente fichero.
 ### 1. Mide
 
 ```bash
-cd mcm-app
 npm ci            # solo si no hay node_modules
 npm run test:coverage
 ```
@@ -43,7 +42,7 @@ De la tabla, coge los que tengan **más líneas sin cubrir** (columna
 ```bash
 node -e "const s=require('./coverage/coverage-summary.json');
 Object.entries(s).filter(([k])=>k!=='total')
- .map(([k,v])=>({f:k.split('/mcm-app/')[1],p:v.statements.pct,m:v.statements.total-v.statements.covered}))
+ .map(([k,v])=>({f:k.split(process.cwd()+'/')[1],p:v.statements.pct,m:v.statements.total-v.statements.covered}))
  .sort((a,b)=>b.m-a.m).slice(0,15)
  .forEach(r=>console.log(String(r.m).padStart(4),String(r.p).padStart(6),r.f))"
 ```
@@ -58,7 +57,7 @@ Object.entries(s).filter(([k])=>k!=='total')
 
 ### 3. Escribe el test
 
-Ponlo en `mcm-app/__tests__/<nombreDelFichero>.test.ts` (o `.tsx` si hay JSX).
+Ponlo en `__tests__/<nombreDelFichero>.test.ts` (o `.tsx` si hay JSX).
 Copia el estilo de los que ya hay: cabecera de comentario **en español**
 explicando _qué se rompe si esto falla_, y los `it(...)` también en español.
 

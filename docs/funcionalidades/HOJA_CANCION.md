@@ -1,9 +1,9 @@
 # Hoja de canción — cómo se pinta una canción
 
 > Qué hace la app con el ChordPro de una canción para que se lea bien en un
-> móvil, en un iPad y a un metro del atril. Código: `mcm-app/utils/songSheet.ts`
-> (modelo + HTML), `mcm-app/utils/songSheetLayout.ts` (CSS + script de
-> maquetación dentro del WebView), `mcm-app/utils/songDocument.ts` (el
+> móvil, en un iPad y a un metro del atril. Código: `utils/songSheet.ts`
+> (modelo + HTML), `utils/songSheetLayout.ts` (CSS + script de
+> maquetación dentro del WebView), `utils/songDocument.ts` (el
 > documento entero, puro) y `hooks/useSongProcessor.ts` (el estado de React).
 > Cómo escribir un `.cho` que aproveche todo esto: `docs/CAMPOS_CANCIONES.md`
 > §4.6 del repo `mcmapp-cantoral`. Plan y decisiones:

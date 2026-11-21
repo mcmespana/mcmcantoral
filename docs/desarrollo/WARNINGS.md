@@ -24,7 +24,6 @@ qué se queda.
 ## Cómo contarlos
 
 ```bash
-cd mcm-app
 npm run lint 2>&1 | tail -3                       # total
 # Reparto por regla (el grep sobre la salida de texto cuenta también las pistas
 # de cada mensaje; es más fiable el JSON, limitado a lo que lintea `expo lint`):
@@ -113,7 +112,7 @@ apuntarlo aquí.
 
 `app/screens/WordleScreen.tsx` (2 × `set-state-in-effect`, 1 × `purity`).
 El Wordle está congelado a propósito como código de referencia (ver
-`mcm-app/CLAUDE.md`): no se refactoriza, no se le añade nada.
+`CLAUDE.md`): no se refactoriza, no se le añade nada.
 
 ## 5. `purity` en `ReflexionesScreen` (2) — mirar si se toca el fichero
 

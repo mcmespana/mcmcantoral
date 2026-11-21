@@ -73,8 +73,7 @@ export EXPO_PUBLIC_FIREBASE_APP_ID=demo
    afinador con `react-native-audio-api`):
 
    ```bash
-   cd mcm-app
-   LANG=en_US.UTF-8 LC_ALL=en_US.UTF-8 npx expo run:ios --device "iPhone 17 Pro" --no-bundler
+      LANG=en_US.UTF-8 LC_ALL=en_US.UTF-8 npx expo run:ios --device "iPhone 17 Pro" --no-bundler
    ```
 
    - `LANG=en_US.UTF-8` es obligatorio: sin él CocoaPods revienta con
@@ -87,14 +86,13 @@ export EXPO_PUBLIC_FIREBASE_APP_ID=demo
 2. **Servidor de JS** (Metro), con las variables de §1 puestas:
 
    ```bash
-   cd mcm-app
-   npx expo start --dev-client --port 8081 --clear
+      npx expo start --dev-client --port 8081 --clear
    ```
 
 3. **Abrir la app** apuntando a Metro, sin el engranaje:
 
    ```
-   exp+mcm-app://expo-development-client/?url=http%3A%2F%2Flocalhost%3A8081&__expo_disable_fab=1
+   exp+mcm-cantoral://expo-development-client/?url=http%3A%2F%2Flocalhost%3A8081&__expo_disable_fab=1
    ```
 
    (Claude: `control` → `open_url`.)
@@ -164,7 +162,6 @@ marcador **fuera del repo** con `GOOGLE_SERVICES_JSON`
 ```
 
 ```bash
-cd mcm-app
 export GOOGLE_SERVICES_JSON=/ruta/fuera/del/repo/google-services.demo.json
 rm -rf android                                   # si hubo un prebuild a medias o cambió algo nativo
 npx expo prebuild --platform android --no-install
@@ -180,14 +177,14 @@ el viejo. Comprobar y arreglar a mano:
 
 ```bash
 adb shell dumpsys package com.mcmespana.mcmapp | grep lastUpdateTime   # debe ser posterior al build
-adb install -r mcm-app/android/app/build/outputs/apk/debug/app-debug.apk
+adb install -r android/app/build/outputs/apk/debug/app-debug.apk
 ```
 
 ### Abrir la app y mover el emulador desde la terminal (o desde Claude)
 
 ```bash
 adb shell am start -a android.intent.action.VIEW \
-  -d "exp+mcm-app://expo-development-client/?url=http%3A%2F%2Flocalhost%3A8081&__expo_disable_fab=1"
+  -d "exp+mcm-cantoral://expo-development-client/?url=http%3A%2F%2Flocalhost%3A8081&__expo_disable_fab=1"
 adb exec-out screencap -p > captura.png      # 1080×2400 reales
 adb shell input tap X Y                      # coordenadas en píxeles REALES
 adb shell input text "familia@ejemplo.org"
@@ -220,7 +217,6 @@ se cierra el panel).
 ## 5. Antes de dar un cambio de pantallas por bueno
 
 ```bash
-cd mcm-app
 npx tsc --noEmit && npm run typecheck:tests && npx expo lint
 npx jest --maxWorkers=3      # con el Mac justo, 3 workers: hay tests que dan timeout con carga alta y pasan sueltos
 ```

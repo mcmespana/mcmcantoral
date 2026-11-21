@@ -1,160 +1,83 @@
-# CLAUDE.md — MCM Cantoral (repo recién copiado de MCM App)
+# CLAUDE.md — MCM Cantoral
 
-> ## ⚠️ Lee esto primero
->
-> Este repo es **`mcmespana/mcmcantoral`**: la futura app **MCM Cantoral**
-> (solo el cantoral, wifi local y modo Navidad para Villancicos Solidarios
-> del **19/12/2026**). Se creó el 21/11/2026 como **copia con toda la
-> historia** de `mcmespana/mcmapp` (`main` @ `d4338986`), no como fork de
-> GitHub.
->
-> **Todavía no se ha ejecutado nada del plan**: todo lo que hay debajo de
-> este aviso (y el código, y `mcm-app/`) es aún MCM App tal cual. No
-> trabajes en este repo como si fuera MCM App.
->
-> **Por dónde se empieza:**
->
-> 1. [`docs/planes/fork-cantoral/README.md`](docs/planes/fork-cantoral/README.md)
->    entero — qué es, decisiones ya contestadas (D-01…D-23), fases y
->    calendario. Todo está decidido: no se re-pregunta.
-> 2. [`docs/planes/fork-cantoral/01-arranque-y-poda.md`](docs/planes/fork-cantoral/01-arranque-y-poda.md)
->    — **Fase 0**. El §0 (crear el repo y empujar la historia) **ya está
->    hecho**. Se empieza por el **spike de wifi local** (§2.10) y la
->    identidad nueva (§2.1).
-> 3. [`docs/DIVERGENCIAS.md`](docs/DIVERGENCIAS.md) — ya creado con el sha
->    de origen; se mantiene vivo desde aquí.
->
-> **Ya hecho al crear el repo:** fuera `scraper-lecturas.yml` y
-> `deploy-firebase-rules.yml` (el scraper y las reglas de Firebase son de
-> `mcmapp`: dos repos desplegándolas se pisarían; `01` §2.9).
->
-> **Para traer cambios de MCM App:** `git remote add upstream
-> https://github.com/mcmespana/mcmapp` (la historia es común, así que
-> `merge-base` y `cherry-pick` funcionan; tras mover la app a la raíz, con
-> parches: `docs/DIVERGENCIAS.md` §4).
->
-> En la Fase 0 (§2.8 bis) este fichero se sustituye por un `CLAUDE.md`
-> único y corto de MCM Cantoral, y este aviso desaparece.
+> Orientación para agentes IA. Corto a propósito: lo demás está enlazado.
 
----
+**MCM Cantoral** es la app del cantoral de MCM (Movimiento Consolación para
+el Mundo) **sola**: estudiar, preparar repertorios, ensayar y **actuar en
+directo** (seguir al maestro por la nube o por la wifi del coro), con modo
+Navidad para los **Villancicos Solidarios** (19/12/2026). Nació el 21/11/2026
+como copia con toda la historia de `mcmespana/mcmapp` (`main` @ `d4338986`):
+ver [`docs/DIVERGENCIAS.md`](docs/DIVERGENCIAS.md).
 
-# CLAUDE.md — MCM App Monorepo
+**Stack:** Expo 58 · React Native 0.88 · React 19.3 · TypeScript · Firebase
+RTDB (la misma base de datos que MCM App) · heroui-native · ChordSheetJS.
+La app vive en la **raíz** del repo (en MCM App está en `mcm-app/`).
 
-> Archivo de orientación para agentes IA. El código de la app está en `mcm-app/`.
+## Antes de tocar nada
 
-## Estructura del repositorio
+1. **El plan**: [`docs/planes/fork-cantoral/README.md`](docs/planes/fork-cantoral/README.md)
+   — decisiones D-01…D-23 ya contestadas: no se re-preguntan. Estado de cada
+   fase en su §5.
+2. **Interfaz**: lee [`design.md`](design.md) (prescriptivo). Los tokens de
+   `constants/theme.ts` mandan sobre todo lo demás.
+3. **Zona espejo** (la hoja de canción y la lógica compartida con MCM App):
+   lista en [`docs/DIVERGENCIAS.md`](docs/DIVERGENCIAS.md) §2. Ahí se cambia
+   pensando en las dos apps; cualquier novedad que valga para MCM App se
+   apunta como fila 🟢 en §3.
 
-```
-/                           ← Raíz del monorepo
-├── design.md               🎨 Guía de diseño PRESCRIPTIVA para agentes — léela antes de tocar UI
-├── mcm-app/                ← App principal (Expo/React Native) — LEE mcm-app/CLAUDE.md
-│   ├── CLAUDE.md           Referencia técnica completa (arquitectura, convenciones, Firebase)
-│   ├── TODO.md             Tareas pendientes de mantenimiento y mejora
-│   ├── CHANGELOG.md        Registro de cambios
-│   └── firebase-seed/      JSONs de seed/plantilla para Firebase (perfiles, encuestas, eventos)
-├── docs/                   ← Documentación del monorepo — ÍNDICE en docs/README.md
-│   ├── funcionalidades/    Notificaciones push, eventos, encuestas, arreglos y etiquetas del cantoral
-│   ├── contratos/          Contratos de datos App ↔ MCM Panel (notificaciones, encuestas, perfiles)
-│   ├── planes/             BACKLOG.md (★ orden de ejecución) + README.md (★★ qué plan está VIVO y cuál HECHO)
-│   │   └── archivo/        🗄️ Planes YA EJECUTADOS o anulados — NO se re-ejecutan
-│   ├── desarrollo/         Sistema de diseño, tabs, OTA (preview → production, rollback), build de tienda y WARNINGS.md
-│   └── SEGURIDAD.md        Reglas Firebase RTDB y gestión de credenciales
-├── scraper-lecturas/       ← Scraper Python de lecturas litúrgicas (corre vía GitHub Action)
-├── portadas-albumes/       ← Portadas de álbumes: las URLs de Firebase apuntan aquí — NO borrar
-├── medallas-3d/            ← Modelos .glb de las medallas (y thumbs/ para el pañuelo); la app los descarga vía jsDelivr — NO borrar
-├── piezas-3d/              ← Modelos .glb de chapas, pin y troncho reales (ficha en piezas.json, generador en _fuente/) — NO borrar
-├── .agents/skills/         ← Skills de UI para agentes (lockfile: skills-lock.json)
-├── _para-borrar/           ← Cuarentena de ficheros dudosos; su README dice qué es cada uno
-└── README.md               ← Guía rápida para humanos (setup, builds, releases)
-```
-
-## Reglas para agentes
-
-1. **Trabaja siempre desde `mcm-app/`** para cualquier cambio de código de la app
-2. **Lee `mcm-app/CLAUDE.md`** antes de hacer cualquier cambio — contiene la arquitectura, convenciones y referencia técnica completa
-3. **Consulta `docs/README.md`** para localizar la documentación de funcionalidades (notificaciones, eventos, encuestas), contratos con el panel y planes técnicos
-4. **Documenta cambios importantes en `mcm-app/CHANGELOG.md`** — entrada nueva arriba del todo, con **fecha Y hora** (`## YYYY-MM-DD HH:MM — Título`). NO documentes cambios cosméticos (colores, padding, etc.), SÍ documenta: nuevas pantallas, cambios de navegación, cambios de lógica de datos, cambios en perfiles/visibilidad, nuevas dependencias, cambios en Firebase
-5. **Consulta `mcm-app/TODO.md`** para ver la lista de tareas pendientes de mantenimiento y mejora
-6. **No toques archivos `.env.local`** — contienen credenciales de Firebase
-7. **Que algo NO sea OTA no es un motivo para no hacerlo, ni un riesgo a debatir.** El usuario decide cuándo le viene mal esperar al siguiente build nativo. Si un cambio lleva código nativo: añade `[skip-ota]` al commit y cierra la respuesta con UNA línea al final, sin dramatizar ni repetirlo en el cuerpo del texto:
-   - `OTA: ❌ — requiere build nativo (paquetes: [lista]). Commit con [skip-ota].`
-   - `OTA: ✅ — solo JS.`
-     (detalles del workflow en OTA de `mcm-app/CLAUDE.md`; flujo preview → production y rollback en `docs/desarrollo/OTA.md`)
-7b. **Ritmo de ramas (decisión del usuario, 2026-11-07):** se trabaja y se sube a `main`; lo que hay que probar va a `preview` y reposa; `production` se mueve **por tandas**, solo cuando el usuario lo pide (cada OTA de producción le enseña a todo el mundo la pantalla de actualizar). **Al cerrar cada tarea, di cuántos cambios hay en `preview` pendientes de `production` y recomienda «ya las puedes pasar» o «aguanta».** Detalle en `docs/desarrollo/OTA.md` («Norma de ritmo»).
-8. **Sin acceso a Firebase, usa `mcm-app/firebase-seed/`** como referencia de la estructura real de los nodos (perfiles, encuestas, eventos como el Jubileo 2025) para construir JSONs nuevos
-9. **Antes de retomar o priorizar cualquier plan/tarea de fondo, lee `docs/planes/BACKLOG.md` ENTERO** — es la fuente única de verdad del orden de ejecución, qué está bloqueado por una decisión pendiente del usuario, y el protocolo de trabajo (qué hacer cuando dicen "seguimos" o "me sobran tokens"). No priorices desde cero ni mires un solo `PLAN_*.md` suelto sin pasar antes por ahí.
-10. **Un plan dentro de `docs/planes/archivo/` está HECHO o ANULADO: NO lo re-ejecutes.** El índice de qué sigue vivo es `docs/planes/README.md`. Al terminar un plan, muévelo a `archivo/` **en el mismo commit** que cierra el trabajo — dejarlo en su sitio con una cabecera de "✅ hecho" no basta, ya provocó que dos sesiones ejecutaran los mismos 15 planes en paralelo.
-11. **Antes de "arreglar los warnings" del linter, lee `docs/desarrollo/WARNINGS.md`** — los que quedan están clasificados y justificados uno a uno (la cifra vigente y el techo están en ese documento); casi todos son falsos positivos de Reanimated o del patrón de "ref al último callback". Lo que sí se pide es no añadir warnings NUEVOS.
-12. **Antes de tocar interfaz, lee [`design.md`](design.md)** (raíz del
-    monorepo). Es la guía **prescriptiva** de diseño para agentes: criterio,
-    orden de prioridad cuando dos requisitos chocan, los tres territorios
-    visuales, antipatrones que no se envían y la API aprobada de componentes.
-    `docs/desarrollo/DESIGN.md` sigue siendo el **inventario** de valores, y
-    los tokens del código (`mcm-app/constants/*.ts`) mandan sobre ambos. Las
-    incoherencias de diseño ya detectadas, con su destino decidido, están en
-    `docs/planes/PLAN_DISENO.md` — no las arregles de paso: anótalas ahí.
-13. **Los archivos gigantes se quedan gigantes** (decisión del usuario, 2026-08-15). No trocees por tamaño; trocea solo por testabilidad. Razonamiento en `docs/planes/PLAN_CALIDAD.md` §0.
-
-## Comandos rápidos (desde mcm-app/)
+## Comandos
 
 ```bash
 npm start              # Servidor de desarrollo
-npm run web            # Versión web
-npm run lint           # ESLint
-npm run format         # Prettier
+npm run web            # Web
+npm run lint           # ESLint (0 errores; no añadir warnings: docs/desarrollo/WARNINGS.md)
 npm test               # Jest
-npx tsc --noEmit       # Typecheck
+npx tsc --noEmit       # Typecheck (y `npm run typecheck:tests`)
+npm run snapshot:cantoral  # Semilla del catálogo (antes de cada build y OTA)
 ```
 
-### Builds EAS
+Builds: **nunca** `npx eas-cli build` a pelo; `npm run eas:build:ios -- --profile …`
+(limpian los symlinks de skills). El proyecto EAS es **nuevo** y sale de
+`EAS_PROJECT_ID` (`app.config.ts`): sin él no hay `updates.url` y ninguna OTA
+puede caer en MCM App.
 
-**NUNCA uses `npx eas-cli build` directamente** — usa los scripts npm que limpian symlinks de Claude Code:
+## Reglas
 
-```bash
-npm run eas:build:ios -- --profile development      # iOS para dispositivo
-npm run eas:build:ios -- --profile production       # iOS para App Store
-npm run eas:build:android -- --profile development  # Android para dispositivo
-npm run eas:build:android -- --profile production   # Android para Play Store
-```
+1. **Datos**: el fork **solo lee `songs/*`** (y las lecturas del domingo) y
+   escribe únicamente en `songs/fallitos`, `songs/solicitudes`,
+   `choirSessions/<clave>`, `choirs` y `playlistShares/<código>`. Lo vigila
+   `__tests__/firebaseNodesGuard.test.ts`. Las **reglas de Firebase y las
+   Cloud Functions de MCM App son de `mcmapp`**: aquí no se despliegan reglas.
+2. **Nada de pestañas ni FAB** (T-05): una pila con barras inferiores.
+3. **Directo = cero toques para quien sigue y uno para quien dirige**;
+   controles de directo ≥ 56 pt (`03-diseno-y-flujos.md` §1).
+4. **Todo funciona sin red**: el catálogo vive en ficheros con semilla
+   empaquetada (`services/catalog/`). Las pantallas leen del catálogo, nunca
+   de Firebase directamente.
+5. **Una regla que se puede romper sin enterarse va en un test**, no en un
+   documento.
+6. **CHANGELOG.md**: entrada nueva arriba, `## YYYY-MM-DD HH:MM — Título`,
+   para cambios de funcionalidad, datos, navegación o dependencias.
+7. **OTA**: si un cambio lleva código nativo, `[skip-ota]` en el commit y una
+   línea al final de la respuesta: `OTA: ❌ — requiere build nativo
+   (paquetes: …). Commit con [skip-ota].` o `OTA: ✅ — solo JS.` Ritmo de
+   ramas `main → preview → production` como MCM App:
+   [`docs/desarrollo/OTA.md`](docs/desarrollo/OTA.md).
+8. **Logging**: nunca `console.*`; `@/utils/logger`. Hápticas por
+   `@/utils/haptics`. Importaciones con `@/`.
+9. **No toques `.env.local`** (credenciales de Firebase).
 
-## Documentación por tema
+## Dónde está cada cosa
 
-| Tema                                                                     | Documento                                                                    |
-| ------------------------------------------------------------------------ | ---------------------------------------------------------------------------- |
-| **🎨 Reglas de diseño para agentes (★ antes de tocar UI)**               | **`design.md`** (raíz) — inventario en `docs/desarrollo/DESIGN.md`           |
-| Incoherencias de diseño pendientes de unificar                           | `docs/planes/PLAN_DISENO.md`                                                 |
-| Diseño del área nativa de Comunica: piezas y reglas aprendidas           | `docs/desarrollo/AREA_NATIVA_DISENO.md`                                      |
-| Notificaciones push (sistema completo)                                   | `docs/funcionalidades/NOTIFICACIONES.md`                                     |
-| Inicio de sesión (Google/Apple) y huellas SHA-1 de Android               | `docs/funcionalidades/LOGIN.md`                                              |
-| Modo tester: canal `preview` de EAS Update (Laboratorio Alpha)           | `docs/funcionalidades/CANAL_PREVIEW.md`                                      |
-| Enlaces de una canción (Spotify, partituras, webs)                       | `docs/funcionalidades/ENLACES_CANCION.md`                                    |
-| Reglas de Firebase RTDB: qué falta y cómo desplegarlas                   | `docs/desarrollo/FIREBASE_REGLAS.md`                                         |
-| **OTA: `main` → `preview` → `production`, cuándo no empujar y rollback** | `docs/desarrollo/OTA.md`                                                     |
-| Contrato de notificaciones con el panel                                  | `docs/contratos/NOTIFICACIONES_CONTRATO.md`                                  |
-| Eventos (Jubileo, encuentros, retiros…)                                  | `docs/funcionalidades/EVENTOS.md`                                            |
-| Calendarios ICS y su precacheo (Cloud Function)                          | `docs/funcionalidades/CALENDARIOS.md`                                        |
-| Modo Carismochito y la colección (escondida en el Laboratorio Alpha)     | `docs/funcionalidades/CARISMOCHITO.md`                                       |
-| **Pañuelo virtual en 3D** (piezas, visor, intercambios; en el Laboratorio) | `docs/funcionalidades/PANUELO.md` + `docs/contratos/PANUELO_CONTRATO.md`     |
-| Modelos 3D y caras de las chapas, pines y troncho de verdad             | `piezas-3d/README.md`                                                        |
-| **Editor de canciones** (administradores; sustituye al panel secreto)     | `docs/funcionalidades/EDITOR_CANCIONES.md`                                   |
-| Coros y playlists compartidas                                            | `docs/funcionalidades/COROS.md`                                              |
-| Encuestas/evaluaciones                                                   | `docs/funcionalidades/ENCUESTAS.md` + `docs/contratos/ENCUESTAS_CONTRATO.md` |
-| Sistema de perfiles (App ↔ Panel)                                        | `docs/contratos/PANEL_PERFILES.md`                                           |
-| Seguridad y reglas Firebase                                              | `docs/SEGURIDAD.md`                                                          |
-| Orden de ejecución de planes (★ leer primero)                            | `docs/planes/BACKLOG.md`                                                     |
-| Qué plan está VIVO y cuál ya está HECHO (★★)                             | `docs/planes/README.md`                                                      |
-| **"Me sobran créditos"** → subir cobertura de tests (receta paso a paso) | `docs/desarrollo/COBERTURA.md`                                               |
-| Warnings del linter: cuáles quedan y por qué                             | `docs/desarrollo/WARNINGS.md`                                                |
-| **Probar en iPhone/Android desde el Mac (y desde Claude)**               | `docs/desarrollo/PRUEBAS_EN_SIMULADOR.md`                                    |
-| Cómo organizar código que solo edita una IA                              | `docs/planes/PLAN_CALIDAD.md` §0                                             |
-| Plan de saneamiento de código                                            | `docs/planes/PLAN_CALIDAD.md`                                                |
-| Etiquetas del cantoral (`{tags:}`)                                       | `docs/funcionalidades/ETIQUETAS.md`                                          |
-| Sistema de diseño / tabs                                                 | `docs/desarrollo/DESIGN.md` + `docs/desarrollo/TABS_MAINTENANCE.md`          |
-| Build de tienda de agosto 2026 (paso a paso)                             | `docs/desarrollo/BUILD_AGOSTO_2026.md`                                       |
-| Cómo se pinta una canción (hoja, cortes, vista compacta, admin igual)    | `docs/funcionalidades/HOJA_CANCION.md`                                       |
-| Arreglos del cantoral (`{arr:}`)                                         | `docs/funcionalidades/ARREGLOS.md`                                           |
-| Contigo: compartir como imagen, exportar y «Tu año»                     | `docs/funcionalidades/CONTIGO_COMPARTIR.md`                                  |
-| Subrayado de lecturas (Contigo)                                          | `docs/funcionalidades/SUBRAYADO.md`                                          |
-| Afinador de guitarra del cantoral                                        | `docs/funcionalidades/AFINADOR.md`                                           |
-| «Cantos para el domingo» (misa propuesta según el día litúrgico)         | `docs/funcionalidades/CANTOS_DOMINGO.md`                                     |
-| Recordatorios de Contigo (textos editables)                              | `docs/funcionalidades/RECORDATORIOS_CONTIGO.md`                              |
+| Qué | Dónde |
+| --- | ----- |
+| Rutas (una pila) | `app/` — `cancionero/` (categorías → lista → canción → pantalla completa), `cancion.tsx`, `coro.tsx`, `playlist.tsx` (puentes de enlaces) |
+| Pantallas | `app/screens/` |
+| Catálogo offline | `services/catalog/` + `hooks/useCatalog.ts` |
+| Repertorios y bloques | `services/repertorios/` |
+| Directo (protocolo, nube, wifi local) | `services/live/` |
+| Configuración remota y modo Navidad | `utils/cantoralConfig.ts` (`songs/cantoralConfig`) |
+| Hoja de canción (zona espejo) | `utils/songSheet*.ts`, `utils/songDocument.ts` |
+| Tokens de diseño | `constants/theme.ts` (+ `constants/colors.ts` heredado) |
+| Funcionalidades heredadas | `docs/funcionalidades/` (coros, hoja, arreglos, etiquetas, afinador, editor, enlaces, cantos del domingo) |
+| Tareas pendientes | `TODO.md` |

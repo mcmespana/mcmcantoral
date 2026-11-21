@@ -5,15 +5,13 @@
 > [`ota-preview.yml`](../../.github/workflows/ota-preview.yml) y
 > [`ota-production.yml`](../../.github/workflows/ota-production.yml). La regla
 > de `[skip-ota]` para cambios nativos está en
-> [`mcm-app/CLAUDE.md`](../../mcm-app/CLAUDE.md) (sección "OTA vs Build de
-> tienda"); el modo tester, en
-> [`CANAL_PREVIEW.md`](../funcionalidades/CANAL_PREVIEW.md).
+> [`CLAUDE.md`](../../CLAUDE.md) (sección "OTA").
 
 ## Qué es una OTA aquí
 
 Una OTA (EAS Update) es **el bundle JS entero del commit publicado**, no solo
 tu cambio. Lo recibe **todo binario instalado con la misma `runtimeVersion`**
-(hoy `2.5.1`, en `app.json`) que mire ese canal. Dos consecuencias:
+(hoy `1.0.0`, en `app.json`) que mire ese canal. Dos consecuencias:
 
 - Si el JS del commit necesita un módulo nativo que el binario de las tiendas
   no tiene, la app **crashea** al arrancar con esa OTA.
@@ -22,12 +20,13 @@ tu cambio. Lo recibe **todo binario instalado con la misma `runtimeVersion`**
 
 ## El flujo
 
-Hay tres ramas git y cada una publica a su canal de EAS Update al hacer push:
+**MCM Cantoral no tiene Laboratorio Alpha**: el canal `preview` lo reciben
+las builds de prueba. Hay tres ramas git y cada una publica a su canal de EAS Update al hacer push:
 
 | Rama git     | Workflow             | Canal EAS    | Quién lo recibe                                                    |
 | ------------ | -------------------- | ------------ | ------------------------------------------------------------------ |
 | `main`       | — (no publica)       | —            | Es la rama de desarrollo: aquí se mergean los PR                   |
-| `preview`    | `ota-preview.yml`    | `preview`    | Solo los dispositivos con el "Laboratorio Alpha" activado (7 taps) |
+| `preview`    | `ota-preview.yml`    | `preview`    | Solo las builds de prueba (perfil `preview` de `eas.json`)        |
 | `production` | `ota-production.yml` | `production` | Todos los usuarios                                                 |
 
 ```
@@ -37,7 +36,7 @@ PR → main ──merge→ preview ──(se prueba en el iPhone del usuario)─
 1. **PR a `main`.** Nada se publica.
 2. **A `preview`**: `git checkout preview && git merge main && git push`. En
    ~2 min hay OTA en el canal `preview`. El usuario la prueba en su iPhone
-   (Laboratorio Alpha). **Quien valida es el usuario**: nadie
+   (build de prueba). **Quien valida es el usuario**: nadie
    promueve a `production` sin que él lo diga.
 3. **A `production`**, solo cuando el usuario diga que está bien. Para que
    salga **exactamente lo que se probó**, mergea `preview` (no `main`, que
@@ -131,7 +130,7 @@ Precedente: 2026-11-07, enlace de la App Store roto. `hotfix/ota-rt-2.0.0`
 
 Lo primero, **parar el sangrado en `production`**; el arreglo de fondo viene
 después, por el flujo normal. Hay tres vías, de más a menos rápida. Los
-comandos se ejecutan desde `mcm-app/` con sesión de EAS (`eas login`).
+comandos se ejecutan desde `` con sesión de EAS (`eas login`).
 
 **1. `eas update:rollback` — la normal.** Republica el update anterior de la
 rama (o, si no hay anterior, vuelve al bundle embebido en el binario):

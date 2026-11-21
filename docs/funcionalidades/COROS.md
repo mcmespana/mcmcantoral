@@ -170,7 +170,7 @@ En la hoja del coro, un coro **sin playlists** ya no enseña «Importar la
   y una sesión olvidada caduca igual a las 12 h (`shouldRenewChoirSession` /
   `extendChoirSession` en `services/choirSessionService.ts`).
   ⚠️ Los textos de la app aún dicen «24 h» (`ChoirSheet`, `usePlaylistSharing`):
-  apuntado en `mcm-app/TODO.md`.
+  apuntado en `TODO.md`.
 - Tomar el mando reinicia el contador (empiezan otras 12 h) y la playlist del
   nuevo líder pasa a ser la de la sesión.
 - Unirse reemplaza tu lista por la del líder, con los mismos 10 s de deshacer.
@@ -237,7 +237,7 @@ Se esperan **5-10 coros**, así que la lista se lee entera sin paginar.
 
 ## Reglas de seguridad
 
-En `mcm-app/database.rules.json`:
+En `database.rules.json` de **mcmapp** (las reglas son suyas):
 
 - `/choirs` es de **lectura pública y enumerable** (hay que poder listarlos) y
   de escritura por coro (`$choirId`), nunca en la raíz.

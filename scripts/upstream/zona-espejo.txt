@@ -1,0 +1,27 @@
+# Zona espejo: ficheros que se mantienen IGUAL que en MCM App (allí con
+# `mcm-app/` delante). Uno por línea; una ruta acabada en `/` es una carpeta.
+# Lo lee scripts/upstream-diff.sh y lo vigila __tests__/zonaEspejo.test.ts.
+# Ver docs/DIVERGENCIAS.md §2.
+utils/songSheet.ts
+utils/songSheetLayout.ts
+utils/songDocument.ts
+utils/songDocumentBundle.ts
+utils/songDisplayBridge.ts
+utils/chordNotation.ts
+utils/transposeKey.ts
+utils/arrangements.ts
+utils/songTags.ts
+utils/chordProLint.ts
+utils/songEditor.ts
+utils/songUtils.ts
+utils/updatedAt.ts
+utils/tuner/
+utils/metronome.ts
+utils/playlistPdfHtml.ts
+utils/offlinePlaylist.ts
+utils/playlistCodes.ts
+utils/choirIds.ts
+utils/playlistSync.ts
+utils/liturgicalDay.ts
+utils/sundayMatch.ts
+utils/sundaySongs.ts

@@ -45,6 +45,8 @@ jobs:
     timeout-minutes: 20
     env:
       EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }} # yamllint disable-line
+      # Proyecto EAS de MCM Cantoral (NUEVO, no el de MCM App: ver app.config.ts).
+      EAS_PROJECT_ID: ${{ secrets.EAS_PROJECT_ID }}
     steps:
       - name: Checkout código
         uses: actions/checkout@v4
@@ -56,12 +58,16 @@ jobs:
         with:
           node-version: '24'
           cache: 'npm'
-          cache-dependency-path: mcm-app/package-lock.json
+          cache-dependency-path: package-lock.json
 
-      - name: Verificar que EXPO_TOKEN existe
+      - name: Verificar que EXPO_TOKEN y EAS_PROJECT_ID existen
         run: |
           if [ -z "${EXPO_TOKEN}" ]; then
             echo "::error::EXPO_TOKEN no está configurado en los secrets del repositorio"
+            exit 1
+          fi
+          if [ -z "${EAS_PROJECT_ID}" ]; then
+            echo "::error::EAS_PROJECT_ID no está configurado: hace falta el proyecto EAS NUEVO de MCM Cantoral (eas init). Sin él no se publica nada."
             exit 1
           fi
 
@@ -70,14 +76,12 @@ jobs:
         run: npm install -g eas-cli@21.0.2
 
       - name: Instalar dependencias
-        working-directory: ./mcm-app
         run: npm ci
 
       - name: Verificar autenticación
         run: eas whoami
 
       - name: Encolar build
-        working-directory: ./mcm-app
         env:
           PLATFORM: ${{ inputs.platform }}
           PROFILE: ${{ inputs.profile }}
@@ -91,4 +95,4 @@ jobs:
             ARGS+=(--auto-submit)
           fi
           eas build "${ARGS[@]}"
-          echo "Build encolada. Sigue el progreso en https://expo.dev (proyecto mcm-app)." >> "$GITHUB_STEP_SUMMARY"
+          echo "Build encolada. Sigue el progreso en https://expo.dev (proyecto mcm-cantoral)." >> "$GITHUB_STEP_SUMMARY"

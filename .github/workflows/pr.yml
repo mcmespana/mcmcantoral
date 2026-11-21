@@ -9,7 +9,7 @@
 # "disabled_manually": alguien lo desactivó desde la pestaña Actions. Con ese
 # estado GitHub NO crea el run — ni aparece en rojo ni en gris, simplemente no
 # existe—, así que desde entonces ninguna PR se verificó de verdad aunque el
-# archivo siguiera en el repo (era el §0 de mcm-app/TODO.md). El estado
+# archivo siguiera en el repo (era el §0 del TODO.md de MCM App). El estado
 # desactivado va pegado a la RUTA del workflow, no a su contenido: la única
 # forma de resucitarlo sin entrar en la web es registrarlo en una ruta nueva,
 # que nace activa. De ahí el rename.
@@ -39,7 +39,6 @@ on:
     paths-ignore:
       - "**.md"
       - "docs/**"
-      - "portadas-albumes/**"
       - ".gitignore"
       - ".prettierignore"
   workflow_dispatch:

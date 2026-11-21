@@ -15,7 +15,7 @@
  *      · `components/contigo/theme.ts` — paleta cálida de Contigo.
  *      · `constants/events.ts` — `tintColor` propio de cada evento.
  *    Cualquier otro color fuera de este archivo es un bug.
- * 4. `mcm-app/global.css` NO es una tercera paleta: son las variables del tema
+ * 4. `global.css` NO es una tercera paleta: son las variables del tema
  *    de HeroUI, cuyos nombres pertenecen a HeroUI (su `--accent` es nuestro
  *    `primary`). Se alimentan de los valores de aquí; no las renombres.
  */

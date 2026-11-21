@@ -30,20 +30,12 @@ cambios con parches (§4) o copiando el fichero. Si hay que tocarlos, el
 cambio se hace pensando en las dos apps y se apunta abajo como 🟢. Rutas del
 fork (en MCM App, con `mcm-app/` delante):
 
-```
-utils/songSheet.ts            utils/songSheetLayout.ts
-utils/songDocument.ts         utils/songDisplayBridge.ts
-utils/chordNotation.ts        utils/arrangements.ts
-utils/songTags.ts             utils/chordProLint.ts
-utils/songEditor.ts           utils/tuner/**
-utils/playlistPdfHtml.ts      utils/offlinePlaylist.ts
-utils/choirIds.ts             utils/playlistSync.ts
-```
-
-(La lista definitiva se cierra en la Fase 0 con el mapa de código.)
-`scripts/upstream-diff.sh` enseña qué ficheros de la zona espejo difieren de
-`upstream/main`. Un test del fork comprueba que la lista existe y que cada
-fichero está.
+La lista vive en **`scripts/upstream/zona-espejo.txt`** (hoja de canción,
+notación y transporte, arreglos, etiquetas, editor, afinador y metrónomo, PDF,
+repertorios offline y sus códigos, ids de coro, cantos del domingo).
+`scripts/upstream-diff.sh` enseña qué ficheros de la lista difieren de
+`upstream/main`, y `__tests__/zonaEspejo.test.ts` comprueba que la lista
+existe y que cada fichero está.
 
 ## 3. Divergencias
 
@@ -53,7 +45,7 @@ sentido en MCM App) · ↩️ vino de MCM App después del fork.
 
 | ID | Qué | Tipo | En MCM App | Dónde (fork) | Notas |
 | -- | --- | ---- | ---------- | ------------ | ----- |
-| DIV-001 | Sin barra de pestañas ni FAB; una pila con barras inferiores de vidrio | 🔒 | — | `app/_layout.tsx` | MCM App necesita sus pestañas |
+| DIV-001 | Sin barra de pestañas ni FAB; una pila con barras inferiores de vidrio | 🔒 | — | `app/_layout.tsx`, `app/index.tsx` | MCM App necesita sus pestañas |
 | DIV-002 | Identidad visual propia (sin territorios ni azul MCM) | 🔒 | — | `constants/theme.ts`, `design.md` | |
 | DIV-003 | Catálogo en ficheros con semilla empaquetada, escritura atómica, comparación numérica | 🟢 | ⏳ | `services/catalog/` | Arregla «la primera vez sin red está vacío» en MCM App |
 | DIV-004 | Varios repertorios (MCM App: una «Tu selección») | 🟢 | ⏳ | `services/repertorios/` | Compartir v3 ya es compatible con MCM App |
@@ -65,10 +57,14 @@ sentido en MCM App) · ↩️ vino de MCM App después del fork.
 | DIV-010 | Apuntes por capas (yo / instrumento / todos) | 🟢 | ⏳ | | |
 | DIV-011 | Riffs en ABC (abcjs) | 🟢 | ⏳ | zona espejo (hoja) | También requiere el generador del cantoral |
 | DIV-012 | Admin por código (Auth anónimo + función) | 🔒 | — | | MCM App ya tiene login |
-| DIV-013 | Sin Contigo, Comunica, calendario, fotos, eventos, encuestas, pañuelo, notificaciones, perfiles | 🔒 | — | (borrado) | |
-| DIV-014 | App en la raíz del repo, sin `mcm-app/` | 🔒 | — | (estructura) | Por eso se porta con parches (§4) |
+| DIV-013 | Sin Contigo, Comunica, calendario, fotos, eventos, encuestas, pañuelo, notificaciones, perfiles | 🔒 | — | (borrado, 21/11) | |
+| DIV-014 | App en la raíz del repo, sin `mcm-app/` | 🔒 | — | (estructura, 21/11) | Por eso se porta con parches (§4) |
 | DIV-015 | El cantoral no se congela en directo: se aplica al momento sin mover la canción | 🟢 | ⏳ | `services/catalog/` | |
 | DIV-016 | Seguir por sección, cuenta atrás de bloque, resumen al acabar | 🟢 | ⏳ | `services/live/` | |
+
+| DIV-017 | Mantenimiento y versión mínima en `songs/cantoralConfig` (no en `/profileConfig`) | 🔒 | — | `utils/cantoralConfig.ts`, `contexts/VersionGateContext.tsx` | La de MCM App bloquearía al fork |
+| DIV-018 | Nombre local en Ajustes en lugar del perfil (coro, fallitos, sugerencias) | 🔒 | — | `contexts/AppSettingsContext.tsx` (`choirName`) | |
+| DIV-019 | `qrScan` sin el pañuelo; textos «repertorio / directo» | 🔒 | — | `utils/qrScan.ts` | Lee igual los QR de las dos apps |
 
 Al añadir una fila: ID siguiente, una frase, tipo y dónde. Al portarla a MCM
 App: «✅ AAAA-MM-DD» y el PR de `mcmapp`.

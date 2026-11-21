@@ -55,8 +55,8 @@ esbuild
     banner: {
       js:
         `/* mcm-sheet.js — GENERADO, no editar. Hoja de canción de la app MCM ` +
-        `(mcmapp/mcm-app/utils/songDocument*.ts, commit ${commit}). ` +
-        `Regenerar con «npm run build:sheet-bundle» en mcm-app. */`,
+        `(utils/songDocument*.ts de MCM App o MCM Cantoral, commit ${commit}). ` +
+        `Regenerar con «npm run build:sheet-bundle» . */`,
     },
     logLevel: 'warning',
   })
