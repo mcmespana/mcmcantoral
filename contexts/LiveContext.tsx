@@ -84,12 +84,15 @@ export interface LivePrefs {
   reactionsMuted: boolean;
   /** Cantoral más nuevo del maestro: aplicarlo sin preguntar. */
   autoCatalog: boolean;
+  /** Brillo al máximo con el Atril delante en directo. */
+  brightUp: boolean;
 }
 
 export const DEFAULT_LIVE_PREFS: LivePrefs = {
   inst: [],
   reactionsMuted: false,
   autoCatalog: false,
+  brightUp: false,
 };
 
 const PREFS_KEY = '@cantoral_live_prefs_v1';

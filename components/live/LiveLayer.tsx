@@ -18,6 +18,7 @@ import { PressableFeedback } from 'heroui-native';
 import { MaterialIcons } from '@/components/ui/icons';
 import { useTheme } from '@/hooks/useTheme';
 import { useNow } from '@/hooks/useNow';
+import { useLiveBrightness } from '@/hooks/useLiveBrightness';
 import { useLive } from '@/contexts/LiveContext';
 import { useChoirSession } from '@/contexts/ChoirSessionContext';
 import { useCantoralConfig } from '@/hooks/useCantoralConfig';
@@ -87,6 +88,7 @@ export default function LiveLayer({
     role !== 'off' &&
     (view.avisos.length > 0 || !!countdown || !!cue || role === 'master');
   const now = useNow(ticking);
+  useLiveBrightness(!compact && role !== 'off' && prefs.brightUp);
 
   const avisos = useMemo(
     () =>

@@ -5,7 +5,7 @@
  * dirige.
  */
 import React from 'react';
-import { StyleSheet, Switch, Text, View } from 'react-native';
+import { Platform, StyleSheet, Switch, Text, View } from 'react-native';
 import { PressableFeedback } from 'heroui-native';
 import { useTheme } from '@/hooks/useTheme';
 import { useLive } from '@/contexts/LiveContext';
@@ -78,6 +78,16 @@ export default function LivePrefsSettings() {
         styles={styles}
         t={t}
       />
+      {Platform.OS !== 'web' ? (
+        <Row
+          title="Subir el brillo en directo"
+          help="Al máximo con la canción delante; al salir vuelve el de antes."
+          value={prefs.brightUp}
+          onChange={(brightUp) => setPrefs({ brightUp })}
+          styles={styles}
+          t={t}
+        />
+      ) : null}
     </View>
   );
 }

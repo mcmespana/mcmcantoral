@@ -15,3 +15,27 @@
 - [ ] Spike de wifi local en dos móviles reales (`01` §2.10).
 - [ ] Icono definitivo en Canva (D-06); hoy va el provisional.
 - [ ] Izan como colaborador del repo.
+- [ ] Probar un **pedal real** en iPad y en Android (`04` §8.6) y los
+      botones de volumen como pedal (iOS: norma 2.5.9; si Apple se queja,
+      `cantoralConfig.volumeButtons.ios = false`).
+- [ ] **Ensayo con el router del evento** y 10+ móviles (`04` §5.3): una sola
+      red, sin aislamiento de clientes, mDNS permitido. Probar también el
+      relevo (apagar el equipo base a mitad) y «Los dos» sin internet.
+- [ ] Crear en `songs/cantoralConfig` el evento con su `liveKey` y
+      `liveTransport`, y los bloques en `songs/packs` (repo del cantoral).
+
+## Directo: lo que falta en el código
+
+- [ ] **Seguir por sección** completo (`04` §10.1): hoy el maestro anuncia
+      «Ahora: …» con una cinta; falta resaltar y llevar la hoja hasta esa
+      sección en quien sigue (zona espejo: `utils/songDocument.ts`).
+- [ ] QR del directo con `ip:puerto` para entrar por la wifi cuando Bonjour
+      no funciona (`04` §5.1).
+- [ ] Pantalla propia antes del permiso de **red local** de iOS y el
+      «Probar la conexión del coro» del onboarding de Navidad (`04` §5.4).
+      Android 17: `ACCESS_LOCAL_NETWORK` en tiempo de ejecución cuando el
+      targetSdk llegue a 37.
+- [ ] Que un maestro le suba su cantoral más nuevo al equipo base por la
+      wifi (hoy el base reparte el suyo).
+- [ ] Revisar en dispositivo lo que solo está comprobado por tipos en
+      `services/live/local/native.ts` (puerto tras `listen`, `setEncoding`).
