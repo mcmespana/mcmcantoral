@@ -29,6 +29,7 @@ import AddToHomeBanner from '@/components/AddToHomeBanner';
 import CatalogUpdater from '@/components/CatalogUpdater';
 import CommandPalette from '@/components/CommandPalette';
 import LiveSummarySheet from '@/components/live/LiveSummarySheet';
+import { importApuntesFrom } from '@/services/apuntes';
 import ErrorBoundary from '@/components/ErrorBoundary';
 import MaintenanceScreen from '@/components/MaintenanceScreen';
 import UpdateRequiredScreen from '@/components/UpdateRequiredScreen';
@@ -117,6 +118,7 @@ function InnerLayout() {
         },
       );
       if (rep) repertoriosStore.create(rep);
+      if (raw) importApuntesFrom(raw);
       trackEvent('playlist_usada', {
         accion: 'importada',
         tamano: tramoTamano(songs.length),

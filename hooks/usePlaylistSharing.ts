@@ -16,6 +16,7 @@
  *     "actualizar la que subí" existe como opción de primera clase en vez de
  *     obligarte a recordar un código de 4 dígitos.
  */
+import { importApuntesFrom } from '@/services/apuntes';
 import {
   fromShared,
   newId,
@@ -136,6 +137,9 @@ export function usePlaylistSharing(opts: {
           name: meta?.name ?? nextLink?.name ?? 'Repertorio importado',
         }) ?? newRepertorio(meta?.name ?? 'Repertorio importado', now);
       const created = repertoriosStore.create({ ...rep, link: nextLink });
+      // Los apuntes que traiga (de Todos y de instrumento) se quedan aunque se
+      // deshaga: son de las canciones, no del repertorio.
+      if (meta?.shared) importApuntesFrom(meta.shared);
       toast.show({
         label,
         variant: 'success',

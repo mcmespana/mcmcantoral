@@ -14,6 +14,11 @@ import {
   type Apunte,
 } from '@/services/apuntes/model';
 import { ApuntesStore, fileFor, mergeById } from '@/services/apuntes/store';
+import {
+  collectShareableApuntes,
+  importSharedApuntes,
+  readSharedApuntes,
+} from '@/services/apuntes/share';
 import { memoryFiles } from '@/services/catalog/filesTypes';
 import { apuntesScript, toPainted } from '@/utils/apuntesScript';
 import { EMPTY_VIEW, liveReducer } from '@/services/live/protocol';
@@ -219,5 +224,38 @@ describe('apuntes en directo', () => {
     expect(readCloudExtras({ apuntes: { x: ev, y: 1 } }).apuntes).toHaveLength(
       1,
     );
+  });
+});
+
+describe('apuntes dentro del repertorio (`05` §6)', () => {
+  const items = [
+    { category: 'alabanza', filename: 'alabare.cho' },
+    { type: 'break' as const, title: 'Pausa' },
+    { category: 'alabanza', filename: 'alabare.cho' },
+  ];
+
+  it('se comparten los de Todos e instrumento, sin «Solo yo» ni repetir', async () => {
+    const s = new ApuntesStore(memoryFiles());
+    s.upsert({ ...note(1), id: 'a', layer: 'todos', orphan: true });
+    s.upsert({ ...note(2), id: 'b', layer: 'yo' });
+    s.upsert({ ...note(5), id: 'c', layer: 'inst:bajo' });
+    const out = await collectShareableApuntes(items, s);
+    expect(out.map((a) => a.id).sort()).toEqual(['a', 'c']);
+    expect(out[0]).not.toHaveProperty('orphan');
+  });
+
+  it('al importar llegan; lo mal formado o «Solo yo» no', async () => {
+    const s = new ApuntesStore(memoryFiles());
+    const raw = {
+      songs: [],
+      apuntes: [
+        { ...note(1), id: 'x', layer: 'todos' },
+        { ...note(2), id: 'y', layer: 'yo' },
+        { basura: true },
+      ],
+    };
+    expect(readSharedApuntes(raw)).toHaveLength(1);
+    expect(readSharedApuntes({ apuntes: 'no' })).toEqual([]);
+    expect(await importSharedApuntes(raw, s)).toBe(1);
   });
 });

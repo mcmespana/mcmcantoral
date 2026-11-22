@@ -9,6 +9,8 @@
 import type { RepertorioItem } from '@/services/repertorios/model';
 import { getDatabase, ref, get, set, remove, update } from 'firebase/database';
 import { getFirebaseApp } from '@/utils/firebaseApp';
+import { shareableApuntesOf } from '@/services/apuntes';
+import { logger } from '@/utils/logger';
 import type { SelectedSong } from '@/contexts/SelectedSongsContext';
 import {
   CODE_LENGTH,
@@ -30,6 +32,8 @@ export interface CloudPlaylist {
   items?: RepertorioItem[];
   event?: string;
   date?: string;
+  /** Apuntes de Todos e instrumento de sus canciones (MCM Cantoral, `05` §6). */
+  apuntes?: unknown[];
   name?: string;
   createdAt: number;
   updatedAt: number;
@@ -98,15 +102,26 @@ export async function uploadCloudPlaylist(
     items?: RepertorioItem[];
     event?: string;
     date?: string;
+    apuntes?: unknown[];
   },
 ): Promise<CloudPlaylist> {
   const now = Date.now();
+  // Los apuntes de Todos y de instrumento viajan con el repertorio (`05` §6).
+  const apuntes =
+    opts?.apuntes ??
+    (opts?.items
+      ? await shareableApuntesOf(opts.items).catch((e) => {
+          logger.warn('[apuntes] al subir', e);
+          return [];
+        })
+      : undefined);
   const payload: CloudPlaylist = {
     v: opts?.items ? 3 : 2,
     songs,
     items: opts?.items,
     event: opts?.event,
     date: opts?.date,
+    apuntes: apuntes?.length ? apuntes : undefined,
     name: opts?.name,
     createdAt: opts?.createdAt ?? now,
     updatedAt: now,
