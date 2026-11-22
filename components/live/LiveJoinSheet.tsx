@@ -18,6 +18,7 @@ import {
 import { PressableFeedback } from 'heroui-native';
 import BottomSheet from '@/components/BottomSheet';
 import { MaterialIcons } from '@/components/ui/icons';
+import { InstrumentPicker } from '@/components/live/LivePrefsSettings';
 import { useTheme } from '@/hooks/useTheme';
 import { useLive, keyOfSessionId } from '@/contexts/LiveContext';
 import { useChoirSession } from '@/contexts/ChoirSessionContext';
@@ -256,6 +257,12 @@ export default function LiveJoinSheet({
             )}
           </PressableFeedback>
         </View>
+
+        <Text style={styles.label}>¿Qué tocas?</Text>
+        <InstrumentPicker />
+        <Text style={styles.help}>
+          Para que te lleguen los avisos y apuntes de tu instrumento.
+        </Text>
 
         <Text style={styles.label}>¿Vas a dirigir? PIN de maestro</Text>
         <TextInput

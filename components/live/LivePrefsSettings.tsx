@@ -20,12 +20,12 @@ import spacing from '@/constants/spacing';
 import typography from '@/constants/typography';
 import { h } from '@/utils/haptics';
 
-export default function LivePrefsSettings() {
+/** «¿Qué tocas?»: los instrumentos de este dispositivo (Ajustes y Unirme). */
+export function InstrumentPicker() {
   const t = useTheme();
   const styles = createStyles(t);
   const { prefs, setPrefs } = useLive();
-
-  const toggleInst = (i: Instrumento) => {
+  const toggle = (i: Instrumento) => {
     h.select();
     setPrefs({
       inst: prefs.inst.includes(i)
@@ -33,31 +33,40 @@ export default function LivePrefsSettings() {
         : [...prefs.inst, i],
     });
   };
+  return (
+    <View style={styles.chips}>
+      {INSTRUMENTOS.map((i) => {
+        const on = prefs.inst.includes(i);
+        return (
+          <PressableFeedback
+            key={i}
+            onPress={() => toggle(i)}
+            style={[styles.chip, on && styles.chipOn]}
+            accessibilityRole="checkbox"
+            accessibilityState={{ checked: on }}
+            accessibilityLabel={INSTRUMENTO_LABEL[i]}
+          >
+            <PressableFeedback.Highlight />
+            <Text style={[styles.chipText, on && styles.chipTextOn]}>
+              {INSTRUMENTO_LABEL[i]}
+            </Text>
+          </PressableFeedback>
+        );
+      })}
+    </View>
+  );
+}
+
+export default function LivePrefsSettings() {
+  const t = useTheme();
+  const styles = createStyles(t);
+  const { prefs, setPrefs } = useLive();
 
   return (
     <View style={styles.block}>
       <Text style={styles.label}>Directo</Text>
       <Text style={styles.rowTitle}>¿Qué tocas?</Text>
-      <View style={styles.chips}>
-        {INSTRUMENTOS.map((i) => {
-          const on = prefs.inst.includes(i);
-          return (
-            <PressableFeedback
-              key={i}
-              onPress={() => toggleInst(i)}
-              style={[styles.chip, on && styles.chipOn]}
-              accessibilityRole="checkbox"
-              accessibilityState={{ checked: on }}
-              accessibilityLabel={INSTRUMENTO_LABEL[i]}
-            >
-              <PressableFeedback.Highlight />
-              <Text style={[styles.chipText, on && styles.chipTextOn]}>
-                {INSTRUMENTO_LABEL[i]}
-              </Text>
-            </PressableFeedback>
-          );
-        })}
-      </View>
+      <InstrumentPicker />
       <Text style={styles.help}>
         Los avisos para un instrumento («Bajos: fuera») solo te llegan si lo
         marcas aquí.
