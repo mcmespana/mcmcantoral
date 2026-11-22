@@ -11,7 +11,7 @@
  * Funcional, no decorativo (T-08): en modo normal solo salen el directo (si
  * lo hay) y los repertorios.
  */
-import React, { useMemo } from 'react';
+import React, { useMemo, useState } from 'react';
 import { ScrollView, StyleSheet, Text, View } from 'react-native';
 import { PressableFeedback } from 'heroui-native';
 import { MaterialIcons } from '@/components/ui/icons';
@@ -19,6 +19,8 @@ import { useTheme } from '@/hooks/useTheme';
 import { useRepertorios } from '@/hooks/useRepertorios';
 import { useCantoralConfig } from '@/hooks/useCantoralConfig';
 import { useChoirSession } from '@/contexts/ChoirSessionContext';
+import { useLive } from '@/contexts/LiveContext';
+import LiveJoinSheet from '@/components/live/LiveJoinSheet';
 import { openCantoral } from '@/utils/cantoralNavigation';
 import { formatDuration } from '@/utils/songCategories';
 import { isSong, type Repertorio } from '@/services/repertorios';
@@ -72,6 +74,8 @@ export default function HomeSections() {
   const config = useCantoralConfig();
   const choir = useChoirSession();
   const reps = useRepertorios();
+  const live = useLive();
+  const [joinKey, setJoinKey] = useState<string | null>(null);
 
   const navidad = config.effectiveMode === 'navidad' && !!config.event;
   const eventPacks = useMemo(() => {
@@ -91,15 +95,19 @@ export default function HomeSections() {
       : reps.list;
   }, [reps.list, reps.activeId]);
 
-  const live = choir.mode !== 'off' && choir.session;
+  const inLive = live.role !== 'off';
   const liveLabel =
-    choir.mode === 'master'
+    live.role === 'master'
       ? 'Estás dirigiendo'
-      : `Sigues a ${choir.session?.master?.name || 'quien dirige'}`;
+      : `Sigues a ${live.view.state?.by.name || choir.session?.master?.name || 'quien dirige'}`;
+  const liveTitle =
+    live.view.state?.repertorio.name ||
+    choir.session?.choirName ||
+    `Directo ${choir.code ?? live.localSession?.key ?? ''}`;
 
   return (
     <View>
-      {live ? (
+      {inLive ? (
         <PressableFeedback
           onPress={() => openCantoral('SelectedSongs')}
           style={[styles.card, styles.liveCard]}
@@ -111,7 +119,7 @@ export default function HomeSections() {
           <View style={styles.flex}>
             <Text style={styles.kicker}>EN DIRECTO</Text>
             <Text style={styles.cardTitle} numberOfLines={1}>
-              {choir.session?.choirName || `Directo ${choir.code ?? ''}`}
+              {liveTitle}
             </Text>
             <Text style={styles.cardMeta}>{liveLabel}</Text>
           </View>
@@ -128,11 +136,11 @@ export default function HomeSections() {
               .toUpperCase()}
           </Text>
           <Text style={styles.eventTitle}>{config.event.title}</Text>
-          {config.event.liveKey ? (
+          {config.event.liveKey && !inLive ? (
             <PressableFeedback
               onPress={() => {
                 h.tap();
-                openCantoral('SelectedSongs', { c: config.event!.liveKey });
+                setJoinKey(config.event!.liveKey ?? null);
               }}
               style={styles.joinButton}
               accessibilityRole="button"
@@ -214,6 +222,11 @@ export default function HomeSections() {
           );
         })}
       </ScrollView>
+      <LiveJoinSheet
+        visible={!!joinKey}
+        onClose={() => setJoinKey(null)}
+        presetKey={joinKey}
+      />
     </View>
   );
 }

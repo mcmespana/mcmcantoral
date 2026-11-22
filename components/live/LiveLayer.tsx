@@ -485,7 +485,7 @@ const createStyles = (t: ReturnType<typeof useTheme>) =>
       flexDirection: 'row',
       alignItems: 'center',
       gap: spacing.sm,
-      minHeight: TouchTarget.min,
+      minHeight: TouchTarget.live,
       paddingHorizontal: spacing.sm,
       borderRadius: radii.md,
       overflow: 'hidden',

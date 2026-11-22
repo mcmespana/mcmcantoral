@@ -28,6 +28,8 @@ import ContextMenuSheet, {
 } from '@/components/ContextMenuSheet';
 import { useTheme } from '@/hooks/useTheme';
 import { useRepertorios } from '@/hooks/useRepertorios';
+import { useLive } from '@/contexts/LiveContext';
+import LiveStartSheet from '@/components/live/LiveStartSheet';
 import { useSettings } from '@/contexts/SettingsContext';
 import { openCantoral } from '@/utils/cantoralNavigation';
 import { songNavItemFromEntry, songRouteParams } from '@/utils/songNavList';
@@ -58,6 +60,8 @@ export default function RepertorioScreen() {
   const rep = reps.byId(typeof id === 'string' ? id : undefined);
   const { settings } = useSettings();
   const [menu, setMenu] = useState(false);
+  const [directing, setDirecting] = useState<Repertorio | null>(null);
+  const live = useLive();
   const [renaming, setRenaming] = useState<string | null>(null);
 
   const duration = rep ? reps.durationOf(rep) : null;
@@ -287,6 +291,18 @@ export default function RepertorioScreen() {
             disabled: !rep.items.some(isSong),
             onPress: () => start(0),
           },
+          ...(live.role === 'off'
+            ? [
+                {
+                  key: 'direct',
+                  icon: 'sensors' as const,
+                  label: 'Dirigir',
+                  showLabel: true,
+                  disabled: !rep.items.some(isSong),
+                  onPress: () => setDirecting(reps.activate(rep)),
+                },
+              ]
+            : []),
           ...(rep.readOnly
             ? []
             : [
@@ -305,6 +321,12 @@ export default function RepertorioScreen() {
             onPress: () => setMenu(true),
           },
         ]}
+      />
+      <LiveStartSheet
+        visible={!!directing}
+        onClose={() => setDirecting(null)}
+        repertorio={directing}
+        onStarted={() => start(0)}
       />
       <ContextMenuSheet
         visible={menu}

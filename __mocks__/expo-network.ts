@@ -28,3 +28,15 @@ export const __setNetworkState = (state: Partial<typeof mockNetworkState>) => {
 export const __triggerNetworkChange = () => {
   listeners.forEach((l) => l(mockNetworkState));
 };
+
+export const NetworkStateType = {
+  NONE: 'NONE',
+  UNKNOWN: 'UNKNOWN',
+  CELLULAR: 'CELLULAR',
+  WIFI: 'WIFI',
+  BLUETOOTH: 'BLUETOOTH',
+  ETHERNET: 'ETHERNET',
+  WIMAX: 'WIMAX',
+  VPN: 'VPN',
+  OTHER: 'OTHER',
+} as const;

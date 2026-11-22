@@ -1,3 +1,4 @@
+import LiveJoinSheet from '@/components/live/LiveJoinSheet';
 import AjustesSheet from '@/components/AjustesSheet';
 import BottomBar, { BOTTOM_BAR_SPACE } from '@/components/ui/BottomBar';
 import HomeSections from '@/components/home/HomeSections';
@@ -133,6 +134,7 @@ export default function CategoriesScreen() {
   const displayCategories = baseCategoryItems;
 
   const [showForm, setShowForm] = useState(false);
+  const [showJoin, setShowJoin] = useState(false);
   const { toast } = useToast();
 
   // ── Etiquetas ────────────────────────────────────────────────────────────
@@ -666,7 +668,7 @@ export default function CategoriesScreen() {
             key: 'join',
             label: 'Unirme a un directo',
             icon: 'sensors',
-            onPress: () => openCantoral('SelectedSongs', { hoja: 'unirse' }),
+            onPress: () => setShowJoin(true),
           },
           {
             key: 'scan',
@@ -677,6 +679,7 @@ export default function CategoriesScreen() {
         ]}
       />
 
+      <LiveJoinSheet visible={showJoin} onClose={() => setShowJoin(false)} />
       <AjustesSheet
         visible={showSettings}
         onClose={() => setShowSettings(false)}

@@ -28,6 +28,7 @@ import { tramoTamano } from '@/constants/analyticsEvents';
 import AddToHomeBanner from '@/components/AddToHomeBanner';
 import CatalogUpdater from '@/components/CatalogUpdater';
 import CommandPalette from '@/components/CommandPalette';
+import LiveSummarySheet from '@/components/live/LiveSummarySheet';
 import ErrorBoundary from '@/components/ErrorBoundary';
 import MaintenanceScreen from '@/components/MaintenanceScreen';
 import UpdateRequiredScreen from '@/components/UpdateRequiredScreen';
@@ -178,6 +179,7 @@ function InnerLayout() {
       <CatalogUpdater />
       <AddToHomeBanner />
       <CommandPalette />
+      <LiveSummarySheet />
     </NavThemeProvider>
   );
 }
