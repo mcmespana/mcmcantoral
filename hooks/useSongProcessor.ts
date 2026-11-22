@@ -1,5 +1,5 @@
 import { logger } from '@/utils/logger';
-import { useState, useEffect, useMemo, useRef } from 'react';
+import { useState, useMemo } from 'react';
 import { Platform, useWindowDimensions } from 'react-native';
 import { Notation } from '../utils/chordNotation';
 import type { ChorusStyle } from '../utils/songSheetLayout';
@@ -65,6 +65,8 @@ export interface UseSongProcessorParams {
    * a RN (mensaje `{ type: 'arr-longpress', line }`) para insertar un `{arr:}`.
    */
   adminMode?: boolean;
+  /** Apuntes: `data-line` y toque largo → `line-longpress` (`05`). */
+  lineNotes?: boolean;
 }
 
 // El detalle pasa su propio `bottomInset` (la barra inferior de vidrio flota
@@ -80,6 +82,40 @@ const defaultBottomPadding = (isFullscreen: boolean) =>
         : 80;
 
 const defaultTopPadding = (isFullscreen: boolean) => (isFullscreen ? 72 : 16);
+
+interface BuiltSheet {
+  deps: unknown[];
+  html: string;
+  info: SongSheetInfo;
+}
+
+function sameDeps(a: unknown[], b: unknown[]): boolean {
+  return a.length === b.length && a.every((x, i) => Object.is(x, b[i]));
+}
+
+type ComposeOptions = Omit<Parameters<typeof buildSongDocument>[1], 'style'>;
+
+/** La hoja (o la de error) con el estilo de ahora dentro. */
+function composeSheet(
+  baseSong: ParsedResult['song'],
+  songError: SongParseError | null,
+  style: SongStyleState,
+  opts: ComposeOptions,
+): { html: string; info: SongSheetInfo } {
+  const errorHtml = () =>
+    buildErrorHtml(songError, style.isDark, style.fontFamily);
+  if (!baseSong) return { html: errorHtml(), info: NO_SHEET_INFO };
+  try {
+    const { html, sheetInfo } = buildSongDocument(baseSong, {
+      ...opts,
+      style,
+    });
+    return { html, info: sheetInfo };
+  } catch (err) {
+    logger.error('Error procesando canción en useSongProcessor:', err);
+    return { html: errorHtml(), info: NO_SHEET_INFO };
+  }
+}
 
 export const useSongProcessor = ({
   originalChordPro,
@@ -107,11 +143,8 @@ export const useSongProcessor = ({
   topInset,
   bottomInset,
   adminMode = false,
+  lineNotes = false,
 }: UseSongProcessorParams) => {
-  const [songHtml, setSongHtml] = useState<string>('Cargando…');
-  const [isLoadingSong, setIsLoadingSong] = useState<boolean>(true);
-  const [sheetInfo, setSheetInfo] = useState<SongSheetInfo>(NO_SHEET_INFO);
-
   const parsed = useMemo<ParsedResult>(() => {
     if (!originalChordPro) return { song: null, error: null };
     return parseChordPro(originalChordPro);
@@ -165,70 +198,17 @@ export const useSongProcessor = ({
     ],
   );
 
-  // Capture latest style in a ref so we can bake current values into HTML
-  // whenever structural deps change (without re-running the structural effect
-  // on every style change).
   // Escala de letra del sistema: la hoja la aplica en su CSS (ver
   // `systemFontScale` en songDocument). Cambiarla en ajustes recompone la hoja.
   const { fontScale: systemFontScale } = useWindowDimensions();
 
-  const styleRef = useRef(styleState);
-  styleRef.current = styleState;
-
-  useEffect(() => {
-    if (!originalChordPro) {
-      setIsLoadingSong(false);
-      return;
-    }
-    if (!baseSong) {
-      setSheetInfo(NO_SHEET_INFO);
-      setSongHtml(
-        buildErrorHtml(
-          songError,
-          styleRef.current.isDark,
-          styleRef.current.fontFamily,
-        ),
-      );
-      setIsLoadingSong(false);
-      return;
-    }
-
-    setIsLoadingSong(true);
-    try {
-      const { html, sheetInfo: info } = buildSongDocument(baseSong, {
-        style: styleRef.current,
-        currentTranspose,
-        notation,
-        title,
-        author,
-        key,
-        capo,
-        duration,
-        isFullscreen,
-        adminMode,
-        // En web no: el navegador ya tiene su propio zoom, y la vista previa
-        // del admin (`mcm-sheet.js`) tiene que pintar el mismo HTML.
-        systemFontScale: Platform.OS === 'web' ? undefined : systemFontScale,
-      });
-      setSheetInfo(info);
-      setSongHtml(html);
-    } catch (err) {
-      logger.error('Error procesando canción en useSongProcessor:', err);
-      setSongHtml(
-        buildErrorHtml(
-          songError,
-          styleRef.current.isDark,
-          styleRef.current.fontFamily,
-        ),
-      );
-    } finally {
-      setIsLoadingSong(false);
-    }
-    // Structural-only deps. Style-only changes (fontSize, fontFamily, isDark,
-    // chordsVisible, top/bottomInset) are picked up by `styleRef` for the next
-    // structural rebuild but do NOT trigger a rebuild on their own — the
-    // WebView updates them live via postMessage.
-  }, [
+  // La hoja se recompone SOLO con cambios estructurales (la canción, el tono,
+  // la notación…), y se compone al pintar —no en un efecto— con el estilo de
+  // ese momento ya dentro. Los cambios solo de estilo (letra, tema, acordes,
+  // márgenes) no la recomponen: el WebView los aplica en vivo por mensaje.
+  // Es el patrón de React «guardar lo del render anterior»: se compara con lo
+  // último compuesto y, si cambió, se compone y se guarda en el mismo render.
+  const structural: unknown[] = [
     originalChordPro,
     baseSong,
     songError,
@@ -241,8 +221,37 @@ export const useSongProcessor = ({
     duration,
     isFullscreen,
     adminMode,
+    lineNotes,
     systemFontScale,
-  ]);
+  ];
+  const [built, setBuilt] = useState<BuiltSheet | null>(null);
+  let current = built;
+  // Sin ChordPro (aún no ha llegado) se queda lo que hubiera.
+  if (originalChordPro && (!current || !sameDeps(current.deps, structural))) {
+    current = {
+      deps: structural,
+      ...composeSheet(baseSong, songError, styleState, {
+        currentTranspose,
+        notation,
+        title,
+        author,
+        key,
+        capo,
+        duration,
+        isFullscreen,
+        adminMode,
+        lineNotes,
+        // En web no: el navegador ya tiene su propio zoom, y la vista previa
+        // del admin (`mcm-sheet.js`) tiene que pintar el mismo HTML.
+        systemFontScale: Platform.OS === 'web' ? undefined : systemFontScale,
+      }),
+    };
+    setBuilt(current);
+  }
+  const songHtml = current?.html ?? 'Cargando…';
+  const sheetInfo = current?.info ?? NO_SHEET_INFO;
+  // Se compone al pintar: nunca hay una hoja «a medio hacer».
+  const isLoadingSong = false;
 
   return { songHtml, isLoadingSong, styleState, songError, sheetInfo };
 };

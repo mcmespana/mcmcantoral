@@ -529,6 +529,13 @@ export interface SongDocumentOptions {
   /** Números de línea del ChordPro (`data-line`) y toque largo → `{arr:}`. */
   adminMode?: boolean;
   /**
+   * Apuntes (MCM Cantoral, `05`): `data-line` en cada línea y toque largo →
+   * `{ type: 'line-longpress', line }` aunque no se sea admin. Con
+   * `adminMode` el toque largo sigue mandando `arr-longpress`. Apagado de
+   * serie: sin él, la hoja es la de siempre.
+   */
+  lineNotes?: boolean;
+  /**
    * Escala de letra del SISTEMA (`useWindowDimensions().fontScale`). La hoja
    * la aplica ella misma en el CSS (en las dos plataformas) y el WebView va
    * con `textZoom={100}`: antes solo Android la respetaba, vía el `textZoom`
@@ -584,8 +591,10 @@ export function buildSongDocument(
     duration,
     isFullscreen = false,
     adminMode = false,
+    lineNotes = false,
     systemFontScale,
   } = opts;
+  const longPress = adminMode || lineNotes;
   const s = opts.style;
   const c = themeVarsFor(s.isDark, s.sheetTheme);
 
@@ -604,7 +613,7 @@ export function buildSongDocument(
   };
   // En modo admin cada línea lleva su número en el ChordPro original
   // (`data-line`) para insertar arreglos con un toque largo.
-  const sheetHtml = renderSheetHtml(model, { lineNumbers: adminMode });
+  const sheetHtml = renderSheetHtml(model, { lineNumbers: longPress });
   // El título sale del ChordPro (ya escapado al parsear); si no trae, el
   // de la navegación, que sí hay que escapar.
   const songTitle = songForFormatting.title || escapeHtml(title ?? '');
@@ -747,10 +756,10 @@ export function buildSongDocument(
       window.addEventListener('message', onMessage);
 
       ${
-        adminMode
+        longPress
           ? `
-      // ── Modo admin: long-press sobre una fila → avisar a RN con el índice
-      // de la línea original (data-line) para insertar un {arr:} encima. ──
+      // ── Long-press sobre una fila → avisar a RN con el índice de la línea
+      // original (data-line): un {arr:} (admin) o un apunte (lineNotes). ──
       (function(){
         function post(payload) {
           var msg = JSON.stringify(payload);
@@ -783,7 +792,9 @@ export function buildSongDocument(
           timer = setTimeout(function(){
             fired = true;
             var line = parseInt(target.getAttribute('data-line'), 10);
-            if (!isNaN(line)) { flash(target); post({ type: 'arr-longpress', line: line }); }
+            if (!isNaN(line)) { flash(target); post({ type: ${JSON.stringify(
+              adminMode ? 'arr-longpress' : 'line-longpress',
+            )}, line: line }); }
             clear();
           }, DELAY);
         }
