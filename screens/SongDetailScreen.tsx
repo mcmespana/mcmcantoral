@@ -942,6 +942,13 @@ function SongDetailBody({
         fullBleed
         topInset={headerHeight > 0 ? headerHeight : insets.top + 44}
         pageRequest={pedal.pageRequest}
+        liveSection={
+          live.role !== 'off' &&
+          !live.free &&
+          live.view.state?.song?.filename === filename
+            ? (live.view.state.section ?? null)
+            : null
+        }
         onPageEdge={pedal.onPageEdge}
       />
       {/* Directo: va en el flujo, así que sus cintas EMPUJAN la letra. */}

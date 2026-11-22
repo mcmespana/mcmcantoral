@@ -1,6 +1,7 @@
 import { Palette, SheetPalette } from '@/constants/theme';
 import React, { useEffect, useRef, useState } from 'react';
 import { pedalPageScript } from '@/utils/pedalPage';
+import { liveSectionScript } from '@/utils/liveSections';
 import { View, StyleSheet, Platform } from 'react-native';
 import { WebView } from 'react-native-webview';
 import { Spinner } from 'heroui-native';
@@ -62,6 +63,11 @@ interface SongDisplayProps {
    */
   pageRequest?: { dir: 1 | -1; n: number } | null;
   onPageEdge?: (dir: 1 | -1) => void;
+  /**
+   * Directo: la sección (índice de `buildSheet`) que se está cantando; se
+   * resalta y se lleva a la vista. `null` = ninguna.
+   */
+  liveSection?: number | null;
 }
 
 /**
@@ -105,6 +111,7 @@ const SongDisplay: React.FC<SongDisplayProps> = ({
   docKey,
   pageRequest,
   onPageEdge,
+  liveSection = null,
 }) => {
   const scheme = useColorScheme();
   const isDark = scheme === 'dark';
@@ -195,6 +202,21 @@ const SongDisplay: React.FC<SongDisplayProps> = ({
       webViewRef.current?.injectJavaScript(js);
     }
   }, [view.swaps, view.shown]);
+
+  // Directo: resaltar la sección que se canta (también tras recargar).
+  useEffect(() => {
+    if (!ready) return;
+    const js = liveSectionScript(liveSection ?? -1);
+    if (Platform.OS === 'web') {
+      try {
+        (iframeRef.current?.contentWindow as any)?.eval(js);
+      } catch {
+        /* noop */
+      }
+    } else {
+      webViewRef.current?.injectJavaScript(js);
+    }
+  }, [liveSection, ready, view.swaps]);
 
   // Web (iframe): listen for window messages from the document. Solo los de
   // NUESTRO iframe: la pantalla completa (otro iframe) se queda montada encima

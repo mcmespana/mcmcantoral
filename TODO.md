@@ -26,9 +26,8 @@
 
 ## Directo: lo que falta en el código
 
-- [ ] **Seguir por sección** completo (`04` §10.1): hoy el maestro anuncia
-      «Ahora: …» con una cinta; falta resaltar y llevar la hoja hasta esa
-      sección en quien sigue (zona espejo: `utils/songDocument.ts`).
+- [ ] «Estamos aquí» tocando la sección en la hoja del maestro o pasándola
+      con el pedal (`04` §10.1); hoy se elige en «Avisos → Ahora hacemos…».
 - [ ] QR del directo con `ip:puerto` para entrar por la wifi cuando Bonjour
       no funciona (`04` §5.1).
 - [ ] Pantalla propia antes del permiso de **red local** de iOS y el

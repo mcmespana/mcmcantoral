@@ -909,7 +909,7 @@ export function renderSheetHtml(
         (preview ? `<span class="pv">${preview}</span>` : '') +
         `</summary>${sectionBody(s, lineNumbers)}</details>`;
       parts.push(
-        `<section class="sec ${kindCls} rep"><div class="rep-full">${full}</div>${fold}</section>`,
+        `<section class="sec ${kindCls} rep" data-i="${i}" data-n="${times}"><div class="rep-full">${full}</div>${fold}</section>`,
       );
       i += times;
       continue;
@@ -917,7 +917,7 @@ export function renderSheetHtml(
     const lbl =
       label && s.kind !== 'verse' ? `<div class="lbl">${label}</div>` : '';
     parts.push(
-      `<section class="sec ${kindCls}">${lbl}${sectionBody(s, lineNumbers)}</section>`,
+      `<section class="sec ${kindCls}" data-i="${i}">${lbl}${sectionBody(s, lineNumbers)}</section>`,
     );
     i++;
   }

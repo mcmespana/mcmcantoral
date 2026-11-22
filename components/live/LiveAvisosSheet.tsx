@@ -37,6 +37,7 @@ import { radii } from '@/constants/uiStyles';
 import spacing from '@/constants/spacing';
 import typography from '@/constants/typography';
 import { h } from '@/utils/haptics';
+import { sectionsForCue } from '@/utils/liveSections';
 
 /** Lo que se anuncia con «Ahora:» (el orden lo decide quien dirige). */
 export const SECTION_CUES = [
@@ -77,6 +78,15 @@ export default function LiveAvisosSheet({
   const state = live.view.state;
   const code = choir.code ?? live.localSession?.key ?? '';
   const sent = live.view.avisos.slice(-5).reverse();
+  // Las secciones de la canción que suena (si no, las de siempre, sin
+  // resaltar: solo la cinta).
+  const content = state?.song?.content;
+  const cues = useMemo(() => {
+    const own = sectionsForCue(content);
+    return own.length
+      ? own
+      : SECTION_CUES.map((label) => ({ index: -1, label }));
+  }, [content]);
 
   const send = (a: { kind: AvisoKind; text: string; preset?: string }) => {
     h.tap();
@@ -181,18 +191,28 @@ export default function LiveAvisosSheet({
 
         <Text style={styles.label}>Ahora hacemos…</Text>
         <View style={styles.chipsWrap}>
-          {SECTION_CUES.map((label) => (
+          {cues.map((c) => (
             <Chip
-              key={label}
-              label={label}
-              active={state?.sectionCue?.label === label}
+              key={`${c.index}-${c.label}`}
+              label={c.label}
+              active={
+                state?.sectionCue?.label === c.label &&
+                state.sectionCue.section === c.index
+              }
               onPress={() => {
                 h.tap();
-                live.cueSection(-1, label);
+                live.cueSection(c.index, c.label);
               }}
               styles={styles}
             />
           ))}
+          {state?.section != null && state.section >= 0 ? (
+            <Chip
+              label="Quitar"
+              onPress={() => live.cueSection(null)}
+              styles={styles}
+            />
+          ) : null}
         </View>
 
         <Text style={styles.label}>Cuenta atrás</Text>
