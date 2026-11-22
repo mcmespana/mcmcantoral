@@ -15,6 +15,10 @@ import {
 } from '@/services/apuntes/model';
 import { ApuntesStore, fileFor, mergeById } from '@/services/apuntes/store';
 import { memoryFiles } from '@/services/catalog/filesTypes';
+import { apuntesScript, toPainted } from '@/utils/apuntesScript';
+import { EMPTY_VIEW, liveReducer } from '@/services/live/protocol';
+import { parseWire } from '@/services/live/local/framing';
+import { readCloudExtras } from '@/services/live/cloud';
 
 const SONG_V1 = [
   '{title: Prueba}', // 0
@@ -174,6 +178,46 @@ describe('ApuntesStore', () => {
   it('fichero seguro aunque la categoría tenga barras', () => {
     expect(fileFor({ category: 'a/b', filename: 'c d.cho' })).toBe(
       'a~b~c%20d.cho.json',
+    );
+  });
+});
+
+describe('pintar en la hoja', () => {
+  it('es JS válido y el texto no puede cerrar el <script>', () => {
+    const js = apuntesScript(
+      toPainted([
+        { ...note(1), text: '</script><img src=x onerror=alert(1)>' },
+      ]),
+    );
+    expect(() => new Function(js)).not.toThrow();
+    expect(js).not.toContain('</script>');
+    expect(js).toContain('textContent');
+  });
+});
+
+describe('apuntes en directo', () => {
+  const ev = {
+    t: 'apunte' as const,
+    id: 'a1-1',
+    apunte: { ...note(2), layer: 'inst:bajo' },
+    from: 'm',
+    at: 5,
+  };
+
+  it('llega una vez aunque venga por los dos caminos', () => {
+    let v = liveReducer(EMPTY_VIEW, { type: 'event', event: ev }, 0);
+    v = liveReducer(v, { type: 'event', event: ev }, 0);
+    expect(v.apuntes).toHaveLength(1);
+    expect(parseApunte(v.apuntes[0].apunte)?.layer).toBe('inst:bajo');
+  });
+
+  it('pasa por el cable de la wifi y por la nube', () => {
+    expect(parseWire({ type: 'event', event: ev })).not.toBeNull();
+    expect(
+      parseWire({ type: 'event', event: { ...ev, apunte: 3 } }),
+    ).toBeNull();
+    expect(readCloudExtras({ apuntes: { x: ev, y: 1 } }).apuntes).toHaveLength(
+      1,
     );
   });
 });

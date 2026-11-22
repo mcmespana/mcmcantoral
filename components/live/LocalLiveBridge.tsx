@@ -43,6 +43,7 @@ export function viewToMessages(v: LiveView): LiveMessage[] {
   if (v.state) out.push({ type: 'state', state: v.state });
   for (const a of v.avisos) out.push({ type: 'event', event: a });
   for (const r of v.reacciones) out.push({ type: 'event', event: r });
+  for (const a of v.apuntes) out.push({ type: 'event', event: a });
   if (v.ended) out.push({ type: 'event', event: { t: 'fin', at: 0 } });
   return out;
 }

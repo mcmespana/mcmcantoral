@@ -78,6 +78,10 @@ interface SongControlsProps {
   onToggleNotation: () => void;
   onNavigateToFullscreen: () => void;
   onCopyLyrics: () => void;
+  /** Los apuntes de la canción (✎, `05`): capas y lista. */
+  onOpenNotes?: () => void;
+  /** Cuántos apuntes tiene (para la etiqueta). */
+  notesCount?: number;
   songTitle?: string;
   songFilename?: string;
   songAuthor?: string;
@@ -177,6 +181,8 @@ const SongControls: React.FC<SongControlsProps> = ({
   onToggleNotation,
   onNavigateToFullscreen,
   onCopyLyrics,
+  onOpenNotes,
+  notesCount = 0,
   songTitle,
   songFilename,
   songAuthor,
@@ -518,6 +524,17 @@ const SongControls: React.FC<SongControlsProps> = ({
                 }}
               />
             )}
+            {onOpenNotes ? (
+              <ActionButton
+                isDark={isDark}
+                icon="edit-note"
+                label={notesCount ? `Apuntes (${notesCount})` : 'Apuntes'}
+                onPress={() => {
+                  setMenuOpen(false);
+                  onOpenNotes();
+                }}
+              />
+            ) : null}
             <ActionButton
               isDark={isDark}
               icon="bug-report"

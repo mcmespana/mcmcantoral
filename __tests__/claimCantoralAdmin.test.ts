@@ -3,8 +3,9 @@
  * compara en el servidor por su huella, sin mayúsculas ni espacios, y con
  * 5 intentos por hora y dispositivo.
  */
-// eslint-disable-next-line @typescript-eslint/no-require-imports
-const logic = require('../functions/logic') as {
+import * as logicModule from '../functions/logic';
+
+const logic = logicModule as unknown as {
   MAX_ATTEMPTS: number;
   WINDOW_MS: number;
   hashCode: (c: string) => string;

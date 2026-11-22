@@ -11,6 +11,7 @@
  *   avisos/<id>           ← avisos del maestro (se podan: los últimos 20)
  *   reacciones/<deviceId> ← la última reacción de cada uno (acota el tamaño
  *                            y hace de límite de ritmo: 1 por dispositivo)
+ *   apuntes/<id>          ← apuntes que manda quien dirige (`05` §2)
  *
  * Las reglas de hoy ya permiten escribir en `choirSessions/<clave>` a quien
  * tenga la clave: no hace falta tocarlas (`04` §4).
@@ -27,7 +28,9 @@ import {
 import { getFirebaseApp } from '@/utils/firebaseApp';
 import { logger } from '@/utils/logger';
 import {
+  MAX_APUNTES,
   MAX_AVISOS,
+  type ApunteEvento,
   type Aviso,
   type Instrumento,
   type LiveState,
@@ -149,6 +152,21 @@ export async function sendAviso(
   return ids.slice(drop.length);
 }
 
+/** Un apunte al directo (como los avisos: se podan los más viejos). */
+export async function sendApunteLive(
+  key: string,
+  ev: ApunteEvento,
+  sentIds: string[],
+): Promise<string[]> {
+  const patch: Record<string, unknown> = { [`apuntes/${ev.id}`]: clean(ev) };
+  const ids = [...sentIds, ev.id];
+  const drop =
+    ids.length > MAX_APUNTES ? ids.slice(0, ids.length - MAX_APUNTES) : [];
+  for (const id of drop) patch[`apuntes/${id}`] = null;
+  await update(nodeRef(key), patch);
+  return ids.slice(drop.length);
+}
+
 /** La última reacción de este dispositivo (una por persona: límite de ritmo). */
 export async function sendReaccion(
   key: string,
@@ -163,6 +181,7 @@ export interface CloudLiveExtras {
   state: LiveState | null;
   avisos: Aviso[];
   reacciones: Reaccion[];
+  apuntes: ApunteEvento[];
   presence: Record<string, PresenceEntry>;
   masters: Record<string, { name?: string; joinedAt: number; at: number }>;
   masterPinHash: string | null;
@@ -192,10 +211,18 @@ export function readCloudExtras(node: unknown): CloudLiveExtras {
     (r): r is Reaccion =>
       !!r && typeof r === 'object' && (r as Reaccion).t === 'reaccion',
   );
+  const apuntes = Object.values(obj(n.apuntes)).filter(
+    (a): a is ApunteEvento =>
+      !!a &&
+      typeof a === 'object' &&
+      (a as ApunteEvento).t === 'apunte' &&
+      typeof (a as ApunteEvento).id === 'string',
+  );
   return {
     state,
     avisos,
     reacciones,
+    apuntes,
     presence: obj(n.presence) as Record<string, PresenceEntry>,
     masters: obj(n.masters) as CloudLiveExtras['masters'],
     masterPinHash: typeof n.masterPinHash === 'string' ? n.masterPinHash : null,

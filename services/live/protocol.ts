@@ -123,7 +123,19 @@ export interface Fin {
   at: number;
 }
 
-export type LiveEvent = Aviso | Reaccion | Fin;
+/**
+ * Un apunte que quien dirige manda al directo (`05` §2: «bajo: aquí
+ * entras»). Su contenido lo valida quien lo recibe (`parseApunte`).
+ */
+export interface ApunteEvento {
+  t: 'apunte';
+  id: string;
+  apunte: Record<string, unknown>;
+  from: string;
+  at: number;
+}
+
+export type LiveEvent = Aviso | Reaccion | Fin | ApunteEvento;
 
 /** Lo que viaja por cualquiera de los dos caminos. */
 export type LiveMessage =
@@ -153,6 +165,8 @@ export interface LiveView {
   avisos: Aviso[];
   /** Reacciones del último minuto (agregadas en la UI). */
   reacciones: Reaccion[];
+  /** Apuntes mandados al directo (los últimos `MAX_APUNTES`). */
+  apuntes: ApunteEvento[];
   ended: boolean;
 }
 
@@ -160,8 +174,12 @@ export const EMPTY_VIEW: LiveView = {
   state: null,
   avisos: [],
   reacciones: [],
+  apuntes: [],
   ended: false,
 };
+
+/** Cuántos apuntes de directo se recuerdan. */
+export const MAX_APUNTES = 50;
 
 /** Cuántos avisos se recuerdan (historial corto del seguidor). */
 export const MAX_AVISOS = 20;
@@ -189,6 +207,10 @@ export function liveReducer(
   }
   const ev = msg.event;
   if (ev.t === 'fin') return { ...view, ended: true };
+  if (ev.t === 'apunte') {
+    if (view.apuntes.some((a) => a.id === ev.id)) return view;
+    return { ...view, apuntes: [...view.apuntes, ev].slice(-MAX_APUNTES) };
+  }
   if (ev.t === 'aviso') {
     if (view.avisos.some((a) => a.id === ev.id)) return view;
     const avisos = [...view.avisos, ev]

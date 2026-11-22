@@ -46,6 +46,7 @@ import {
   removePresence,
   sendAviso as cloudSendAviso,
   sendReaccion as cloudSendReaccion,
+  sendApunteLive,
   unregisterMaster,
 } from '@/services/live/cloud';
 import {
@@ -57,6 +58,7 @@ import {
   nextState,
   pinHash,
   summarize,
+  type ApunteEvento,
   type Aviso,
   type AvisoKind,
   type Instrumento,
@@ -72,6 +74,7 @@ import {
 import { isSong, toSelection, type Repertorio } from '@/services/repertorios';
 import { catalogStore } from '@/services/catalog';
 import { logger } from '@/utils/logger';
+import { apuntesStore, parseApunte, type Apunte } from '@/services/apuntes';
 import { LOCAL_LIVE_AVAILABLE } from '@/services/live/local/native';
 
 export type LiveRole = 'off' | 'master' | 'follower';
@@ -217,6 +220,8 @@ interface LiveContextValue {
 
   // ── Quien sigue ──
   react: (emoji: string) => void;
+  /** Quien dirige: un apunte (de Todos o de un instrumento) al directo. */
+  sendApunte: (apunte: Apunte) => void;
 
   /** Unirse a un directo encontrado por la wifi (con PIN: para dirigir). */
   joinLocal: (found: NearbyLive, pin?: string) => void;
@@ -331,6 +336,8 @@ export function LiveProvider({ children }: { children: ReactNode }) {
 
   const masterStateRef = useRef<LiveState | null>(null);
   const sentAvisosRef = useRef<string[]>([]);
+  const sentApuntesRef = useRef<string[]>([]);
+  const importedApuntesRef = useRef<Set<string>>(new Set());
   const songLogRef = useRef<SungEntry[]>([]);
   const localRef = useRef<LiveLink | null>(null);
   const transportsRef = useRef<LiveTransport[]>(['cloud']);
@@ -411,6 +418,7 @@ export function LiveProvider({ children }: { children: ReactNode }) {
     if (extras.state) msgs.push({ type: 'state', state: extras.state });
     for (const a of extras.avisos) msgs.push({ type: 'event', event: a });
     for (const r of extras.reacciones) msgs.push({ type: 'event', event: r });
+    for (const a of extras.apuntes) msgs.push({ type: 'event', event: a });
     // Reloj de la ventana de reacciones: la más reciente que haya (puro).
     const latest = [...extras.reacciones, ...ownView.reacciones].reduce(
       (m, r) => Math.max(m, r.at),
@@ -730,6 +738,43 @@ export function LiveProvider({ children }: { children: ReactNode }) {
     return summary;
   }, [role, code, choir, owner]);
 
+  const sendApunte = useCallback(
+    (apunte: Apunte) => {
+      if (role !== 'master' || !code || apunte.layer === 'yo') return;
+      const now = Date.now();
+      const ev: ApunteEvento = {
+        t: 'apunte',
+        id: `${apunte.id}-${apunte.updatedAt.toString(36)}`,
+        apunte: JSON.parse(JSON.stringify(apunte)) as Record<string, unknown>,
+        from: choir.deviceId,
+        at: now,
+      };
+      broadcast({ type: 'event', event: ev });
+      if (choir.mode !== 'off') {
+        sendApunteLive(code, ev, sentApuntesRef.current)
+          .then((ids) => {
+            sentApuntesRef.current = ids;
+          })
+          .catch((e) => logger.warn('[directo] apunte', e));
+      }
+    },
+    [role, code, choir.deviceId, choir.mode, broadcast],
+  );
+
+  // Quien sigue: los apuntes del directo pasan a sus apuntes (al momento).
+  useEffect(() => {
+    if (role !== 'follower') return;
+    const fresh = view.apuntes.filter(
+      (a) => !importedApuntesRef.current.has(a.id),
+    );
+    if (!fresh.length) return;
+    for (const a of fresh) importedApuntesRef.current.add(a.id);
+    const list = fresh
+      .map((a) => parseApunte(a.apunte))
+      .filter((a): a is Apunte => !!a);
+    if (list.length) void apuntesStore.importMany(list);
+  }, [role, view.apuntes]);
+
   const react = useCallback(
     (emoji: string) => {
       if (role === 'off' || !code) return;
@@ -856,6 +901,7 @@ export function LiveProvider({ children }: { children: ReactNode }) {
       setReactionsOff,
       end,
       react,
+      sendApunte,
       joinLocal,
       localError,
       localSession,
@@ -896,6 +942,7 @@ export function LiveProvider({ children }: { children: ReactNode }) {
       setReactionsOff,
       end,
       react,
+      sendApunte,
       joinLocal,
       localError,
       localSession,
@@ -942,6 +989,7 @@ const OFF: LiveContextValue = {
   setReactionsOff: noop,
   end: async () => null,
   react: noop,
+  sendApunte: noop,
   joinLocal: noop,
   localError: null,
   localSession: null,

@@ -68,6 +68,11 @@ interface SongDisplayProps {
    * resalta y se lleva a la vista. `null` = ninguna.
    */
   liveSection?: number | null;
+  /**
+   * JS que se ejecuta en la hoja cuando está lista, cada vez que cambia y
+   * tras pintar otra versión dentro (apuntes, `utils/apuntesScript.ts`).
+   */
+  overlayScript?: string | null;
 }
 
 /**
@@ -112,6 +117,7 @@ const SongDisplay: React.FC<SongDisplayProps> = ({
   pageRequest,
   onPageEdge,
   liveSection = null,
+  overlayScript = null,
 }) => {
   const scheme = useColorScheme();
   const isDark = scheme === 'dark';
@@ -217,6 +223,20 @@ const SongDisplay: React.FC<SongDisplayProps> = ({
       webViewRef.current?.injectJavaScript(js);
     }
   }, [liveSection, ready, view.swaps]);
+
+  // Capas encima de la hoja (apuntes): también tras recargar o intercambiar.
+  useEffect(() => {
+    if (!ready || !overlayScript) return;
+    if (Platform.OS === 'web') {
+      try {
+        (iframeRef.current?.contentWindow as any)?.eval(overlayScript);
+      } catch {
+        /* noop */
+      }
+    } else {
+      webViewRef.current?.injectJavaScript(overlayScript);
+    }
+  }, [overlayScript, ready, view.swaps]);
 
   // Web (iframe): listen for window messages from the document. Solo los de
   // NUESTRO iframe: la pantalla completa (otro iframe) se queda montada encima

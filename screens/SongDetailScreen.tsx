@@ -73,6 +73,8 @@ import { useColorScheme } from '@/hooks/useColorScheme';
 import LiveLayer from '@/components/live/LiveLayer';
 import LiveFlash from '@/components/live/LiveFlash';
 import { useSongPedal } from '@/hooks/useSongPedal';
+import { useSongApuntes } from '@/components/apuntes/useSongApuntes';
+import { linePreview } from '@/components/apuntes/ApunteSheet';
 import ArrangementInputModal from '@/components/ArrangementInputModal';
 import * as Clipboard from 'expo-clipboard';
 import brandColors, { SwipeColors, themeColors } from '@/constants/colors';
@@ -364,6 +366,7 @@ function SongDetailBody({
     bottomInset: BOTTOM_BAR_SPACE + insets.bottom + 24,
     isDark,
     adminMode: isAdmin,
+    lineNotes: true,
   });
 
   const isSelected = isSongSelected(filename);
@@ -726,24 +729,25 @@ function SongDetailBody({
 
   // ── Arreglos por long-press (admin) ──
   // Mensaje desde el WebView/iframe: el usuario mantuvo pulsada una línea.
-  const handleSongMessage = (data: any) => {
-    if (!isAdmin || !data || data.type !== 'arr-longpress') return;
-    if (typeof data.line !== 'number') return;
-    h.select();
-    setArrLineIndex(data.line);
-    setArrError(null);
-    setArrModalVisible(true);
-  };
+  // Toques largos y apuntes de la hoja (`05`); el admin elige entre un
+  // apunte y un arreglo oficial `{arr:}`.
+  const apuntes = useSongApuntes({
+    song: filename ? { category: firebaseCategory ?? '', filename } : null,
+    content: originalChordPro,
+    isAdmin,
+    onArrangement: (line) => {
+      h.select();
+      setArrLineIndex(line);
+      setArrError(null);
+      setArrModalVisible(true);
+    },
+  });
 
-  // Texto (preview) de la línea sobre la que se insertará el arreglo.
-  const arrPreviewLine = useMemo(() => {
-    if (arrLineIndex === null || !originalChordPro) return undefined;
-    const line = originalChordPro.split(/\r?\n/)[arrLineIndex];
-    if (!line) return undefined;
-    // Mostramos la letra sin los acordes entre corchetes, más legible.
-    const clean = line.replace(/\[[^\]]*\]/g, '').trim();
-    return clean || line.trim();
-  }, [arrLineIndex, originalChordPro]);
+  // La línea (sin acordes) sobre la que irá el arreglo.
+  const arrPreviewLine =
+    arrLineIndex === null || !originalChordPro
+      ? undefined
+      : linePreview(originalChordPro, arrLineIndex) || undefined;
 
   const handleSaveArrangement = async (text: string) => {
     if (arrLineIndex === null || !originalChordPro) {
@@ -912,10 +916,6 @@ function SongDetailBody({
     { ...keyOpts, preventDefault: false },
   );
 
-  if (isLoadingSettings) {
-    // Brief settings loading
-  }
-
   // Mismo color que el fondo del HTML de la letra (`bodyBg` en useSongProcessor)
   // para que el header transparente y la letra full-bleed se vean como un único
   // fondo (sin el efecto de "dos fondos").
@@ -935,7 +935,8 @@ function SongDetailBody({
         songHtml={songHtml}
         isLoading={isSongProcessing || isLoadingSettings}
         styleState={styleState}
-        onMessage={isAdmin ? handleSongMessage : undefined}
+        onMessage={apuntes.onMessage}
+        overlayScript={apuntes.script}
         // Misma canción → transponer o cambiar la notación se pinta sin
         // recargar la hoja (ni volver arriba).
         docKey={filename}
@@ -984,6 +985,8 @@ function SongDetailBody({
         onToggleNotation={handleToggleNotation}
         onNavigateToFullscreen={handleNavigateToFullscreen}
         onCopyLyrics={handleCopyLyrics}
+        onOpenNotes={apuntes.openList}
+        notesCount={apuntes.count}
         songTitle={_navScreenTitle}
         songFilename={filename}
         songAuthor={author}
@@ -1067,6 +1070,7 @@ function SongDetailBody({
     <View style={{ flex: 1, backgroundColor: screenBg }}>
       {gestureContent}
       <LiveFlash />
+      {apuntes.sheets}
       {hasPrev && (
         <SongSwipePeek
           side="prev"

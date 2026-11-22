@@ -47,7 +47,10 @@ function isLiveState(v: unknown): v is LiveState {
 function isLiveEvent(v: unknown): v is LiveEvent {
   return (
     isObj(v) &&
-    (v.t === 'aviso' || v.t === 'reaccion' || v.t === 'fin') &&
+    (v.t === 'aviso' ||
+      v.t === 'reaccion' ||
+      v.t === 'fin' ||
+      (v.t === 'apunte' && typeof v.id === 'string' && isObj(v.apunte))) &&
     typeof v.at === 'number'
   );
 }
