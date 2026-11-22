@@ -119,6 +119,7 @@ const styles = StyleSheet.create({
   bar: {
     flexDirection: 'row',
     alignItems: 'center',
+    justifyContent: 'space-around',
     gap: spacing.xs,
     padding: spacing.xs,
     borderRadius: radii.pillFull,
