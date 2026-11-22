@@ -1,0 +1,9 @@
+{
+  "functions": [
+    {
+      "source": "functions",
+      "codebase": "cantoral",
+      "ignore": ["node_modules", ".git", "*.log", "README.md", "hash-code.js"]
+    }
+  ]
+}

@@ -4,6 +4,17 @@
 > dependencias). Entrada nueva arriba, con fecha Y hora de España. La
 > historia anterior al fork está en el repo de MCM App.
 
+## 2026-11-22 10:05 — Fase 4: administrador por código
+
+- Al arrancar, la app entra **en silencio** con Firebase Auth anónimo (un
+  `uid` por instalación, sin pantalla ni correo).
+- Ajustes → **«Soy administrador»**: el código lo comprueba la función
+  `claimCantoralAdmin` (`functions/`, codebase `cantoral`, 5 intentos por
+  hora) contra su huella en `/_config/cantoral`, y deja
+  `users/<uid>/isAdmin`, que es lo que ya mira el NAS del editor.
+- Nueva dependencia de servidor: `functions/` (firebase-admin,
+  firebase-functions). Hay que activarlo fuera del código (`TODO.md`).
+
 ## 2026-11-22 09:40 — Fase 3: el directo
 
 - **Protocolo propio** (`services/live/protocol.ts`): un estado del maestro

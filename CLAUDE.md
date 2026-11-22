@@ -45,9 +45,11 @@ puede caer en MCM App.
 
 1. **Datos**: el fork **solo lee `songs/*`** (y las lecturas del domingo) y
    escribe únicamente en `songs/fallitos`, `songs/solicitudes`,
-   `choirSessions/<clave>`, `choirs` y `playlistShares/<código>`. Lo vigila
+   `choirSessions/<clave>`, `choirs` y `playlistShares/<código>` (y lee
+   `users/<uid>/isAdmin`, el admin por código). Lo vigila
    `__tests__/firebaseNodesGuard.test.ts`. Las **reglas de Firebase y las
-   Cloud Functions de MCM App son de `mcmapp`**: aquí no se despliegan reglas.
+   Cloud Functions de MCM App son de `mcmapp`**: aquí no se despliegan reglas;
+   las funciones propias van en `functions/` (codebase `cantoral`).
 2. **Nada de pestañas ni FAB** (T-05): una pila con barras inferiores.
 3. **Directo = cero toques para quien sigue y uno para quien dirige**;
    controles de directo ≥ 56 pt (`03-diseno-y-flujos.md` §1).
@@ -60,7 +62,7 @@ puede caer en MCM App.
    para cambios de funcionalidad, datos, navegación o dependencias.
 7. **OTA**: si un cambio lleva código nativo, `[skip-ota]` en el commit y una
    línea al final de la respuesta: `OTA: ❌ — requiere build nativo
-   (paquetes: …). Commit con [skip-ota].` o `OTA: ✅ — solo JS.` Ritmo de
+(paquetes: …). Commit con [skip-ota].` o `OTA: ✅ — solo JS.` Ritmo de
    ramas `main → preview → production` como MCM App:
    [`docs/desarrollo/OTA.md`](docs/desarrollo/OTA.md).
 8. **Logging**: nunca `console.*`; `@/utils/logger`. Hápticas por
@@ -69,15 +71,15 @@ puede caer en MCM App.
 
 ## Dónde está cada cosa
 
-| Qué | Dónde |
-| --- | ----- |
-| Rutas (una pila) | `app/` — `cancionero/` (categorías → lista → canción → pantalla completa), `cancion.tsx`, `coro.tsx`, `playlist.tsx` (puentes de enlaces) |
-| Pantallas | `screens/` |
-| Catálogo offline | `services/catalog/` + `hooks/useCatalog.ts` |
-| Repertorios y bloques | `services/repertorios/` |
-| Directo (protocolo, nube, wifi local) | `services/live/` |
-| Configuración remota y modo Navidad | `utils/cantoralConfig.ts` (`songs/cantoralConfig`) |
-| Hoja de canción (zona espejo) | `utils/songSheet*.ts`, `utils/songDocument.ts` |
-| Tokens de diseño | `constants/theme.ts` (+ `constants/colors.ts` heredado) |
-| Funcionalidades heredadas | `docs/funcionalidades/` (coros, hoja, arreglos, etiquetas, afinador, editor, enlaces, cantos del domingo) |
-| Tareas pendientes | `TODO.md` |
+| Qué                                   | Dónde                                                                                                                                     |
+| ------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------- |
+| Rutas (una pila)                      | `app/` — `cancionero/` (categorías → lista → canción → pantalla completa), `cancion.tsx`, `coro.tsx`, `playlist.tsx` (puentes de enlaces) |
+| Pantallas                             | `screens/`                                                                                                                                |
+| Catálogo offline                      | `services/catalog/` + `hooks/useCatalog.ts`                                                                                               |
+| Repertorios y bloques                 | `services/repertorios/`                                                                                                                   |
+| Directo (protocolo, nube, wifi local) | `services/live/`                                                                                                                          |
+| Configuración remota y modo Navidad   | `utils/cantoralConfig.ts` (`songs/cantoralConfig`)                                                                                        |
+| Hoja de canción (zona espejo)         | `utils/songSheet*.ts`, `utils/songDocument.ts`                                                                                            |
+| Tokens de diseño                      | `constants/theme.ts` (+ `constants/colors.ts` heredado)                                                                                   |
+| Funcionalidades heredadas             | `docs/funcionalidades/` (coros, hoja, arreglos, etiquetas, afinador, editor, enlaces, cantos del domingo)                                 |
+| Tareas pendientes                     | `TODO.md`                                                                                                                                 |

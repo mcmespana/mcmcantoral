@@ -24,6 +24,13 @@
 - [ ] Crear en `songs/cantoralConfig` el evento con su `liveKey` y
       `liveTransport`, y los bloques en `songs/packs` (repo del cantoral).
 
+- [ ] **Admin por código** (`functions/README.md`): activar el inicio de
+      sesión **anónimo** en Firebase Auth, guardar la huella del código en
+      `/_config/cantoral/adminCodeHashes`, añadir las reglas en `mcmapp`
+      (`/_config/cantoral` cerrado; `users/$uid/isAdmin` legible solo por su
+      `uid`) y desplegar `functions:cantoral`. Luego, probar el editor contra
+      el NAS con un admin anónimo (`06` 6.4).
+
 ## Directo: lo que falta en el código
 
 - [ ] «Estamos aquí» tocando la sección en la hoja del maestro o pasándola

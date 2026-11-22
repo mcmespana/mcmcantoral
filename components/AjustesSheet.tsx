@@ -1,6 +1,7 @@
 /**
  * Ajustes de la app (`03-diseno-y-flujos.md` §3): tema, cómo te llamas en el
- * coro, el directo (qué tocas, reacciones), el pedal y la versión. Lo de la hoja de canción (letra, acordes, notación) vive
+ * coro, el directo (qué tocas, reacciones), el pedal, «Soy administrador» y
+ * la versión. Lo de la hoja de canción (letra, acordes, notación) vive
  * en «Aa» dentro del Atril.
  */
 import React from 'react';
@@ -21,6 +22,7 @@ import typography from '@/constants/typography';
 import { APP_NAME } from '@/constants/appLinks';
 import LivePrefsSettings from '@/components/live/LivePrefsSettings';
 import PedalSettings from '@/components/PedalSettings';
+import AdminCodeSettings from '@/components/AdminCodeSettings';
 
 export default function AjustesSheet({
   visible,
@@ -76,6 +78,7 @@ export default function AjustesSheet({
 
       <LivePrefsSettings />
       <PedalSettings />
+      <AdminCodeSettings />
 
       {children}
 

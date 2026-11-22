@@ -43,6 +43,7 @@ const native = {
     // ESM sin transpilar, igual que los otros dos: sin esto, cualquier test
     // que monte `AuthProvider` muere con «Unexpected token 'export'».
     '^firebase/auth$': '<rootDir>/__mocks__/firebase-auth.ts',
+    '^firebase/functions$': '<rootDir>/__mocks__/firebase-functions.ts',
     '^expo-network$': '<rootDir>/__mocks__/expo-network.ts',
     // El micrófono del afinador es un TurboModule: sin su mock oficial, todo
     // test que monte el cantoral entero (los de rutas) muere al importarlo.

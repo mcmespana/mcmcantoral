@@ -32,3 +32,6 @@ export const OAuthProvider = jest.fn(() => ({
   credential: jest.fn(() => ({ providerId: 'apple.com' })),
 }));
 export const browserPopupRedirectResolver = {};
+export const signInAnonymously = jest.fn(() =>
+  Promise.resolve({ user: { uid: 'anon-uid', isAnonymous: true } }),
+);
