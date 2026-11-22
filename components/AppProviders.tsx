@@ -4,6 +4,8 @@ import { HeroUINativeProvider } from 'heroui-native';
 import { AppSettingsProvider } from '@/contexts/AppSettingsContext';
 import { AppToastProvider } from '@/contexts/AppToastContext';
 import { ChoirSessionProvider } from '@/contexts/ChoirSessionContext';
+import { LiveProvider } from '@/contexts/LiveContext';
+import LocalLiveBridge from '@/components/live/LocalLiveBridge';
 import { OTAProvider } from '@/contexts/OTAContext';
 import { OverlayStackProvider } from '@/contexts/OverlayStackContext';
 import { SelectedSongsProvider } from '@/contexts/SelectedSongsContext';
@@ -40,9 +42,12 @@ export default function AppProviders({
             <UniwindThemeBridge />
             <SelectedSongsProvider>
               <ChoirSessionProvider>
-                <OTAProvider>
-                  <VersionGateProvider>{children}</VersionGateProvider>
-                </OTAProvider>
+                <LiveProvider>
+                  <LocalLiveBridge />
+                  <OTAProvider>
+                    <VersionGateProvider>{children}</VersionGateProvider>
+                  </OTAProvider>
+                </LiveProvider>
               </ChoirSessionProvider>
             </SelectedSongsProvider>
           </AppSettingsProvider>

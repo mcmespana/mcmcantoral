@@ -1,3 +1,4 @@
+/* global jest */
 /**
  * Mocks de módulos NATIVOS, para toda la suite.
  *
@@ -96,3 +97,35 @@ jest.mock('react-native/src/private/assets/AssetRegistry', () => ({
 jest.mock('react-native-worklets', () =>
   require('react-native-worklets/lib/module/mock'),
 );
+
+// Wifi del coro (`services/live/local/native.ts`): módulos nativos sin
+// implementación en Jest. Los tests del camino local usan `net` de Node.
+jest.mock('react-native-tcp-socket', () => ({
+  __esModule: true,
+  default: {
+    createServer: jest.fn(() => ({
+      on: jest.fn(),
+      listen: jest.fn(),
+      close: jest.fn(),
+      address: jest.fn(() => null),
+    })),
+    createConnection: jest.fn(() => ({
+      on: jest.fn(),
+      write: jest.fn(),
+      end: jest.fn(),
+      destroy: jest.fn(),
+      setEncoding: jest.fn(),
+    })),
+  },
+}));
+jest.mock('react-native-zeroconf', () => ({
+  __esModule: true,
+  default: jest.fn().mockImplementation(() => ({
+    on: jest.fn(),
+    scan: jest.fn(),
+    stop: jest.fn(),
+    publishService: jest.fn(async () => ({ name: 'mock' })),
+    unpublishService: jest.fn(async () => {}),
+    removeDeviceListeners: jest.fn(),
+  })),
+}));

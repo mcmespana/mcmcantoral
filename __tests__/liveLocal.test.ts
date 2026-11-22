@@ -288,6 +288,28 @@ describe('hub + cliente (net, localhost)', () => {
     expect(rig.hub.getState()?.index).toBe(-1);
   });
 
+  test('quien sigue puede reaccionar (firmada como suya), nada más', async () => {
+    const rig = await startRig();
+    const errors: string[] = [];
+    const a = makeClient(rig, 'a', { onError: (c) => errors.push(c) });
+    const b = makeClient(rig, 'b');
+    await until(() => [a, b].every((c) => c.getStatus() === 'online'));
+    a.sendEvent({ t: 'reaccion', e: '🔥', from: 'impostor', at: Date.now() });
+    await until(() => b.getView().reacciones.length === 1);
+    expect(b.getView().reacciones[0]).toMatchObject({ e: '🔥', from: 'a' });
+    a.sendEvent({
+      t: 'aviso',
+      id: 'x',
+      kind: 'cinta',
+      text: 'no',
+      ttlMs: 1,
+      from: 'a',
+      at: 1,
+    });
+    await until(() => errors.includes('pin'));
+    expect(b.getView().avisos).toHaveLength(0);
+  });
+
   test('el dueño manda sin PIN y una orden vieja se rechaza', async () => {
     const rig = await startRig();
     const f = makeClient(rig, 'f');

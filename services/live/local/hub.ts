@@ -29,6 +29,7 @@ import {
   MISSED_BEATS,
   liveReducer,
   type LiveMessage,
+  type Reaccion,
   type LiveState,
   type LiveView,
   type PresenceEntry,
@@ -298,11 +299,24 @@ export class LocalHub {
         this.send(conn, { op: 'pong', at: m.at });
         break;
       case 'command': {
-        if (!conn.master) {
+        // Quien sigue solo puede reaccionar (y firmada como suya).
+        const isReaction =
+          m.msg.type === 'event' && m.msg.event.t === 'reaccion';
+        if (!conn.master && !isReaction) {
           this.send(conn, { op: 'error', code: 'pin', id: m.id });
           break;
         }
-        const r = this.apply(m.msg);
+        const msg: LiveMessage =
+          isReaction && !conn.master && conn.hello && m.msg.type === 'event'
+            ? {
+                type: 'event',
+                event: {
+                  ...m.msg.event,
+                  from: conn.hello.deviceId,
+                } as Reaccion,
+              }
+            : m.msg;
+        const r = this.apply(msg);
         if (r === 'ok' || r === 'dup') this.send(conn, { op: 'ack', id: m.id });
         else this.send(conn, { op: 'error', code: r, id: m.id });
         break;
