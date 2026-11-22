@@ -29,6 +29,11 @@ import {
 } from '@/utils/songNavList';
 import { useChoirSession } from '@/contexts/ChoirSessionContext';
 import { useLive } from '@/contexts/LiveContext';
+import LiveLayer from '@/components/live/LiveLayer';
+import LiveFlash from '@/components/live/LiveFlash';
+import { usePedal } from '@/hooks/usePedal';
+import { pedalPageScript } from '@/utils/pedalPage';
+import { TouchTarget } from '@/constants/theme';
 import { useSelectedSongs } from '@/contexts/SelectedSongsContext';
 import { h } from '@/utils/haptics';
 import { resolveFullscreenSong } from '@/utils/fullscreenSong';
@@ -649,6 +654,19 @@ function SongFullscreenBody({
     if (!sheet?.__SONG_LAYOUT__?.page(dir)) go(dir);
   };
   const pagedKeys = { disabled: !paged };
+  // Pedal en iOS/Android (en la web lo llevan los atajos de arriba).
+  usePedal({
+    enabled: !isWeb,
+    onAction: (a) => {
+      poke();
+      if (a === 'nextSong') go(1);
+      else if (a === 'prevSong') go(-1);
+      else
+        webViewRef.current?.injectJavaScript(
+          pedalPageScript(a === 'next' ? 1 : -1, 'sheet-nav'),
+        );
+    },
+  });
   useKeyboardShortcut(PAGE_NEXT_KEYS, () => pageOrGo(1), pagedKeys);
   useKeyboardShortcut(PAGE_PREV_KEYS, () => pageOrGo(-1), pagedKeys);
 
@@ -710,6 +728,9 @@ function SongFullscreenBody({
           />
         )}
       </View>
+      {/* Directo: cintas y reacciones (empujan la hoja, no la tapan). */}
+      <LiveLayer compact bottomOffset={controlsBottom + TouchTarget.live} />
+      <LiveFlash />
 
       {/* Cerrar — esquina superior derecha. Con los controles escondidos
           solo se atenúa: la salida siempre está a la vista. */}

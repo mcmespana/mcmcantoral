@@ -1,5 +1,6 @@
 import { Palette, SheetPalette } from '@/constants/theme';
 import React, { useEffect, useRef, useState } from 'react';
+import { pedalPageScript } from '@/utils/pedalPage';
 import { View, StyleSheet, Platform } from 'react-native';
 import { WebView } from 'react-native-webview';
 import { Spinner } from 'heroui-native';
@@ -54,6 +55,13 @@ interface SongDisplayProps {
    * recarga, como siempre.
    */
   docKey?: string;
+  /**
+   * Pasar página (pedal, `04-directo.md` §8): cada vez que cambia `n` se
+   * desplaza una pantalla en `dir`. Si ya estaba en el borde, avisa con
+   * `onPageEdge` (la pantalla pasa entonces de canción).
+   */
+  pageRequest?: { dir: 1 | -1; n: number } | null;
+  onPageEdge?: (dir: 1 | -1) => void;
 }
 
 /**
@@ -95,6 +103,8 @@ const SongDisplay: React.FC<SongDisplayProps> = ({
   topInset = 0,
   scrollTo,
   docKey,
+  pageRequest,
+  onPageEdge,
 }) => {
   const scheme = useColorScheme();
   const isDark = scheme === 'dark';
@@ -110,20 +120,45 @@ const SongDisplay: React.FC<SongDisplayProps> = ({
     ? SheetPalette[styleState.sheetTheme].bg
     : themeColors(isDark).background;
   const pendingStyleRef = useRef<SongStyleState | undefined>(styleState);
-  pendingStyleRef.current = styleState;
   // Latest onMessage in a ref so the web listener stays stable.
   const onMessageRef = useRef(onMessage);
-  onMessageRef.current = onMessage;
+  const onPageEdgeRef = useRef(onPageEdge);
+  // Al día tras cada render (el primer efecto: antes que los que los leen).
+  useEffect(() => {
+    pendingStyleRef.current = styleState;
+    onMessageRef.current = onMessage;
+    onPageEdgeRef.current = onPageEdge;
+  });
 
   // Parse a raw message string coming from the page and relay it.
   const handleRawMessage = (raw: string) => {
-    if (!onMessageRef.current || !raw) return;
+    if (!raw) return;
     try {
-      onMessageRef.current(JSON.parse(raw));
+      const data = JSON.parse(raw);
+      if (data?.type === 'pageEdge') {
+        onPageEdgeRef.current?.(data.dir === -1 ? -1 : 1);
+        return;
+      }
+      onMessageRef.current?.(data);
     } catch {
       /* ignore non-JSON messages */
     }
   };
+
+  // Pedal: una página más (o el borde, que lo decide la pantalla).
+  useEffect(() => {
+    if (!pageRequest) return;
+    const js = pedalPageScript(pageRequest.dir, 'pageEdge');
+    if (Platform.OS === 'web') {
+      try {
+        (iframeRef.current?.contentWindow as any)?.eval(js);
+      } catch {
+        /* noop */
+      }
+    } else {
+      webViewRef.current?.injectJavaScript(js);
+    }
+  }, [pageRequest]);
 
   // Lo que la página tiene cargado (`loaded`, lo que va en `source`/`srcDoc`)
   // y lo que enseña (`shown`). Difieren cuando un HTML nuevo se ha pintado

@@ -129,3 +129,17 @@ jest.mock('react-native-zeroconf', () => ({
     removeDeviceListeners: jest.fn(),
   })),
 }));
+
+// Pedal (`hooks/usePedal.ts`): teclas y botones de volumen, sin módulo nativo.
+jest.mock('expo-key-event', () => ({
+  useKeyEventListener: () => ({
+    startListening: jest.fn(),
+    stopListening: jest.fn(),
+  }),
+}));
+jest.mock('react-native-volume-manager', () => ({
+  getVolume: jest.fn(async () => ({ volume: 0.5 })),
+  setVolume: jest.fn(async () => {}),
+  showNativeVolumeUI: jest.fn(async () => {}),
+  addVolumeListener: jest.fn(() => ({ remove: jest.fn() })),
+}));

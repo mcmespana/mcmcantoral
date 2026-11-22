@@ -121,6 +121,10 @@ export default function CancioneroLayout() {
               options={{ title: 'Repertorio' }}
             />
             <Stack.Screen
+              name={CANTORAL_SLUGS.EquipoBase}
+              options={{ title: 'Equipo base' }}
+            />
+            <Stack.Screen
               name={CANTORAL_SLUGS.SundaySongs}
               options={{ title: 'Cantos del domingo' }}
             />

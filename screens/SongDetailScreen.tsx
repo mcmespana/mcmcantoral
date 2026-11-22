@@ -70,7 +70,9 @@ import { IconSymbol } from '@/components/ui/IconSymbol';
 import { SONG_FONTS, useSettings } from '@/contexts/SettingsContext';
 import { hasArrangements, insertArrangementAtLine } from '@/utils/arrangements';
 import { useColorScheme } from '@/hooks/useColorScheme';
-import ChoirSessionBanner from '@/components/playlist/ChoirSessionBanner';
+import LiveLayer from '@/components/live/LiveLayer';
+import LiveFlash from '@/components/live/LiveFlash';
+import { useSongPedal } from '@/hooks/useSongPedal';
 import ArrangementInputModal from '@/components/ArrangementInputModal';
 import * as Clipboard from 'expo-clipboard';
 import brandColors, { SwipeColors, themeColors } from '@/constants/colors';
@@ -876,6 +878,16 @@ function SongDetailBody({
     arrModalVisible ||
     linkSource !== null;
   const keyOpts = { disabled: keysOff };
+  const pedal = useSongPedal({
+    enabled:
+      isFocused &&
+      !controlsOverlayOpen &&
+      !showMediaSheet &&
+      !arrModalVisible &&
+      linkSource === null,
+    onNextSong: () => handleSwipeRight(),
+    onPrevSong: () => handleSwipeLeft(),
+  });
   useKeyboardShortcut('arrowright', () => handleSwipeRight(), keyOpts);
   useKeyboardShortcut('arrowleft', () => handleSwipeLeft(), keyOpts);
   // Con Shift o sin él: «+» es Shift+= en un teclado inglés y una tecla
@@ -917,7 +929,6 @@ function SongDetailBody({
     <Animated.View
       style={[styles.container, { backgroundColor: screenBg }, slideStyle]}
     >
-      <ChoirSessionBanner />
       {/* Letra a pantalla completa: scrollea bajo el header transparente (en
           iOS, vía contentInset = altura del header). */}
       <SongDisplay
@@ -930,6 +941,20 @@ function SongDetailBody({
         docKey={filename}
         fullBleed
         topInset={headerHeight > 0 ? headerHeight : insets.top + 44}
+        pageRequest={pedal.pageRequest}
+        onPageEdge={pedal.onPageEdge}
+      />
+      {/* Directo: va en el flujo, así que sus cintas EMPUJAN la letra. */}
+      <LiveLayer
+        bottomOffset={BOTTOM_BAR_SPACE + Math.max(insets.bottom, 8)}
+        onPrev={() => handleSwipeLeft()}
+        onNext={() => handleSwipeRight()}
+        hasPrev={!!navigationList && (currentIndex ?? 0) > 0}
+        hasNext={
+          !!navigationList &&
+          typeof currentIndex === 'number' &&
+          currentIndex < navigationList.length - 1
+        }
       />
       <SongControls
         chordsVisible={chordsVisible}
@@ -1034,6 +1059,7 @@ function SongDetailBody({
   return (
     <View style={{ flex: 1, backgroundColor: screenBg }}>
       {gestureContent}
+      <LiveFlash />
       {hasPrev && (
         <SongSwipePeek
           side="prev"

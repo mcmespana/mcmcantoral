@@ -50,6 +50,7 @@ export const CANTORAL_SLUGS = {
   SundaySongs: 'domingo',
   Repertorios: 'repertorios',
   Repertorio: 'repertorio',
+  EquipoBase: 'equipo-base',
 } as const;
 
 export type CantoralScreenName = keyof typeof CANTORAL_SLUGS;
