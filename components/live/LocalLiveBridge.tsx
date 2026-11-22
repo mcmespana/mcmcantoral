@@ -15,6 +15,7 @@
  */
 import { useEffect, useRef, useState } from 'react';
 import { AppState } from 'react-native';
+import { activateKeepAwakeAsync, deactivateKeepAwake } from 'expo-keep-awake';
 import { useLive, keyOfSessionId } from '@/contexts/LiveContext';
 import { useChoirSession } from '@/contexts/ChoirSessionContext';
 import { useAppSettings } from '@/contexts/AppSettingsContext';
@@ -111,6 +112,12 @@ export default function LocalLiveBridge() {
     };
     pushCatalog();
     const unsubCatalog = catalogStore.subscribe(pushCatalog);
+    // Quien sirve no puede dormirse (iOS deja de servir con la pantalla
+    // apagada, §5.2): pantalla encendida mientras dure.
+    const awake = activateKeepAwakeAsync('directo-servidor').then(
+      () => true,
+      () => false,
+    );
     startLocalServer(hub)
       .then((h) => {
         if (cancelled) {
@@ -135,6 +142,9 @@ export default function LocalLiveBridge() {
       unsubCatalog();
       attachLocal(null);
       void handle?.stop();
+      void awake.then((ok) => {
+        if (ok) deactivateKeepAwake('directo-servidor').catch(() => {});
+      });
     };
     // El servidor se abre una vez por directo: el PIN y el estado de partida
     // se leen al abrir (cambiarlos no debe tirar a todo el mundo).
