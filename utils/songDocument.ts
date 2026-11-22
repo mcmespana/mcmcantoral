@@ -19,7 +19,9 @@ import {
   CHORUS_REF_SENTINEL,
   renderSheetHtml,
   renderSongMapHtml,
+  sheetHasAbc,
 } from './songSheet';
+import { abcSheetCss, abcSheetScripts } from './songSheetAbc';
 import {
   CHORUS_STYLE_CLASSES,
   SHEET_CSS,
@@ -613,7 +615,13 @@ export function buildSongDocument(
   };
   // En modo admin cada línea lleva su número en el ChordPro original
   // (`data-line`) para insertar arreglos con un toque largo.
-  const sheetHtml = renderSheetHtml(model, { lineNumbers: longPress });
+  // Partituras ABC: siguen el tono con `visualTranspose` (`data-tr`). abcjs
+  // y su CSS solo entran en el HTML si la canción trae alguna.
+  const sheetHtml = renderSheetHtml(model, {
+    lineNumbers: longPress,
+    abcTranspose: currentTranspose,
+  });
+  const hasAbc = sheetHasAbc(model);
   // El título sale del ChordPro (ya escapado al parsear); si no trae, el
   // de la navegación, que sí hay que escapar.
   const songTitle = songForFormatting.title || escapeHtml(title ?? '');
@@ -933,7 +941,7 @@ ${sheetThemeCss('body.sheet-sun', 'sun')}
           color: var(--sh-muted) !important;
           box-shadow: inset 0 0 0 1px var(--sh-filler);
         }
-        ${SHEET_CSS}
+        ${SHEET_CSS}${abcSheetCss(hasAbc)}
         ${
           isFullscreen
             ? `
@@ -1000,7 +1008,7 @@ ${sheetThemeCss('body.sheet-sun', 'sun')}
       ${fsHeader}
       ${finalSongContentWithMeta}
       <script>${SHEET_LAYOUT_JS}</script>
-      <script>${bootstrap}</script>
+      <script>${bootstrap}</script>${abcSheetScripts(hasAbc)}
       ${isFullscreen ? `<script>${FS_TOUCH_JS}</script>` : ''}
     </body>
     </html>

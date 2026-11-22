@@ -4,6 +4,8 @@
 # Ver docs/DIVERGENCIAS.md §2.
 utils/songSheet.ts
 utils/songSheetLayout.ts
+utils/songSheetAbc.ts
+utils/songSheetAbcjs.ts
 utils/songDocument.ts
 utils/songDocumentBundle.ts
 utils/songDisplayBridge.ts

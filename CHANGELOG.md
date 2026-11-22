@@ -4,7 +4,27 @@
 > dependencias). Entrada nueva arriba, con fecha Y hora de España. La
 > historia anterior al fork está en el repo de MCM App.
 
-## 2026-11-22 10:05 — Fase 4: administrador por código
+## 2026-11-22 10:05 — Fase 5: apuntes por capas y partituras ABC
+
+- **Apuntes** en el Atril: toque largo en una línea → texto, marca (p, f,
+  a capela, x2…) o acorde alternativo, para **Solo yo**, **Todos** o un
+  **instrumento**. Se pintan debajo de su línea sin tocar el ChordPro, se
+  **recolocan solos** si la canción cambia (y si no, «¿Dónde iba esto?»).
+  «⋯ → Apuntes» elige qué capas se ven.
+- Los de Todos e instrumento **viajan dentro del repertorio** al subirlo y
+  llegan al importarlo; quien dirige puede mandar uno **al directo**.
+- **Partituras**: los bloques `{start_of_abc: Etiqueta}` … `{end_of_abc}` del `.cho` se
+  pintan como pentagrama dentro de la hoja con **abcjs 6.7.2** (en línea, sin
+  red) y **siguen el tono** de la canción (`visualTranspose`), también al
+  transportar sin recargar. Siguen el tema (claro, oscuro, escenario, sol).
+- Zona espejo (`utils/songSheet.ts`, `utils/songDocument.ts`, nuevos
+  `utils/songSheetAbc.ts` y `utils/songSheetAbcjs.ts`): una canción sin ABC
+  da el mismo HTML que antes; abcjs (~445 KB) solo entra en el HTML de las
+  que lo traen.
+- Nueva dependencia de desarrollo `abcjs` (exacta): `npm run build:abcjs`
+  regenera el módulo en línea. Escuchar el riff (▶) queda para luego.
+
+## 2026-11-22 09:55 — Fase 4: administrador por código
 
 - Al arrancar, la app entra **en silencio** con Firebase Auth anónimo (un
   `uid` por instalación, sin pantalla ni correo).

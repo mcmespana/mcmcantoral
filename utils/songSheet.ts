@@ -56,7 +56,14 @@ export type SheetLine =
   | { kind: 'lyrics'; atoms: SheetAtom[]; src: number | null }
   | { kind: 'chords'; chords: string[]; note: string; src: number | null }
   | { kind: 'comment'; text: string; src: number | null }
-  | { kind: 'arr'; text: string; src: number | null };
+  | { kind: 'arr'; text: string; src: number | null }
+  /**
+   * Partitura ABC (`{start_of_abc: Etiqueta}` … `{end_of_abc}`): el texto ABC
+   * tal cual (SIN escapar: el HTML lo codifica al emitirlo) y la etiqueta del
+   * bloque, ya escapada como todo lo que sale del `Song`. La pinta abcjs
+   * dentro de la hoja (`utils/songSheetAbc.ts`).
+   */
+  | { kind: 'abc'; abc: string; label: string | null; src: number | null };
 
 export type SectionKind =
   'verse' | 'chorus' | 'bridge' | 'instrumental' | 'note';
@@ -365,6 +372,32 @@ function isPair(item: unknown): item is PairLike {
 
 const COMMENT_TAGS = new Set(['comment', 'c', 'comment_italic', 'ci']);
 
+/** Línea de texto literal de un entorno delegado (`{start_of_abc}`…). */
+function isLiteral(item: unknown): item is { string: string } {
+  return (
+    !!item &&
+    typeof (item as { string?: unknown }).string === 'string' &&
+    !isPair(item)
+  );
+}
+
+/**
+ * Deshace `escapeHtml` (`utils/songDocument.ts`): el ChordPro se escapa antes
+ * de parsear, y el ABC necesita sus `"`, `<` y `>` de verdad («"Am"A>B»).
+ */
+function unescapeHtml(s: string): string {
+  return s
+    .replace(/&quot;/g, '"')
+    .replace(/&lt;/g, '<')
+    .replace(/&gt;/g, '>')
+    .replace(/&amp;/g, '&');
+}
+
+/** ¿Lleva la hoja alguna partitura ABC? (Solo entonces va abcjs en el HTML.) */
+export function sheetHasAbc(model: SheetModel): boolean {
+  return model.sections.some((s) => s.lines.some((l) => l.kind === 'abc'));
+}
+
 export function buildSheet(song: Song, opts: BuildSheetOptions): SheetModel {
   const sections: SheetSection[] = [];
   const reviewNotes: string[] = [];
@@ -413,10 +446,43 @@ export function buildSheet(song: Song, opts: BuildSheetOptions): SheetModel {
     return open(wanted, null, type);
   };
 
+  /**
+   * Bloque ABC en curso. ChordSheetJS da cada línea del bloque como un
+   * `Literal` de tipo `abc` (y, si lleva etiqueta, una primera línea con el
+   * `{start_of_abc: …}`); aquí se juntan y salen como UNA sección propia,
+   * sin número ni sitio en el mapa (`note`), o como la intro si iba justo
+   * debajo de un `{c: Intro}`. Antes estas líneas se perdían.
+   */
+  let abc: {
+    lines: string[];
+    label: string | null;
+    src: number | null;
+    last: number | null;
+  } | null = null;
+  const flushAbc = () => {
+    if (!abc) return;
+    const block = abc;
+    abc = null;
+    const text = block.lines.join('\n').trim();
+    if (!text) return;
+    close();
+    const p = pendingLabel?.kind === 'instrumental' ? pendingLabel : null;
+    if (p) pendingLabel = null;
+    const s = open(p ? 'instrumental' : 'note', p?.label ?? null, 'abc');
+    s.lines.push({
+      kind: 'abc',
+      abc: text,
+      label: block.label,
+      src: block.src,
+    });
+    close();
+  };
+
   // Dos líneas en blanco seguidas dejan un párrafo vacío en medio: así se
   // cuenta cuánto hueco pidió quien maquetó.
   let blankRun = 0;
   for (const paragraph of song.paragraphs) {
+    flushAbc();
     close();
     if (paragraph.lines.length === 0) {
       blankRun++;
@@ -427,6 +493,29 @@ export function buildSheet(song: Song, opts: BuildSheetOptions): SheetModel {
     const paraLabel = paragraph.label;
     for (const line of paragraph.lines) {
       const src = line.lineNumber ?? null;
+      if ((line.type as string) === 'abc') {
+        // Un `{start_of_abc}` nuevo (con etiqueta trae su propia línea; sin
+        // ella, se nota en el salto de número de línea) cierra el anterior.
+        const start = line.items.find(
+          (it) => isTag(it) && it.name.toLowerCase() === 'start_of_abc',
+        ) as TagLike | undefined;
+        if (
+          abc &&
+          (start || (src !== null && abc.last !== null && src !== abc.last + 1))
+        ) {
+          flushAbc();
+        }
+        if (!abc) abc = { lines: [], label: null, src, last: src };
+        abc.last = src;
+        if (start) {
+          abc.label = stripMarkup((start.value ?? '').trim()) || null;
+        }
+        for (const it of line.items) {
+          if (isLiteral(it)) abc.lines.push(unescapeHtml(it.string));
+        }
+        continue;
+      }
+      flushAbc();
       const type =
         line.type === 'chorus' || line.type === 'bridge' ? line.type : 'verse';
       const raw: RawSeg[] = [];
@@ -525,6 +614,8 @@ export function buildSheet(song: Song, opts: BuildSheetOptions): SheetModel {
       section.lines.push(sheetLine);
     }
   }
+
+  flushAbc();
 
   // Una etiqueta al final, sin nada debajo («{c: Final}»), se queda como nota.
   if (pendingLabel?.label) {
@@ -782,6 +873,7 @@ function lineHtml(
   line: SheetLine,
   number: number | null,
   lineNumbers: boolean,
+  abcTranspose = 0,
 ): string {
   const data =
     lineNumbers && line.src !== null ? ` data-line="${line.src}"` : '';
@@ -811,6 +903,16 @@ function lineHtml(
       const text = /^\s*\|/.test(line.text) ? line.text : `| ${line.text}`;
       return `<div class="arrangement"${data}>${text}</div>`;
     }
+    case 'abc': {
+      // Un marcador de UNA línea, vacío: lo pinta abcjs al cargar la hoja
+      // (`utils/songSheetAbc.ts`). Sin `data-line`: un toque largo aquí no
+      // puede meter un `{arr:}` ni un apunte dentro del bloque ABC. El ABC
+      // va con `encodeURIComponent` (sin comillas ni `<`), y la etiqueta ya
+      // viene escapada.
+      const label = line.label ? ` data-label="${line.label}"` : '';
+      const tr = abcTranspose ? ` data-tr="${abcTranspose}"` : '';
+      return `<div class="abc" data-abc="${encodeURIComponent(line.abc)}"${label}${tr}></div>`;
+    }
   }
 }
 
@@ -822,16 +924,20 @@ const KIND_LABEL: Record<SectionKind, string> = {
   note: '',
 };
 
-function sectionBody(s: SheetSection, lineNumbers: boolean): string {
+function sectionBody(
+  s: SheetSection,
+  lineNumbers: boolean,
+  abcTranspose = 0,
+): string {
   let numberPending = s.kind === 'verse' ? s.number : null;
   return s.lines
     .map((l) => {
       if (l.kind === 'lyrics' && numberPending !== null) {
         const n = numberPending;
         numberPending = null;
-        return lineHtml(l, n, lineNumbers);
+        return lineHtml(l, n, lineNumbers, abcTranspose);
       }
-      return lineHtml(l, null, lineNumbers);
+      return lineHtml(l, null, lineNumbers, abcTranspose);
     })
     .join('');
 }
@@ -855,11 +961,17 @@ export interface RenderSheetOptions {
    * ChordPro original, para insertar un `{arr:}` con un toque largo.
    */
   lineNumbers?: boolean;
+  /**
+   * Semitonos de transporte para las partituras ABC (`data-tr`, que abcjs
+   * aplica con `visualTranspose`). Los acordes ya llegan transportados en el
+   * modelo; el ABC no, porque es texto literal.
+   */
+  abcTranspose?: number;
 }
 
 export function renderSheetHtml(
   model: SheetModel,
-  { lineNumbers = false }: RenderSheetOptions = {},
+  { lineNumbers = false, abcTranspose = 0 }: RenderSheetOptions = {},
 ): string {
   const parts: string[] = [];
   let i = 0;
@@ -891,7 +1003,7 @@ export function renderSheetHtml(
         .slice(i, i + times)
         .map(
           (r) =>
-            `<div class="rep-one">${lbl}${sectionBody(r, lineNumbers)}</div>`,
+            `<div class="rep-one">${lbl}${sectionBody(r, lineNumbers, abcTranspose)}</div>`,
         )
         .join('');
       const preview = firstLyric(s);
@@ -907,7 +1019,7 @@ export function renderSheetHtml(
         `<details class="rep-fold"><summary>` +
         `<span class="lbl">${foldLabel}</span>` +
         (preview ? `<span class="pv">${preview}</span>` : '') +
-        `</summary>${sectionBody(s, lineNumbers)}</details>`;
+        `</summary>${sectionBody(s, lineNumbers, abcTranspose)}</details>`;
       parts.push(
         `<section class="sec ${kindCls} rep" data-i="${i}" data-n="${times}"><div class="rep-full">${full}</div>${fold}</section>`,
       );
@@ -917,7 +1029,7 @@ export function renderSheetHtml(
     const lbl =
       label && s.kind !== 'verse' ? `<div class="lbl">${label}</div>` : '';
     parts.push(
-      `<section class="sec ${kindCls}" data-i="${i}">${lbl}${sectionBody(s, lineNumbers)}</section>`,
+      `<section class="sec ${kindCls}" data-i="${i}">${lbl}${sectionBody(s, lineNumbers, abcTranspose)}</section>`,
     );
     i++;
   }
