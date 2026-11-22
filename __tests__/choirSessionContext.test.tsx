@@ -127,9 +127,9 @@ describe('restaurar sesión persistida', () => {
     const { result } = await mount();
     await waitFor(() => expect(result.current.mode).toBe('master'));
     // Si la limpieza hubiera corrido antes de tiempo, esto ya no sería '9999'.
-    expect(await AsyncStorage.getItem(SESSION_PERSIST_KEY)).toBe(
-      JSON.stringify({ mode: 'master', code: '9999' }),
-    );
+    expect(
+      JSON.parse((await AsyncStorage.getItem(SESSION_PERSIST_KEY))!),
+    ).toMatchObject({ mode: 'master', code: '9999' });
   });
 });
 
@@ -342,7 +342,11 @@ describe('persistencia de la sesión en curso', () => {
     await act(async () => result.current.startAsMaster('1234', []));
     await waitFor(async () => {
       const raw = await AsyncStorage.getItem(SESSION_PERSIST_KEY);
-      expect(JSON.parse(raw!)).toEqual({ mode: 'master', code: '1234' });
+      expect(JSON.parse(raw!)).toEqual({
+        mode: 'master',
+        code: '1234',
+        owner: true,
+      });
     });
   });
 
@@ -364,5 +368,19 @@ describe('fuera del provider (SSG)', () => {
     expect(result.current.session).toBeNull();
     expect(() => result.current.setOverrideTranspose(1)).not.toThrow();
     await expect(result.current.leave()).resolves.toBeUndefined();
+  });
+});
+
+describe('varios maestros (PIN, D-08)', () => {
+  it('quien entra con el PIN dirige pero al salir no cierra el directo', async () => {
+    const { closeChoirSession } = jest.requireMock(
+      '@/services/choirSessionService',
+    );
+    const { result } = await mount();
+    await act(async () => result.current.joinAsMaster('4321'));
+    expect(result.current.mode).toBe('master');
+    expect(result.current.isOwner).toBe(false);
+    await act(async () => result.current.leave());
+    expect(closeChoirSession).not.toHaveBeenCalled();
   });
 });

@@ -111,6 +111,11 @@ export const update = jest.fn(() => Promise.resolve());
 export const remove = jest.fn(() => Promise.resolve());
 export const onValue = jest.fn(() => jest.fn());
 export const off = jest.fn();
+/** Presencia del directo: `onDisconnect(ref).remove()` al perder la conexión. */
+export const onDisconnect = jest.fn(() => ({
+  remove: jest.fn(() => Promise.resolve()),
+  cancel: jest.fn(() => Promise.resolve()),
+}));
 let pushKeyCounter = 0;
 export const push = jest.fn(() => ({ key: `mock-key-${++pushKeyCounter}` }));
 

@@ -52,6 +52,13 @@ interface ChoirSessionContextValue {
     opts?: { name?: string; choirId?: string; choirName?: string },
   ) => Promise<void>;
   joinAsSlave: (code: string) => Promise<void>;
+  /**
+   * Entra como maestro en un directo que ya existe (PIN de maestro, D-08):
+   * dirige sin ser quien lo abrió, así que al salir no lo cierra.
+   */
+  joinAsMaster: (code: string) => Promise<void>;
+  /** Este dispositivo abrió el directo (al salir, lo cierra para todos). */
+  isOwner: boolean;
   leave: () => Promise<void>;
   /** Solo maestro. Publica la canción actual. */
   publishCurrent: (
@@ -74,6 +81,8 @@ const SESSION_PERSIST_KEY = '@mcm_choir_session_v1';
 interface PersistedSession {
   mode: 'master' | 'slave';
   code: string;
+  /** Lo abrió este dispositivo (ausente en lo guardado antes = sí, si es master). */
+  owner?: boolean;
 }
 
 function genDeviceId(): string {
@@ -88,6 +97,7 @@ export const ChoirSessionProvider: React.FC<{ children: ReactNode }> = ({
 }) => {
   const [deviceId, setDeviceId] = useState<string>('');
   const [mode, setMode] = useState<ChoirMode>('off');
+  const [isOwner, setIsOwner] = useState(false);
   const [code, setCode] = useState<string | null>(null);
   // Lo último recibido de Firebase, JUNTO al código al que pertenece: así, al
   // cambiar de sesión o salir, el valor viejo deja de contar solo y no hace
@@ -138,6 +148,7 @@ export const ChoirSessionProvider: React.FC<{ children: ReactNode }> = ({
           (parsed.mode === 'master' || parsed.mode === 'slave')
         ) {
           setMode(parsed.mode);
+          setIsOwner(parsed.mode === 'master' && parsed.owner !== false);
           setCode(parsed.code);
         }
       } catch (e) {
@@ -159,11 +170,12 @@ export const ChoirSessionProvider: React.FC<{ children: ReactNode }> = ({
     const payload: PersistedSession = {
       mode: mode as 'master' | 'slave',
       code,
+      owner: isOwner,
     };
     AsyncStorage.setItem(SESSION_PERSIST_KEY, JSON.stringify(payload)).catch(
       () => {},
     );
-  }, [mode, code, restored]);
+  }, [mode, code, restored, isOwner]);
 
   // La sesión que ve la app: solo cuenta lo recibido para el código actual y
   // con una sesión activa. Cualquier otra cosa (acabamos de cambiar de código,
@@ -210,10 +222,21 @@ export const ChoirSessionProvider: React.FC<{ children: ReactNode }> = ({
         { choirId: opts?.choirId, choirName: opts?.choirName },
       );
       setMode('master');
+      setIsOwner(true);
       setCode(newCode);
       setOverrideTranspose(null);
     },
     [deviceId],
+  );
+
+  const joinAsMaster = useCallback<ChoirSessionContextValue['joinAsMaster']>(
+    async (newCode) => {
+      setMode('master');
+      setIsOwner(false);
+      setCode(newCode);
+      setOverrideTranspose(null);
+    },
+    [],
   );
 
   const joinAsSlave = useCallback<ChoirSessionContextValue['joinAsSlave']>(
@@ -221,6 +244,7 @@ export const ChoirSessionProvider: React.FC<{ children: ReactNode }> = ({
       // No verificamos existencia explícitamente: la suscripción se
       // encargará de avisar (session === null) y la UI lo manejará.
       setMode('slave');
+      setIsOwner(false);
       setCode(newCode);
       setOverrideTranspose(null);
     },
@@ -230,17 +254,20 @@ export const ChoirSessionProvider: React.FC<{ children: ReactNode }> = ({
   const leave = useCallback(async () => {
     const prevMode = mode;
     const prevCode = code;
+    const wasOwner = isOwner;
     setMode('off');
+    setIsOwner(false);
     setCode(null);
     setOverrideTranspose(null);
-    if (prevMode === 'master' && prevCode) {
+    // Un maestro que entró con el PIN se va sin cerrarlo para los demás.
+    if (prevMode === 'master' && prevCode && wasOwner) {
       try {
         await closeChoirSession(prevCode);
       } catch (e) {
         logger.error('Error cerrando sesión coro', e);
       }
     }
-  }, [mode, code]);
+  }, [mode, code, isOwner]);
 
   // Si la sesión está a menos de 2 h de caducar, la actividad del líder
   // (publicar canción o playlist) la alarga 12 h más — ver
@@ -302,6 +329,8 @@ export const ChoirSessionProvider: React.FC<{ children: ReactNode }> = ({
       deviceId,
       startAsMaster,
       joinAsSlave,
+      joinAsMaster,
+      isOwner,
       leave,
       publishCurrent,
       publishPlaylist,
@@ -309,6 +338,8 @@ export const ChoirSessionProvider: React.FC<{ children: ReactNode }> = ({
       changeCode,
     }),
     [
+      joinAsMaster,
+      isOwner,
       mode,
       code,
       session,
@@ -343,6 +374,8 @@ export const useChoirSession = (): ChoirSessionContextValue => {
       deviceId: '',
       startAsMaster: noop as any,
       joinAsSlave: noop as any,
+      joinAsMaster: noop as any,
+      isOwner: false,
       leave: noop,
       publishCurrent: noop,
       publishPlaylist: noop,
