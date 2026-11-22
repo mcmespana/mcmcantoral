@@ -45,3 +45,18 @@
       wifi (hoy el base reparte el suyo).
 - [ ] Revisar en dispositivo lo que solo está comprobado por tipos en
       `services/live/local/native.ts` (puerto tras `listen`, `setEncoding`).
+
+## Apuntes y partituras: lo que falta (`05`)
+
+- [ ] ▶ Escuchar el riff ABC con el sintetizador de abcjs y una soundfont
+      empaquetada (sin red).
+- [ ] Teclado de piano → ABC y tararear/tocar → ABC (con el seguidor de tono
+      del afinador) para riffs personales en los apuntes (5.6, 5.8).
+- [ ] Bloque «🎺 Riff / melodía» en el admin del cantoral y `APP_ABC` en el
+      generador (5.5b, repo `mcmapp-cantoral`), **solo cuando MCM App también
+      pinte el ABC** (zona espejo).
+- [ ] Partituras ABC: nombres de acordes en notación ES, enarmónicos (abcjs
+      elige sostenidos), tamaño con la letra y en el PDF de la playlist.
+- [ ] Exportar los apuntes también en el `.mcm` (hoy viajan al subir el
+      repertorio a la nube o al coro; `SelectedSongsScreen` está por encima
+      del límite de líneas y hay que partirla antes de tocarla).

@@ -4,10 +4,11 @@
 > clasificados abajo uno a uno. La mayoría son falsos positivos estructurales:
 > perseguirlos empeora el código.
 >
-> Estado en MCM Cantoral: **14 warnings, 0 errores** (2026-11-22, `npm run
-> lint`). Es el **techo**: es lo que hay y no debe subir. Historial (MCM App):
+> Estado en MCM Cantoral: **12 warnings, 0 errores** (2026-11-22, `npm run
+lint`). Es el **techo**: es lo que hay y no debe subir. Historial (MCM App):
 > 111 (2026-08-15) → 51 → 39 → 38 → 36 → 35 (2026-11-17); en el fork, 19 tras
-> la poda y 14 al quitar el FAB de la canción. Las fichas de abajo que hablan
+> la poda, 14 al quitar el FAB de la canción y 12 al arreglar los refs de
+> `SongDisplay` (y `useSongProcessor`, que ya compone la hoja al pintar). Las fichas de abajo que hablan
 > de pantallas que ya no existen (Comunica, Contigo…) son historia.
 
 ## Contexto
