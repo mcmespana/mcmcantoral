@@ -79,7 +79,11 @@ export default function LiveStartSheet({
   const choice: LiveTransportChoice = !LOCAL_LIVE_AVAILABLE
     ? 'cloud'
     : (picked ?? eventChoice ?? netChoice);
-  const [code, setCode] = useState(() => eventKey ?? generateRandomCode());
+  // La hoja se monta antes de saber qué se dirige: la clave del evento se
+  // decide al pintar, no al crear el estado.
+  const [randomCode] = useState(generateRandomCode);
+  const [typedCode, setCode] = useState<string | null>(null);
+  const code = eventKey ?? typedCode ?? randomCode;
   const [pin, setPin] = useState(() => generateRandomCode());
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);

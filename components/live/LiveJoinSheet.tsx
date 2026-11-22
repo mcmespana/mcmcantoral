@@ -55,7 +55,8 @@ export default function LiveJoinSheet({
   const live = useLive();
   const choir = useChoirSession();
   const [nearby, setNearby] = useState<FoundLive[]>([]);
-  const [code, setCode] = useState(presetKey ?? '');
+  const [typedCode, setCode] = useState<string | null>(null);
+  const code = typedCode ?? presetKey ?? '';
   const [pin, setPin] = useState('');
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -321,6 +322,7 @@ const createStyles = (t: ReturnType<typeof useTheme>) =>
     inputRow: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm },
     input: {
       ...typography.h2,
+      minWidth: 0,
       color: t.text,
       backgroundColor: t.cardRaised,
       borderRadius: radii.md,
