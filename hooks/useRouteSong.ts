@@ -13,8 +13,7 @@
  */
 import { useMemo } from 'react';
 import { useCatalogSongs } from '@/hooks/useCatalog';
-import { useChoirSession } from '@/contexts/ChoirSessionContext';
-import { filterSongsData, type SongsData } from '@/utils/filterSongsData';
+import { useLive } from '@/contexts/LiveContext';
 import { extractSongMedia } from '@/types/songMedia';
 import {
   findCatalogSong,
@@ -39,8 +38,7 @@ export interface RouteSong {
 export function useRouteSong(params: Partial<SongRouteParams>): RouteSong {
   const filename = typeof params.filename === 'string' ? params.filename : '';
   const { data, loading } = useCatalogSongs();
-  const choir = useChoirSession();
-  const remote = choir.mode === 'slave' ? choir.session?.current : null;
+  const remote = useLive().remote;
 
   return useMemo<RouteSong>(() => {
     const list = getSongNavList(params.list);

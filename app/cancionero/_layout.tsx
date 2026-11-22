@@ -13,7 +13,7 @@ import {
   cantoralHeaderTint,
 } from '@/utils/cantoralHeader';
 import { radii } from '@/constants/uiStyles';
-import { useChoirSession } from '@/contexts/ChoirSessionContext';
+import { useLive } from '@/contexts/LiveContext';
 import { extractSongMedia } from '@/types/songMedia';
 import {
   CANTORAL_BASE,
@@ -189,7 +189,7 @@ const layoutStyles = StyleSheet.create({ fill: { flex: 1 } });
  * así que fuera de él la canción del líder queda pendiente y se abre al volver.
  */
 function useChoirFollower() {
-  const choir = useChoirSession();
+  const live = useLive();
   const pathname = usePathname();
   const { filename: openFilename } = useGlobalSearchParams<{
     filename?: string;
@@ -198,13 +198,17 @@ function useChoirFollower() {
     pathname === CANTORAL_BASE || pathname.startsWith(`${CANTORAL_BASE}/`);
   const handledRef = useRef<string | null>(null);
 
-  const remote = choir.mode === 'slave' ? choir.session?.current : null;
+  // «Ir por libre»: no se le mueve. Al volver, se le lleva a la del maestro.
+  const remote = live.free ? null : live.remote;
   const remoteKey = remote?.filename
     ? `${remote.filename}@${remote.updatedAt}`
     : null;
 
   useEffect(() => {
-    if (!remote || !remoteKey || !inCantoral) return;
+    if (!remote || !remoteKey || !inCantoral) {
+      if (!remote) handledRef.current = null;
+      return;
+    }
     if (handledRef.current === remoteKey) return;
     handledRef.current = remoteKey;
     const slug = lastSegment(pathname);

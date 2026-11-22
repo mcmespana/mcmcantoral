@@ -28,6 +28,7 @@ import {
   type SongSource,
 } from '@/utils/songNavList';
 import { useChoirSession } from '@/contexts/ChoirSessionContext';
+import { useLive } from '@/contexts/LiveContext';
 import { useSelectedSongs } from '@/contexts/SelectedSongsContext';
 import { h } from '@/utils/haptics';
 import { resolveFullscreenSong } from '@/utils/fullscreenSong';
@@ -338,6 +339,7 @@ function SongFullscreenBody({
   const params = route.params;
   const navigation = useNavigation();
   const choir = useChoirSession();
+  const live = useLive();
   const { getSelectedSong } = useSelectedSongs();
 
   // ── Qué canción se ve ─────────────────────────────────────────────────────
@@ -349,7 +351,7 @@ function SongFullscreenBody({
       ? params.currentIndex
       : null,
   );
-  const remote = choir.mode === 'slave' ? choir.session?.current : null;
+  const remote = live.free ? null : live.remote;
   const selectedNow = getSelectedSong(
     remote?.filename ??
       (list && index !== null ? list[index].filename : params.filename),
@@ -388,9 +390,9 @@ function SongFullscreenBody({
 
   // Coro - LÍDER: la canción que pasa aquí la ven todos.
   useEffect(() => {
-    if (choir.mode !== 'master' || index === null || !list) return;
+    if (live.role !== 'master' || index === null || !list) return;
     if (index === params.currentIndex) return;
-    void choir.publishCurrent({
+    live.publishSong({
       filename: song.filename,
       transpose,
       capoOverride,

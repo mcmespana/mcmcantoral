@@ -21,8 +21,6 @@ import Animated, {
   useAnimatedStyle,
   useReducedMotion,
   useSharedValue,
-  withDelay,
-  withSequence,
   withSpring,
   withTiming,
 } from 'react-native-reanimated';
@@ -31,8 +29,13 @@ import { useGestureHint } from '@/hooks/useGestureHint';
 import { scheduleOnRN } from 'react-native-worklets';
 import { MaterialIcons } from '@/components/ui/icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { Gesture, GestureDetector } from 'react-native-gesture-handler';
-import { rubberBand, shouldCommitGesture } from '@/utils/gesturePhysics';
+import { GestureDetector } from 'react-native-gesture-handler';
+import {
+  SONG_SWIPE_DISTANCE,
+  peekTitle,
+  useSongSwipeGesture,
+  useSwipeHint,
+} from '@/hooks/useSongSwipe';
 import { PressableFeedback } from 'heroui-native';
 import SongDisplay from '@/components/SongDisplay';
 import { useSongProcessor } from '@/hooks/useSongProcessor';
@@ -61,6 +64,7 @@ import {
 import EmptyState from '@/components/ui/EmptyState';
 import { useSelectedSongs } from '@/contexts/SelectedSongsContext';
 import { useChoirSession } from '@/contexts/ChoirSessionContext';
+import { useLive } from '@/contexts/LiveContext';
 import { choirCurrentForSong } from '@/services/choirSessionService';
 import { IconSymbol } from '@/components/ui/IconSymbol';
 import { SONG_FONTS, useSettings } from '@/contexts/SettingsContext';
@@ -71,12 +75,7 @@ import ArrangementInputModal from '@/components/ArrangementInputModal';
 import * as Clipboard from 'expo-clipboard';
 import brandColors, { SwipeColors, themeColors } from '@/constants/colors';
 import { cantoralHeaderTint } from '@/utils/cantoralHeader';
-import {
-  durations,
-  motionEasings,
-  reaEasings,
-  springs,
-} from '@/constants/animations';
+import { durations, reaEasings, springs } from '@/constants/animations';
 import { h } from '@/utils/haptics';
 import { useToast } from '@/contexts/AppToastContext';
 import { pushWithRetry } from '@/services/firebaseWrites';
@@ -102,25 +101,6 @@ const availableFonts = SONG_FONTS.map((f) => ({ ...f }));
 
 // Atajos de teclado del detalle (web). Fuera del componente: un array nuevo en
 // cada render haría que el atajo se volviera a registrar cada vez.
-/**
- * Swipe entre canciones: se cambia al soltar si se ha arrastrado más de esto
- * (px) o se suelta más rápido que esto (px/s). Basta con UNO de los dos.
- */
-const SONG_SWIPE_DISTANCE = 80;
-const SONG_SWIPE_VELOCITY = 500;
-/**
- * Pista de las primeras veces: la letra se aparta esto (px) — menos que el
- * umbral, así que la pastilla asoma sin «armarse» — y vuelve.
- */
-const HINT_NUDGE = 64;
-/** Espera antes de la pista (que la letra haya cargado) y cuánto se queda. */
-const HINT_DELAY_MS = 1100;
-const HINT_HOLD_MS = 900;
-const HINT_REVEAL_MS = 2200;
-
-/** Título para la pastilla, sin el «12. » del número del cantoral. */
-const peekTitle = (title: string | undefined) =>
-  (title ?? '').replace(/^\d+\.\s*/, '');
 
 const KEYS_TRANSPOSE_UP = ['+', '='];
 const KEYS_TRANSPOSE_DOWN = ['-'];
@@ -254,6 +234,7 @@ function SongDetailBody({
   } = useSelectedSongs();
   const { toast } = useToast();
   const choir = useChoirSession();
+  const live = useLive();
   const scheme = useColorScheme();
   const isDark = scheme === 'dark';
   const insets = useSafeAreaInsets();
@@ -318,9 +299,9 @@ function SongDetailBody({
   // En modo coro:
   //  - el MAESTRO publica el transpose visible (local o seleccionado).
   //  - el ESCLAVO usa el transpose del maestro salvo que tenga override.
-  const masterCurrent = choir.session?.current;
+  const masterCurrent = live.free ? null : live.remote;
   const slaveTransposeFromChoir =
-    choir.mode === 'slave' && masterCurrent?.filename === filename
+    live.role === 'follower' && masterCurrent?.filename === filename
       ? (choir.overrideTranspose ?? masterCurrent.transpose)
       : null;
   const currentTranspose =
@@ -346,7 +327,6 @@ function SongDetailBody({
   const swipeArmed = useSharedValue(false);
   // Pista de las primeras veces (ver el efecto junto al gesto).
   const hintReveal = useSharedValue(0);
-  const hintPlayed = useRef(false);
   const swipeHint = useGestureHint('cantoral.swipeSong');
   const markSwipeLearned = swipeHint.markLearned;
   const reducedMotion = useReducedMotion();
@@ -635,7 +615,7 @@ function SongDetailBody({
     transpose: number,
     capoOverride: number | null | undefined,
   ) =>
-    choir.publishCurrent(
+    live.publishSong(
       choirCurrentForSong(
         {
           filename,
@@ -651,12 +631,12 @@ function SongDetailBody({
     );
 
   useEffect(() => {
-    if (choir.mode !== 'master' || !filename) return;
-    void publishToChoir(currentTranspose, currentCapoOverride);
+    if (live.role !== 'master' || !filename) return;
+    publishToChoir(currentTranspose, currentCapoOverride);
     // Solo al montar / cambiar de canción, no en cada cambio de transpose
     // (eso lo hace explícitamente handleSetTranspose).
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [choir.mode, filename]);
+  }, [live.role, filename]);
 
   // (la navegación del esclavo la lleva `useChoirFollower`, en
   //  `app/cancionero/_layout.tsx`)
@@ -668,8 +648,8 @@ function SongDetailBody({
       setLocalCapoOverride(newCapo);
     }
     // Si soy maestro, publico el cambio.
-    if (choir.mode === 'master') {
-      void publishToChoir(currentTranspose, newCapo);
+    if (live.role === 'master') {
+      publishToChoir(currentTranspose, newCapo);
     }
   };
 
@@ -706,8 +686,8 @@ function SongDetailBody({
     }
     // Si soy maestro, publico el cambio aunque la canción no esté seleccionada
     // (el maestro puede abrir cualquier canción del cantoral).
-    if (choir.mode === 'master') {
-      void publishToChoir(newTranspose, currentCapoOverride);
+    if (live.role === 'master') {
+      publishToChoir(newTranspose, currentCapoOverride);
     }
   };
   const handleSetFontSize = (newSizeEm: number) =>
@@ -1017,94 +997,26 @@ function SongDetailBody({
       : null;
   const { due: hintDue, consume: consumeHint } = swipeHint;
   const hintSide = hintDue ? hintTarget : null;
-  useEffect(() => {
-    if (!hintSide || hintPlayed.current) return;
-    hintPlayed.current = true;
-    consumeHint();
-    peekEnabled.set(1);
-    if (reducedMotion) {
-      hintReveal.set(
-        withDelay(
-          HINT_DELAY_MS,
-          withSequence(
-            withTiming(1, { duration: durations.base }),
-            withDelay(
-              HINT_REVEAL_MS,
-              withTiming(0, { duration: durations.base }),
-            ),
-          ),
-        ),
-      );
-      return;
-    }
-    const dir = hintSide === 'next' ? -1 : 1;
-    slideAnim.set(
-      withDelay(
-        HINT_DELAY_MS,
-        withSequence(
-          withTiming(dir * HINT_NUDGE, {
-            duration: durations.slow,
-            easing: motionEasings.out,
-          }),
-          withDelay(HINT_HOLD_MS, withSpring(0, springs.settle)),
-        ),
-      ),
-    );
-  }, [
+  useSwipeHint({
     hintSide,
     consumeHint,
     reducedMotion,
     slideAnim,
     hintReveal,
     peekEnabled,
-  ]);
+  });
 
-  const songSwipe = Gesture.Pan()
-    .enabled(canSwipe)
-    .activeOffsetX([-20, 20])
-    .failOffsetY([-15, 15])
-    .onStart(() => {
-      peekEnabled.set(1);
-      swipeArmed.set(false);
-    })
-    .onUpdate((e) => {
-      const tx = e.translationX;
-      const blocked = (tx > 0 && !hasPrev) || (tx < 0 && !hasNext);
-      slideAnim.set(blocked ? rubberBand(tx) : tx);
-      // Tic al cruzar el umbral (soltar ya cambia de canción), a la vez que
-      // la pastilla se arma. Uno por cruce, nunca por frame.
-      const armed = !blocked && Math.abs(tx) >= SONG_SWIPE_DISTANCE;
-      if (armed !== swipeArmed.get()) {
-        swipeArmed.set(armed);
-        if (armed) scheduleOnRN(h.select);
-      }
-    })
-    .onEnd((e, success) => {
-      const tx = e.translationX;
-      const commit =
-        success &&
-        shouldCommitGesture(
-          tx,
-          e.velocityX,
-          SONG_SWIPE_DISTANCE,
-          SONG_SWIPE_VELOCITY,
-        );
-      if (commit && tx > 0 && hasPrev) {
-        peekEnabled.set(0);
-        scheduleOnRN(markSwipeLearned);
-        scheduleOnRN(handleSwipeLeft, e.velocityX);
-      } else if (commit && tx < 0 && hasNext) {
-        peekEnabled.set(0);
-        scheduleOnRN(markSwipeLearned);
-        scheduleOnRN(handleSwipeRight, e.velocityX);
-      } else {
-        // Vuelta rápida, heredando la velocidad (también si el gesto se
-        // canceló: lo robó el scroll, entró una llamada…).
-        slideAnim.set(
-          withSpring(0, { ...springs.snap, velocity: e.velocityX }),
-        );
-      }
-    });
+  const songSwipe = useSongSwipeGesture({
+    canSwipe,
+    hasPrev,
+    hasNext,
+    slideAnim,
+    peekEnabled,
+    swipeArmed,
+    onLearned: markSwipeLearned,
+    onPrev: handleSwipeLeft,
+    onNext: handleSwipeRight,
+  });
 
   const prevTitle = hasPrev
     ? peekTitle(navigationList?.[(currentIndex as number) - 1]?.title)
