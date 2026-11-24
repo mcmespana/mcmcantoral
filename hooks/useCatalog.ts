@@ -86,9 +86,3 @@ export function useCatalogConfig(): CantoralConfig & {
     };
   }, [raw]);
 }
-
-/** `updatedAt` (ms) del cantoral que tiene este dispositivo. */
-export function useCatalogVersion(): number {
-  const state = useCatalogState();
-  return state.catalog?.songs?.updatedAt ?? 0;
-}
