@@ -2,10 +2,9 @@ import { Linking, Platform } from 'react-native';
 import { logger } from '@/utils/logger';
 
 // El id de App Store Connect con el que se publica (`ascAppId` de eas.json).
-// MCM Cantoral es una app NUEVA: hasta que exista en App Store Connect el id
-// va vacío y «Actualizar en la tienda» busca la app por su nombre. Cuando se
-// cree, se pone aquí Y en eas.json (lo vigila storeLinks.test.ts).
-const IOS_APP_ID = '';
+// Va aquí Y en eas.json (lo vigila storeLinks.test.ts). Si se vaciara, «Actualizar
+// en la tienda» buscaría la app por su nombre.
+const IOS_APP_ID = '6838954378';
 const ANDROID_PACKAGE = 'com.mcmespana.mcmcantoral';
 const IOS_SEARCH = 'apps.apple.com/es/search?term=MCM%20Cantoral';
 

@@ -10,11 +10,11 @@
 - [ ] Secreto `EXPO_TOKEN` en GitHub (expo.dev → Access tokens). Sin él no
       hay OTA, web ni builds desde el CI.
 - [ ] Las `EXPO_PUBLIC_FIREBASE_*` en EAS (`npx eas-cli env:push
-  --environment production --environment preview --environment
-  development`, desde `.env.local`) para las builds en la nube, y en los
+--environment production --environment preview --environment
+development`, desde `.env.local`) para las builds en la nube, y en los
       secretos de GitHub para las OTA y la web.
-- [ ] App en App Store Connect (`com.familiaconsolacion.mcmcantoral`): su id en
-      `eas.json` (`submit.production.ios.ascAppId`, hoy sin poner: EAS no acepta vacío) **y** en `utils/storeLinks.ts` (`IOS_APP_ID`).
+- [x] App en App Store Connect (`com.familiaconsolacion.mcmcantoral`), Apple ID
+      `6838954378` en `eas.json` y `utils/storeLinks.ts` (25/11).
 - [ ] App en Play Console (`com.mcmespana.mcmcantoral`) y la huella SHA-256 de
       firma en `public/.well-known/assetlinks.json`.
 - [ ] Spike de wifi local en dos móviles reales (`01` §2.10).
