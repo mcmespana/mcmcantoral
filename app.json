@@ -1,7 +1,7 @@
 {
   "expo": {
     "name": "MCM Cantoral",
-    "slug": "mcm-cantoral",
+    "slug": "mcmcantoral",
     "version": "1.0.0",
     "runtimeVersion": "1.0.0",
     "orientation": "portrait",
@@ -36,47 +36,29 @@
           {
             "UTTypeIdentifier": "com.mcmespana.mcmcantoral.playlist",
             "UTTypeDescription": "Repertorio MCM",
-            "UTTypeConformsTo": [
-              "public.data",
-              "public.json"
-            ],
+            "UTTypeConformsTo": ["public.data", "public.json"],
             "UTTypeTagSpecification": {
-              "public.filename-extension": [
-                "mcm"
-              ],
-              "public.mime-type": [
-                "application/octet-stream"
-              ]
+              "public.filename-extension": ["mcm"],
+              "public.mime-type": ["application/octet-stream"]
             }
           }
         ],
         "NSLocalNetworkUsageDescription": "MCM Cantoral usa la red local para seguir al maestro por la wifi del coro: así las canciones pasan solas aunque no haya internet.",
-        "NSBonjourServices": [
-          "_mcmcantoral._tcp"
-        ],
+        "NSBonjourServices": ["_mcmcantoral._tcp"],
         "UTImportedTypeDeclarations": [
           {
             "UTTypeIdentifier": "com.mcmespana.mcmapp.playlist",
             "UTTypeDescription": "MCM Playlist",
-            "UTTypeConformsTo": [
-              "public.data",
-              "public.json"
-            ],
+            "UTTypeConformsTo": ["public.data", "public.json"],
             "UTTypeTagSpecification": {
-              "public.filename-extension": [
-                "mcm"
-              ],
-              "public.mime-type": [
-                "application/octet-stream"
-              ]
+              "public.filename-extension": ["mcm"],
+              "public.mime-type": ["application/octet-stream"]
             }
           }
         ]
       },
       "appleTeamId": "5P53S6QB23",
-      "associatedDomains": [
-        "applinks:mcm-cantoral.expo.app"
-      ]
+      "associatedDomains": ["applinks:mcm-cantoral.expo.app"]
     },
     "android": {
       "adaptiveIcon": {
@@ -88,10 +70,7 @@
       "intentFilters": [
         {
           "action": "VIEW",
-          "category": [
-            "DEFAULT",
-            "BROWSABLE"
-          ],
+          "category": ["DEFAULT", "BROWSABLE"],
           "data": [
             {
               "scheme": "mcmcantoral"
@@ -100,10 +79,7 @@
         },
         {
           "action": "VIEW",
-          "category": [
-            "DEFAULT",
-            "BROWSABLE"
-          ],
+          "category": ["DEFAULT", "BROWSABLE"],
           "data": [
             {
               "scheme": "file",
@@ -120,10 +96,7 @@
         {
           "autoVerify": true,
           "action": "VIEW",
-          "category": [
-            "DEFAULT",
-            "BROWSABLE"
-          ],
+          "category": ["DEFAULT", "BROWSABLE"],
           "data": [
             {
               "scheme": "https",
@@ -165,9 +138,7 @@
         }
       ],
       "expo-asset",
-      [
-        "expo-build-properties"
-      ],
+      ["expo-build-properties"],
       [
         "expo-font",
         {
@@ -191,9 +162,7 @@
         {
           "iosMicrophonePermission": "MCM Cantoral usa el micrófono para el afinador: escucha tu instrumento para decirte si está afinado. El sonido se analiza en el móvil y no se guarda ni se envía.",
           "iosBackgroundMode": false,
-          "androidPermissions": [
-            "android.permission.RECORD_AUDIO"
-          ],
+          "androidPermissions": ["android.permission.RECORD_AUDIO"],
           "androidForegroundService": false,
           "enableFFmpeg": false
         }
@@ -212,7 +181,22 @@
       "reactCompiler": true
     },
     "extra": {
-      "router": {}
-    }
+      "router": {
+        "asyncRoutes": {
+          "web": true
+        }
+      },
+      "firebaseApiKey": "AIzaSyCdk7KemzzvngYULTD0DcKiH-gxnwLZgNE",
+      "firebaseAuthDomain": "mcmappconsolacion.firebaseapp.com",
+      "firebaseDatabaseUrl": "https://mcmappconsolacion-default-rtdb.europe-west1.firebasedatabase.app",
+      "firebaseProjectId": "mcmappconsolacion",
+      "firebaseStorageBucket": "mcmappconsolacion.firebasestorage.app",
+      "firebaseMessagingSenderId": "333436090762",
+      "firebaseAppId": "1:333436090762:web:4312dae57061559a30b073",
+      "eas": {
+        "projectId": "ef39d4f3-3941-4d46-bfc2-7a9403fabb2d"
+      }
+    },
+    "owner": "mcmespana"
   }
 }
