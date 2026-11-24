@@ -4,6 +4,15 @@
 > dependencias). Entrada nueva arriba, con fecha Y hora de España. La
 > historia anterior al fork está en el repo de MCM App.
 
+## 2026-11-25 00:45 — Build de iOS: sin subida a Sentry
+
+- La build de iOS fallaba en «Bundle React Native code and images»: el paso
+  de Sentry intentaba subir los source maps con un `SENTRY_AUTH_TOKEN` del
+  entorno de EAS pero sin organización ni proyecto. Sentry está apagado hasta
+  la Fase 5 (D-15), así que todos los perfiles de `eas.json` llevan
+  `SENTRY_DISABLE_AUTO_UPLOAD=true`. Al encenderlo: quitarlo y poner
+  `SENTRY_ORG`, `SENTRY_PROJECT` y `SENTRY_AUTH_TOKEN` en EAS.
+
 ## 2026-11-25 00:30 — Proyecto EAS creado
 
 - `eas init` creó el proyecto **nuevo** `mcmespana/mcmcantoral` (slug
