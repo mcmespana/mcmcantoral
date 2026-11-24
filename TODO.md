@@ -9,7 +9,7 @@
       `EAS_PROJECT_ID` (GitHub y EAS). Sin él no hay OTA ni web ni builds
       desde el CI (a propósito: así nunca se publica en el proyecto de MCM App).
 - [ ] App en App Store Connect (`com.familiaconsolacion.mcmcantoral`): su id en
-      `eas.json` (`ascAppId`) **y** en `utils/storeLinks.ts` (`IOS_APP_ID`).
+      `eas.json` (`submit.production.ios.ascAppId`, hoy sin poner: EAS no acepta vacío) **y** en `utils/storeLinks.ts` (`IOS_APP_ID`).
 - [ ] App en Play Console (`com.mcmespana.mcmcantoral`) y la huella SHA-256 de
       firma en `public/.well-known/assetlinks.json`.
 - [ ] Spike de wifi local en dos móviles reales (`01` §2.10).

@@ -149,7 +149,9 @@ describe('id de la App Store', () => {
     const eas = JSON.parse(
       fs.readFileSync(path.join(root, 'eas.json'), 'utf8'),
     );
-    const ascAppId: string = eas.submit.production.ios.ascAppId;
+    // Sin app en App Store Connect todavía, eas.json no lleva `ascAppId`
+    // (EAS no acepta la cadena vacía) y el id del enlace va vacío.
+    const ascAppId: string = eas.submit?.production?.ios?.ascAppId ?? '';
     const src = fs.readFileSync(path.join(root, 'utils/storeLinks.ts'), 'utf8');
     expect(src).toContain(`const IOS_APP_ID = '${ascAppId}';`);
   });
