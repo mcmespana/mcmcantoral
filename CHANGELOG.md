@@ -4,6 +4,15 @@
 > dependencias). Entrada nueva arriba, con fecha Y hora de España. La
 > historia anterior al fork está en el repo de MCM App.
 
+## 2026-11-25 00:30 — Proyecto EAS creado
+
+- `eas init` creó el proyecto **nuevo** `mcmespana/mcmcantoral` (slug
+  `mcmcantoral`); su id vive en `app.json` y `app.config.ts` lo lee de ahí.
+  El secreto `EAS_PROJECT_ID` ya no hace falta (los workflows no lo piden).
+- Fuera de `app.json` las claves de Firebase que `eas init` copió de
+  `.env.local` y de `app.config.ts` los `extra.firebase*`: nadie los leía (la
+  app usa `EXPO_PUBLIC_FIREBASE_*` al empaquetar) y el repo es público.
+
 ## 2026-11-24 23:55 — Versiones al día y limpieza
 
 - **Expo SDK 58.0.26** (el último): todos los `expo-*`,

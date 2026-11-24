@@ -37,9 +37,9 @@ npm run snapshot:cantoral  # Semilla del catálogo (antes de cada build y OTA)
 ```
 
 Builds: **nunca** `npx eas-cli build` a pelo; `npm run eas:build:ios -- --profile …`
-(limpian los symlinks de skills). El proyecto EAS es **nuevo** y sale de
-`EAS_PROJECT_ID` (`app.config.ts`): sin él no hay `updates.url` y ninguna OTA
-puede caer en MCM App.
+(limpian los symlinks de skills). El proyecto EAS es **nuevo**
+(`mcmespana/mcmcantoral`, id en `app.json` → `extra.eas.projectId`; el de MCM
+App es otro): ninguna OTA de aquí puede caer en MCM App.
 
 ## Reglas
 

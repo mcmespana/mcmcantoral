@@ -5,9 +5,14 @@
 
 ## Fuera del código (usuario)
 
-- [ ] `eas init` del proyecto EAS **nuevo** y su id en el secreto
-      `EAS_PROJECT_ID` (GitHub y EAS). Sin él no hay OTA ni web ni builds
-      desde el CI (a propósito: así nunca se publica en el proyecto de MCM App).
+- [x] `eas init` del proyecto EAS **nuevo** (24/11): `mcmespana/mcmcantoral`,
+      id en `app.json` (`extra.eas.projectId`).
+- [ ] Secreto `EXPO_TOKEN` en GitHub (expo.dev → Access tokens). Sin él no
+      hay OTA, web ni builds desde el CI.
+- [ ] Las `EXPO_PUBLIC_FIREBASE_*` en EAS (`npx eas-cli env:push
+  --environment production --environment preview --environment
+  development`, desde `.env.local`) para las builds en la nube, y en los
+      secretos de GitHub para las OTA y la web.
 - [ ] App en App Store Connect (`com.familiaconsolacion.mcmcantoral`): su id en
       `eas.json` (`submit.production.ios.ascAppId`, hoy sin poner: EAS no acepta vacío) **y** en `utils/storeLinks.ts` (`IOS_APP_ID`).
 - [ ] App en Play Console (`com.mcmespana.mcmcantoral`) y la huella SHA-256 de

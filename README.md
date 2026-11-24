@@ -26,8 +26,8 @@ Tests y comprobaciones: `npx tsc --noEmit && npm run lint && npm test`.
   `production`).
 - **OTA**: `main → preview → production` (`docs/desarrollo/OTA.md`).
 - **Tiendas**: `npm run eas:build:ios -- --profile production` (y android).
-  Antes, una vez: `eas init` para el proyecto EAS nuevo y guardar su id en el
-  secreto `EAS_PROJECT_ID` (GitHub y EAS). Detalle en
+  El proyecto EAS (`mcmespana/mcmcantoral`) ya existe: su id está en
+  `app.json`. Detalle en
   [`docs/planes/fork-cantoral/07-tiendas-y-villancicos.md`](docs/planes/fork-cantoral/07-tiendas-y-villancicos.md).
 
 ## Documentación

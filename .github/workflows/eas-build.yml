@@ -4,7 +4,7 @@
 #
 # Requisitos que este workflow NO puede resolver por ti:
 #   - `EXPO_TOKEN` en los secrets del repo (ya existe: lo usan las OTA).
-#   - `EAS_PROJECT_ID`: el proyecto EAS NUEVO de MCM Cantoral (`eas init`).
+#   - El proyecto EAS NUEVO de MCM Cantoral: su id ya está en `app.json`.
 #   - Credenciales de iOS GUARDADAS en EAS. La primera vez EAS las crea
 #     preguntando por terminal, y en `--non-interactive` no puede: hay que
 #     hacer ese primer paso a mano (`npx eas-cli credentials -p ios`, o un
@@ -45,8 +45,6 @@ jobs:
     timeout-minutes: 20
     env:
       EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }} # yamllint disable-line
-      # Proyecto EAS de MCM Cantoral (NUEVO, no el de MCM App: ver app.config.ts).
-      EAS_PROJECT_ID: ${{ secrets.EAS_PROJECT_ID }}
       # Para la semilla del catálogo (lectura pública de `songs`).
       EXPO_PUBLIC_FIREBASE_DATABASE_URL: ${{ secrets.EXPO_PUBLIC_FIREBASE_DATABASE_URL }}
     steps:
@@ -62,14 +60,10 @@ jobs:
           cache: 'npm'
           cache-dependency-path: package-lock.json
 
-      - name: Verificar que EXPO_TOKEN y EAS_PROJECT_ID existen
+      - name: Verificar que EXPO_TOKEN existe
         run: |
           if [ -z "${EXPO_TOKEN}" ]; then
             echo "::error::EXPO_TOKEN no está configurado en los secrets del repositorio"
-            exit 1
-          fi
-          if [ -z "${EAS_PROJECT_ID}" ]; then
-            echo "::error::EAS_PROJECT_ID no está configurado: hace falta el proyecto EAS NUEVO de MCM Cantoral (eas init). Sin él no se publica nada."
             exit 1
           fi
 
@@ -102,4 +96,4 @@ jobs:
             ARGS+=(--auto-submit)
           fi
           eas build "${ARGS[@]}"
-          echo "Build encolada. Sigue el progreso en https://expo.dev (proyecto mcm-cantoral)." >> "$GITHUB_STEP_SUMMARY"
+          echo "Build encolada. Sigue el progreso en https://expo.dev (proyecto mcmcantoral)." >> "$GITHUB_STEP_SUMMARY"

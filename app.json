@@ -181,18 +181,7 @@
       "reactCompiler": true
     },
     "extra": {
-      "router": {
-        "asyncRoutes": {
-          "web": true
-        }
-      },
-      "firebaseApiKey": "AIzaSyCdk7KemzzvngYULTD0DcKiH-gxnwLZgNE",
-      "firebaseAuthDomain": "mcmappconsolacion.firebaseapp.com",
-      "firebaseDatabaseUrl": "https://mcmappconsolacion-default-rtdb.europe-west1.firebasedatabase.app",
-      "firebaseProjectId": "mcmappconsolacion",
-      "firebaseStorageBucket": "mcmappconsolacion.firebasestorage.app",
-      "firebaseMessagingSenderId": "333436090762",
-      "firebaseAppId": "1:333436090762:web:4312dae57061559a30b073",
+      "router": {},
       "eas": {
         "projectId": "ef39d4f3-3941-4d46-bfc2-7a9403fabb2d"
       }
