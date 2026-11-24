@@ -4,6 +4,29 @@
 > dependencias). Entrada nueva arriba, con fecha Y hora de España. La
 > historia anterior al fork está en el repo de MCM App.
 
+## 2026-11-24 23:55 — Versiones al día y limpieza
+
+- **Expo SDK 58.0.26** (el último): todos los `expo-*`,
+  `react-native-safe-area-context` 5.11 y `react-native-screens` 4.30.1
+  alineados con lo que pide el SDK (`npx expo install --check` limpio).
+- Al día dentro de su major: `firebase` 13.4, `uniwind` 1.14, `tailwindcss`
+  4.3.5, `react-native-audio-api` 1.0.1, `react-native-qrcode-svg`,
+  `react-native-reorderable-list`, `prettier`, `lint-staged` 17 y tipos.
+  `abcjs` 6.7.3 con `utils/songSheetAbcjs.ts` regenerado.
+- **`heroui-native` se queda en 1.0.11**: la 1.1.1 lee
+  `Platform.constants.reactNativeVersion` sin comprobarlo y rompe el render
+  estático de la web (`expo export -p web`).
+- Sin subir a propósito (majors que piden migración): ESLint 10,
+  TypeScript 7, Babel 8, `@react-native-async-storage/async-storage` 3 (la
+  fija Expo en 2.2.0), `esbuild` 0.28 y `@react-native-community/cli` 21.
+- CI: `actions/checkout` y `actions/setup-node` v7 (las v4 corrían en Node
+  20, deprecado) y `eas-cli` fijado a 27.11.0.
+- Fuera: `sharp` (era de los generadores de iconos de MCM App), las
+  constantes de la barra de pestañas (`TAB_BAR_*`, `TabHeaderColors`), el
+  hook `useCatalogVersion` sin uso y la plantilla duplicada
+  `docs/planes/fork-cantoral/DIVERGENCIAS.md` (el vivo es
+  `docs/DIVERGENCIAS.md`).
+
 ## 2026-11-22 10:05 — Fase 5: apuntes por capas y partituras ABC
 
 - **Apuntes** en el Atril: toque largo en una línea → texto, marca (p, f,

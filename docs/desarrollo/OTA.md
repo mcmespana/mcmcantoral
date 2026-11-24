@@ -23,11 +23,11 @@ tu cambio. Lo recibe **todo binario instalado con la misma `runtimeVersion`**
 **MCM Cantoral no tiene Laboratorio Alpha**: el canal `preview` lo reciben
 las builds de prueba. Hay tres ramas git y cada una publica a su canal de EAS Update al hacer push:
 
-| Rama git     | Workflow             | Canal EAS    | Quién lo recibe                                                    |
-| ------------ | -------------------- | ------------ | ------------------------------------------------------------------ |
-| `main`       | — (no publica)       | —            | Es la rama de desarrollo: aquí se mergean los PR                   |
-| `preview`    | `ota-preview.yml`    | `preview`    | Solo las builds de prueba (perfil `preview` de `eas.json`)        |
-| `production` | `ota-production.yml` | `production` | Todos los usuarios                                                 |
+| Rama git     | Workflow             | Canal EAS    | Quién lo recibe                                            |
+| ------------ | -------------------- | ------------ | ---------------------------------------------------------- |
+| `main`       | — (no publica)       | —            | Es la rama de desarrollo: aquí se mergean los PR           |
+| `preview`    | `ota-preview.yml`    | `preview`    | Solo las builds de prueba (perfil `preview` de `eas.json`) |
+| `production` | `ota-production.yml` | `production` | Todos los usuarios                                         |
 
 ```
 PR → main ──merge→ preview ──(se prueba en el iPhone del usuario)──merge→ production
@@ -177,7 +177,7 @@ embebido), así que no confíes en ellas: revierte rápido.
 
 - Comandos exactos y flags: `eas update:rollback --help`,
   `eas update:republish --help`, `eas update:list --help` (comprobados con la
-  `eas-cli@21.0.2` que fijan los workflows).
+  `eas-cli@27.11.0` que fijan los workflows).
 - Guard de cambios nativos y `[skip-ota]`: comentario de cabecera de
   `ota-production.yml`.
 - Por qué el login, Sentry y Aptabase viajan en cada OTA (variables

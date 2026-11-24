@@ -138,11 +138,6 @@ export const SongSheetColors = {
   sun: SheetPalette.sun,
 } as const;
 
-/** Cabecera del cantoral (antes, el color de su pestaña). */
-export const TabHeaderColors = {
-  cancionero: D.background,
-};
-
 // Afinador del cantoral (`screens/TunerScreen.tsx`). Son los verde y
 // naranja de sistema de Apple: «afinada» y «casi», que es lo que significan en
 // cualquier afinador. Cada uno en dos tonos: `ink` es el que se lee como texto
@@ -259,4 +254,3 @@ export const LiturgicalColors = {
   /** Solemnidades y fiestas del Señor y de la Virgen (blanco litúrgico). */
   white: '#F5F5F5',
 } as const;
-

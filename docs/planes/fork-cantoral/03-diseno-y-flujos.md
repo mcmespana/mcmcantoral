@@ -14,14 +14,14 @@
 Antes de una sola pantalla, las situaciones reales. Cada decisión de abajo
 sale de una de estas:
 
-| Situación | Dispositivo | Manos | Luz y ruido | Lo que pide |
-| --------- | ----------- | ----- | ----------- | ----------- |
-| **Estudiar en casa** | Móvil o iPad, sentado | Libres | Normal | Buscar rápido, escuchar la grabación, transponer, apuntar |
-| **Preparar la misa del domingo** | Móvil (o el ordenador por la web) | Libres | Normal | Montar un repertorio por momentos, importar el del coro, tono por canción |
-| **Ensayar en grupo** | iPad en el atril o móvil | Una ocupada (guitarra) | Parroquia, se habla | Apuntes para todos / para mi instrumento / para mí, saltar a una canción |
-| **Actuar en directo (misa)** | iPad en atril, móvil en la mano | **Ocupadas tocando** | Penumbra, silencio | Cero toques: sigue al que dirige, pedal, letra grande, mis apuntes a la vista |
-| **Villancicos Solidarios (8 h en la calle)** | Móvil, de pie | Frío, **guantes**, una mano | Sol o noche, ruido de calle | Unirse en 1 toque, avisos del maestro que se vean sin buscar, batería y datos que aguanten |
-| **Maestro de villancicos** | Móvil o iPad | Una mano | Calle | Pasar canción en 1 toque, mandar «¡más fuerte!» en 1-2 toques, ver quién le sigue |
+| Situación                                    | Dispositivo                       | Manos                       | Luz y ruido                 | Lo que pide                                                                                |
+| -------------------------------------------- | --------------------------------- | --------------------------- | --------------------------- | ------------------------------------------------------------------------------------------ |
+| **Estudiar en casa**                         | Móvil o iPad, sentado             | Libres                      | Normal                      | Buscar rápido, escuchar la grabación, transponer, apuntar                                  |
+| **Preparar la misa del domingo**             | Móvil (o el ordenador por la web) | Libres                      | Normal                      | Montar un repertorio por momentos, importar el del coro, tono por canción                  |
+| **Ensayar en grupo**                         | iPad en el atril o móvil          | Una ocupada (guitarra)      | Parroquia, se habla         | Apuntes para todos / para mi instrumento / para mí, saltar a una canción                   |
+| **Actuar en directo (misa)**                 | iPad en atril, móvil en la mano   | **Ocupadas tocando**        | Penumbra, silencio          | Cero toques: sigue al que dirige, pedal, letra grande, mis apuntes a la vista              |
+| **Villancicos Solidarios (8 h en la calle)** | Móvil, de pie                     | Frío, **guantes**, una mano | Sol o noche, ruido de calle | Unirse en 1 toque, avisos del maestro que se vean sin buscar, batería y datos que aguanten |
+| **Maestro de villancicos**                   | Móvil o iPad                      | Una mano                    | Calle                       | Pasar canción en 1 toque, mandar «¡más fuerte!» en 1-2 toques, ver quién le sigue          |
 
 **Consecuencias directas** (no negociables):
 
@@ -54,7 +54,7 @@ sale de una de estas:
 4. **Sin barra de pestañas y sin FAB.** Una sola pila de navegación con
    **barras de herramientas inferiores de vidrio, contextuales por pantalla**
    (en iOS, la barra del sistema —como Notas o Mail en iOS 26—; en Android, la
-   *floating toolbar* de Material 3 Expressive). Decisión del usuario: «me
+   _floating toolbar_ de Material 3 Expressive). Decisión del usuario: «me
    cargaría el FAB y que sean unos botones abajo».
 5. **Lo personal no estorba.** Apuntes, tono y tamaño son tuyos y se ven
    siempre que quieras, pero nunca tapan la letra.
@@ -82,10 +82,10 @@ Hojas a un toque desde donde haga falta: Afinador/Metrónomo · Tono · Apuntes 
 Avisos (maestro) · Unirse a un directo (QR / cerca de ti / código)
 ```
 
-**Vocabulario de la interfaz** (decisión D-12): *Cantoral*, *Repertorio*
+**Vocabulario de la interfaz** (decisión D-12): _Cantoral_, _Repertorio_
 (lo que en MCM App es «Tu selección»/playlist; en datos sigue siendo
-`playlist`), *Directo*, *Dirige / Maestro*, *Sigue*, *Aviso*, *Apunte*,
-*Arreglo* (el `{arr:}` oficial de la canción, como en MCM App). *Bloque*
+`playlist`), _Directo_, _Dirige / Maestro_, _Sigue_, _Aviso_, _Apunte_,
+_Arreglo_ (el `{arr:}` oficial de la canción, como en MCM App). _Bloque_
 solo aparece **dentro de un evento** (los packs de villancicos). Todo tiene
 que tener sentido en el **modo normal**, después de Navidad: la app es para
 todo el año y el modo Navidad es una capa encima, no el centro.
@@ -144,7 +144,7 @@ Bocetos de intención, no de píxeles. Los píxeles se deciden en la maqueta
 - **La hoja de canción de MCM App se queda** (`utils/songSheet*.ts`: cortes
   por frase, acordes que vuelan, columnas en iPad, modo atril con pedal,
   estribillos plegados). Es el mejor trabajo del cantoral y vive en la zona
-  espejo (ver [`DIVERGENCIAS.md`](DIVERGENCIAS.md)). Lo que cambia es todo lo
+  espejo (ver [`DIVERGENCIAS.md`](../../DIVERGENCIAS.md)). Lo que cambia es todo lo
   de alrededor: barra, cabecera, tema, capas.
 - `3 / 12 ▾` abre la lista del repertorio en una hoja para saltar.
 - **Inmersivo**: a los pocos segundos se apagan cabecera y barra (ya existe:
@@ -181,8 +181,8 @@ Bocetos de intención, no de píxeles. Los píxeles se deciden en la maqueta
 ### 4.4 Directo — quien dirige
 
 - Al pulsar «Dirigir»: una hoja con el PIN de 4 cifras y **por dónde va el
-  directo** — *Los dos* · *Solo wifi del coro* · *Solo internet*, con la que
-  encaja con tu conexión ya marcada (con datos y sin wifi, *Solo internet*)
+  directo** — _Los dos_ · _Solo wifi del coro_ · _Solo internet_, con la que
+  encaja con tu conexión ya marcada (con datos y sin wifi, _Solo internet_)
   (`04` §2 bis). Un toque más y empieza.
 
 - En móvil: el mismo Atril con la barra del maestro: **‹ ›** grandes,
@@ -228,19 +228,19 @@ pensada para mirarla de lejos desde la mesa de sonido:
 
 ## 5. Flujos (con el número de toques como métrica)
 
-| Flujo | Camino | Toques objetivo |
-| ----- | ------ | --------------- |
-| Unirme al directo de mi coro (o del evento) | Abrir app → **Unirme** | **1** |
-| Montar el equipo base | (+) → Directo → «Este dispositivo es el equipo base» | 3, una vez |
-| Unirme a un directo por QR | Abrir app → (+) → Escanear → apuntar | 2 + apuntar |
-| Pasar canción (maestro) | **›** o pedal | **1** (0 con pedal al final de página) |
-| Pasar canción (seguidor) | — | **0** |
-| Mandar «¡Más fuerte!» | 📣 → «Más fuerte» | **2** |
-| «Ahora hacemos el puente» (maestro) | ¶ → «Puente» | **2** |
-| Encontrar una canción | Barra → escribir 3 letras → tocar | 1 + texto |
-| Importar la última de mi coro | Inicio → Repertorios → «Traer la última» | 2 |
-| Montar y dirigir la misa | Repertorio → 📡 Dirigir → Empezar (PIN y «los dos» ya puestos) | 2 desde el repertorio |
-| Apuntar «entra el bajo aquí» | Toque largo en la línea → escribir → capa | 2 + texto |
+| Flujo                                       | Camino                                                         | Toques objetivo                        |
+| ------------------------------------------- | -------------------------------------------------------------- | -------------------------------------- |
+| Unirme al directo de mi coro (o del evento) | Abrir app → **Unirme**                                         | **1**                                  |
+| Montar el equipo base                       | (+) → Directo → «Este dispositivo es el equipo base»           | 3, una vez                             |
+| Unirme a un directo por QR                  | Abrir app → (+) → Escanear → apuntar                           | 2 + apuntar                            |
+| Pasar canción (maestro)                     | **›** o pedal                                                  | **1** (0 con pedal al final de página) |
+| Pasar canción (seguidor)                    | —                                                              | **0**                                  |
+| Mandar «¡Más fuerte!»                       | 📣 → «Más fuerte»                                              | **2**                                  |
+| «Ahora hacemos el puente» (maestro)         | ¶ → «Puente»                                                   | **2**                                  |
+| Encontrar una canción                       | Barra → escribir 3 letras → tocar                              | 1 + texto                              |
+| Importar la última de mi coro               | Inicio → Repertorios → «Traer la última»                       | 2                                      |
+| Montar y dirigir la misa                    | Repertorio → 📡 Dirigir → Empezar (PIN y «los dos» ya puestos) | 2 desde el repertorio                  |
+| Apuntar «entra el bajo aquí»                | Toque largo en la línea → escribir → capa                      | 2 + texto                              |
 
 Un flujo nuevo no entra si su camino crítico pasa de estos números sin
 justificarlo en `DIVERGENCIAS.md`.
@@ -264,13 +264,13 @@ Ninguna usa el azul MCM ni la paleta por secciones. Las tres comparten
 tipografía del sistema para la interfaz (nativo) y la hoja de canción con su
 letra elegible.
 
-| | **A · Escenario** (en la maqueta) | **B · Rúbrica** (en la maqueta) | **C · Nativo puro** (descartada como dirección; sus piezas nativas se usan en las dos) |
-| - | ------------------------------- | --------------- | ------------------- |
-| Idea | El atril de noche: tinta casi negra y una luz cálida de vela | El libro de cantos: papel, tinta y el rojo de las rúbricas del misal | Colores del sistema con un solo acento |
-| Modo por defecto | Oscuro primero (claro bien hecho también) | Claro primero | El del sistema |
-| Acento | Ámbar cálido (acordes, acción principal) | Rojo litúrgico (acordes, títulos de sección) | Un tono del sistema (p. ej. índigo) |
-| Fuerte en | Directo en penumbra, calle de noche, batería OLED | Estudiar, imprimir, aire «de cantoral» | Coste cero, se ve «de Apple/Google» |
-| Débil en | Al sol necesita el tema «Sol» | El rojo recuerda al acento de MCM App | Poca personalidad: «otra app más» |
+|                  | **A · Escenario** (en la maqueta)                            | **B · Rúbrica** (en la maqueta)                                      | **C · Nativo puro** (descartada como dirección; sus piezas nativas se usan en las dos) |
+| ---------------- | ------------------------------------------------------------ | -------------------------------------------------------------------- | -------------------------------------------------------------------------------------- |
+| Idea             | El atril de noche: tinta casi negra y una luz cálida de vela | El libro de cantos: papel, tinta y el rojo de las rúbricas del misal | Colores del sistema con un solo acento                                                 |
+| Modo por defecto | Oscuro primero (claro bien hecho también)                    | Claro primero                                                        | El del sistema                                                                         |
+| Acento           | Ámbar cálido (acordes, acción principal)                     | Rojo litúrgico (acordes, títulos de sección)                         | Un tono del sistema (p. ej. índigo)                                                    |
+| Fuerte en        | Directo en penumbra, calle de noche, batería OLED            | Estudiar, imprimir, aire «de cantoral»                               | Coste cero, se ve «de Apple/Google»                                                    |
+| Débil en         | Al sol necesita el tema «Sol»                                | El rojo recuerda al acento de MCM App                                | Poca personalidad: «otra app más»                                                      |
 
 Recomendación de partida para la maqueta: **A**, porque el caso crítico
 (directo) es de penumbra y de calle. En directo el Atril pasa a
@@ -293,16 +293,16 @@ Reglas que se mantienen con cualquier dirección:
 
 ## 7. Plataforma: lo nativo concreto
 
-| Pieza | iOS | Android | Web |
-| ----- | --- | ------- | --- |
-| Navegación | Una `Stack` de expo-router, título grande | Igual, top app bar M3 | Igual |
-| Barra inferior | `Stack.Toolbar` en la parte de abajo (UIToolbar con Liquid Glass) — **verificar en el spike de Fase 0** que expo-router 58 la ofrece; si no, `GlassActionGroup` existente | *Floating toolbar* M3 (vía `@expo/ui` Compose si está; si no, propia sobre `GlassSurface` sólido) | Barra fija abajo |
-| Búsqueda | `headerSearchBarOptions` (en iOS 26, abajo) | Search bar M3 | Campo |
-| Menús | Menú contextual nativo (`Stack.Toolbar.Menu`, `@expo/ui`) | Menú M3 | Menú web |
-| Hojas | `formSheet` con detents | Bottom sheet M3 con asa | Modal |
-| iPad | Barra lateral + atril (split), Stage Manager por tamaño de ventana | Tablets: igual | — |
-| Teclado/pedal | Captura nativa de teclas (ver `04`) | Igual | `keydown` (ya existe) |
-| Iconos | SF Symbols (`IconSymbol`) | Material Symbols | Material |
+| Pieza          | iOS                                                                                                                                                                       | Android                                                                                           | Web                   |
+| -------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------- | --------------------- |
+| Navegación     | Una `Stack` de expo-router, título grande                                                                                                                                 | Igual, top app bar M3                                                                             | Igual                 |
+| Barra inferior | `Stack.Toolbar` en la parte de abajo (UIToolbar con Liquid Glass) — **verificar en el spike de Fase 0** que expo-router 58 la ofrece; si no, `GlassActionGroup` existente | _Floating toolbar_ M3 (vía `@expo/ui` Compose si está; si no, propia sobre `GlassSurface` sólido) | Barra fija abajo      |
+| Búsqueda       | `headerSearchBarOptions` (en iOS 26, abajo)                                                                                                                               | Search bar M3                                                                                     | Campo                 |
+| Menús          | Menú contextual nativo (`Stack.Toolbar.Menu`, `@expo/ui`)                                                                                                                 | Menú M3                                                                                           | Menú web              |
+| Hojas          | `formSheet` con detents                                                                                                                                                   | Bottom sheet M3 con asa                                                                           | Modal                 |
+| iPad           | Barra lateral + atril (split), Stage Manager por tamaño de ventana                                                                                                        | Tablets: igual                                                                                    | —                     |
+| Teclado/pedal  | Captura nativa de teclas (ver `04`)                                                                                                                                       | Igual                                                                                             | `keydown` (ya existe) |
+| Iconos         | SF Symbols (`IconSymbol`)                                                                                                                                                 | Material Symbols                                                                                  | Material              |
 
 Se eliminan: `expo-native-compact-tabs`, `CompactTabBar`, `TabScreenWrapper`
 y todo `components/tabs/`, el FAB de canción (`SongControls`) como FAB — sus
