@@ -58,7 +58,7 @@
         ]
       },
       "appleTeamId": "5P53S6QB23",
-      "associatedDomains": ["applinks:mcm-cantoral.expo.app"]
+      "associatedDomains": ["applinks:mcmcantoral.expo.app"]
     },
     "android": {
       "adaptiveIcon": {
@@ -100,17 +100,17 @@
           "data": [
             {
               "scheme": "https",
-              "host": "mcm-cantoral.expo.app",
+              "host": "mcmcantoral.expo.app",
               "pathPrefix": "/playlist"
             },
             {
               "scheme": "https",
-              "host": "mcm-cantoral.expo.app",
+              "host": "mcmcantoral.expo.app",
               "pathPrefix": "/coro"
             },
             {
               "scheme": "https",
-              "host": "mcm-cantoral.expo.app",
+              "host": "mcmcantoral.expo.app",
               "pathPrefix": "/cancion"
             }
           ]

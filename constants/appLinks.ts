@@ -8,7 +8,7 @@
  */
 
 /** Web de la app (EAS Hosting). Los universal links cuelgan de aquí. */
-export const WEB_BASE_URL = 'https://mcm-cantoral.expo.app';
+export const WEB_BASE_URL = 'https://mcmcantoral.expo.app';
 
 /** Esquema propio (`app.json` → `scheme`). */
 export const APP_SCHEME = 'mcmcantoral://';

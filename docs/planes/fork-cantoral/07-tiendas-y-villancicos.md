@@ -15,26 +15,26 @@
   modo Navidad, directo por wifi local (con equipo base y relevo) y por la
   nube, avisos, reacciones, pedal/volumen. Si da tiempo: seguir por sección
   y el admin.
-- **Repertorio**: la categoría *N. Navidad* del repo del cantoral **hoy está
+- **Repertorio**: la categoría _N. Navidad_ del repo del cantoral **hoy está
   vacía** y los bloques de 2025 sin enlazar. Lo meten ellos con los
   importadores del admin (A-04).
 - **Router**: configurado según `04` §5.3 y probado en el ensayo.
 - **Plan B si la tienda no llega**: ver las canciones en **MCM App**, que
   para entonces debe pintar Navidad con subcategorías (Paquete MCM App,
   documentado en `mcm-app/TODO.md`; D-01). Y la web
-  del fork (`mcm-cantoral.expo.app`) para seguir el directo por la nube.
+  del fork (`mcmcantoral.expo.app`) para seguir el directo por la nube.
 
 ## 2. Calendario
 
-| Semana | App (Claude) | Fuera del código (usuario, Izan) |
-| ------ | ------------ | -------------------------------- |
-| **S0 · 21-23 nov** | Plan mergeado en `main`. **Maqueta A/B**. **Fase 0**: spike de wifi local el primer día, poda, app a la raíz | **Repo `mcmespana/mcmcantoral`** y darle acceso a Claude. Empezar a importar villancicos |
-| **S1 · 24-30 nov** | Fase 0 cerrada → **TestFlight + prueba interna de Play**. **Fase 1** (catálogo, bloques, modo Navidad). Maqueta A/B | Izan mira la maqueta y cierra estilo. Icono en Canva. Fichas de tienda y privacidad |
-| **S2 · 1-7 dic** | **Fase 2** con el estilo de Izan. **Fase 3**: protocolo, nube, **wifi local** con equipo base y relevo, pasar el cantoral | Villancicos revisados, bloques 2026 enlazados y publicados |
-| **S3 · 8-13 dic** | Fase 3: avisos, reacciones, pedal y volumen, cuenta atrás, resumen, seguir por sección. **Enviar a revisión ~9 dic** | **Ensayo con el router del evento** y 10+ móviles |
-| **S4 · 14-18 dic** | Arreglos del ensayo por OTA. Publicar. Modo Navidad encendido. Admin por código si da tiempo | Todo el mundo instala, abre con wifi y prueba «Probar la conexión del coro» |
-| **19 dic** | Guardia (OTA de urgencia si hace falta) | 🎄 |
-| **Enero** | Fase 5: apuntes, partituras (admin del cantoral primero), analítica, ideas «luego» | — |
+| Semana             | App (Claude)                                                                                                              | Fuera del código (usuario, Izan)                                                         |
+| ------------------ | ------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------- |
+| **S0 · 21-23 nov** | Plan mergeado en `main`. **Maqueta A/B**. **Fase 0**: spike de wifi local el primer día, poda, app a la raíz              | **Repo `mcmespana/mcmcantoral`** y darle acceso a Claude. Empezar a importar villancicos |
+| **S1 · 24-30 nov** | Fase 0 cerrada → **TestFlight + prueba interna de Play**. **Fase 1** (catálogo, bloques, modo Navidad). Maqueta A/B       | Izan mira la maqueta y cierra estilo. Icono en Canva. Fichas de tienda y privacidad      |
+| **S2 · 1-7 dic**   | **Fase 2** con el estilo de Izan. **Fase 3**: protocolo, nube, **wifi local** con equipo base y relevo, pasar el cantoral | Villancicos revisados, bloques 2026 enlazados y publicados                               |
+| **S3 · 8-13 dic**  | Fase 3: avisos, reacciones, pedal y volumen, cuenta atrás, resumen, seguir por sección. **Enviar a revisión ~9 dic**      | **Ensayo con el router del evento** y 10+ móviles                                        |
+| **S4 · 14-18 dic** | Arreglos del ensayo por OTA. Publicar. Modo Navidad encendido. Admin por código si da tiempo                              | Todo el mundo instala, abre con wifi y prueba «Probar la conexión del coro»              |
+| **19 dic**         | Guardia (OTA de urgencia si hace falta)                                                                                   | 🎄                                                                                       |
+| **Enero**          | Fase 5: apuntes, partituras (admin del cantoral primero), analítica, ideas «luego»                                        | —                                                                                        |
 
 ## 3. Tiendas
 
@@ -147,12 +147,12 @@ enseña las canciones.
 
 ## 5. Tareas
 
-| # | Tarea | Quién |
-| - | ----- | ----- |
-| 7.1 | Fichas, capturas, privacidad, nota de revisión | Claude prepara textos y capturas; usuario sube |
-| 7.2 | Icono en Canva | Claude propone, Izan y usuario cierran |
-| 7.3 | Builds y envío (`npm run eas:build:* -- --profile production`, `eas submit`) | Claude + usuario |
-| 7.4 | Importar y revisar villancicos; bloques 2026 | Usuario |
-| 7.5 | `packs.py publish`, workflow y `config/cantoral.json` | Claude (repo del cantoral) |
-| 7.6 | Configurar el router y ensayo con 10+ móviles | Usuario y coro |
-| 7.7 | Guardia del día | Claude disponible para OTA de urgencia |
+| #   | Tarea                                                                        | Quién                                          |
+| --- | ---------------------------------------------------------------------------- | ---------------------------------------------- |
+| 7.1 | Fichas, capturas, privacidad, nota de revisión                               | Claude prepara textos y capturas; usuario sube |
+| 7.2 | Icono en Canva                                                               | Claude propone, Izan y usuario cierran         |
+| 7.3 | Builds y envío (`npm run eas:build:* -- --profile production`, `eas submit`) | Claude + usuario                               |
+| 7.4 | Importar y revisar villancicos; bloques 2026                                 | Usuario                                        |
+| 7.5 | `packs.py publish`, workflow y `config/cantoral.json`                        | Claude (repo del cantoral)                     |
+| 7.6 | Configurar el router y ensayo con 10+ móviles                                | Usuario y coro                                 |
+| 7.7 | Guardia del día                                                              | Claude disponible para OTA de urgencia         |

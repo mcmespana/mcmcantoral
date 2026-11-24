@@ -22,7 +22,7 @@ Tests y comprobaciones: `npx tsc --noEmit && npm run lint && npm test`.
 
 ## Publicar
 
-- **Web**: `mcm-cantoral.expo.app` (workflow `deploy-web`, al empujar a
+- **Web**: `mcmcantoral.expo.app` (workflow `deploy-web`, al empujar a
   `production`).
 - **OTA**: `main → preview → production` (`docs/desarrollo/OTA.md`).
 - **Tiendas**: `npm run eas:build:ios -- --profile production` (y android).

@@ -24,11 +24,11 @@
    - Claude empuja `main` de `mcmapp` con toda su historia
      (`git push mcmcantoral main`). Al compartir historia, `git merge-base`
      y `cherry-pick` funcionan igual que en un fork; lo único que se pierde
-     es la etiqueta «forked from» y el botón de *Sync fork*, que aquí no
+     es la etiqueta «forked from» y el botón de _Sync fork_, que aquí no
      servían (la app se mueve a la raíz: los cambios se portan con parche,
      `DIVERGENCIAS.md` §4).
    - En el clon del fork: `git remote add upstream
-     https://github.com/mcmespana/mcmapp` para comparar y traer cambios.
+https://github.com/mcmespana/mcmapp` para comparar y traer cambios.
 3. **Dar acceso a Claude**: la app de GitHub de Claude ya está en
    `mcmespana`; si está limitada a repos concretos, añadir `mcmcantoral`
    (<https://github.com/apps/claude/installations/select_target>) y añadirlo
@@ -66,20 +66,20 @@
 
 ### 2.1 Identidad nueva
 
-| Qué | Hoy (MCM App) | Fork (decidido, D-03) |
-| --- | ------------- | ---------------------- |
-| Nombre | MCM App | **MCM Cantoral** |
-| `slug` / `scheme` | `mcm-app` / `mcmapp` | `mcm-cantoral` / `mcmcantoral` |
-| iOS bundle id | `com.familiaconsolacion.mcmapp` | `com.familiaconsolacion.mcmcantoral` |
-| Android package | `com.mcmespana.mcmapp` | `com.mcmespana.mcmcantoral` |
-| EAS project | `aa9f2d3a-…` | **nuevo** (`eas init`), y su `updates.url` |
-| `ascAppId` (eas.json) | `6753905393` | el de la app nueva en App Store Connect |
-| Versión / runtime | 2.5.1 | **1.0.0** |
-| Web | `mcm.expo.app` | **`mcm-cantoral.expo.app`** (D-13) |
-| Universal links | `applinks:mcm.expo.app` (`/playlist`, `/coro`) | los del dominio nuevo |
-| Tipo de fichero `.mcm` | UTI `com.mcmespana.mcmapp.playlist` (dueña) | UTI propia como dueña **y** la de MCM App como *importada*: las dos apps abren los `.mcm` de la otra sin chocar |
-| Sentry / Aptabase | proyecto de MCM App | **instalados y apagados** (sin claves) hasta la Fase 5 (D-15: «segunda fase»); se encienden con una variable, sin build |
-| Red local | — | `NSLocalNetworkUsageDescription`, `NSBonjourServices: ["_mcmcantoral._tcp"]`; Android según targetSdk (`04` §5.4) |
+| Qué                    | Hoy (MCM App)                                  | Fork (decidido, D-03)                                                                                                   |
+| ---------------------- | ---------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------- |
+| Nombre                 | MCM App                                        | **MCM Cantoral**                                                                                                        |
+| `slug` / `scheme`      | `mcm-app` / `mcmapp`                           | `mcm-cantoral` / `mcmcantoral`                                                                                          |
+| iOS bundle id          | `com.familiaconsolacion.mcmapp`                | `com.familiaconsolacion.mcmcantoral`                                                                                    |
+| Android package        | `com.mcmespana.mcmapp`                         | `com.mcmespana.mcmcantoral`                                                                                             |
+| EAS project            | `aa9f2d3a-…`                                   | **nuevo** (`eas init`), y su `updates.url`                                                                              |
+| `ascAppId` (eas.json)  | `6753905393`                                   | el de la app nueva en App Store Connect                                                                                 |
+| Versión / runtime      | 2.5.1                                          | **1.0.0**                                                                                                               |
+| Web                    | `mcm.expo.app`                                 | **`mcmcantoral.expo.app`** (D-13)                                                                                       |
+| Universal links        | `applinks:mcm.expo.app` (`/playlist`, `/coro`) | los del dominio nuevo                                                                                                   |
+| Tipo de fichero `.mcm` | UTI `com.mcmespana.mcmapp.playlist` (dueña)    | UTI propia como dueña **y** la de MCM App como _importada_: las dos apps abren los `.mcm` de la otra sin chocar         |
+| Sentry / Aptabase      | proyecto de MCM App                            | **instalados y apagados** (sin claves) hasta la Fase 5 (D-15: «segunda fase»); se encienden con una variable, sin build |
+| Red local              | —                                              | `NSLocalNetworkUsageDescription`, `NSBonjourServices: ["_mcmcantoral._tcp"]`; Android según targetSdk (`04` §5.4)       |
 
 Ficheros: `app.json`, `app.config.ts`, `eas.json`, `utils/storeLinks.ts`,
 `SelectedSongsScreen.tsx` (`WEB_BASE_URL`, `APP_SCHEME`, UTI en la línea
@@ -136,22 +136,22 @@ Se quedan `useIncomingPlaylist`, `useScreenTracking` (sin perfil),
 
 ### 2.4 Cortar los enganches del cantoral con lo que se borra
 
-| Enganche | Arreglo |
-| -------- | ------- |
-| `useSuppressCarismochito` en SongDetail y Fullscreen | Quitar la llamada |
-| `useAdminStatus` → `AuthContext` → `authHelpers` (Contigo, Pañuelo…) | `useAdminStatus` devuelve `false` hasta el admin por código (`06`, final de la Fase 4 si da tiempo); el editor y «Ordenar» se esconden mientras |
-| `songEditorService.ts:89` usa `getIdToken()` | Igual: vuelve con el admin por código |
-| `ReportBugsModal`, `SuggestSongModal`, `ChoirStep`, `usePlaylistSharing` leen `useUserProfile().profile.name` (y perfil/delegación) | Un **nombre local** opcional en Ajustes («¿Cómo te llamas en el coro?»); sin perfil ni delegación |
-| `utils/qrScan.ts` importa `isTradeCode` de `panueloTrade` | Quitar esa rama |
-| `constants/analyticsEvents.ts` → `types/notifications.ts` | Quitar los tipos de notificaciones |
-| `useDailyReadings` lee `seccion_oracion/lecturas/<fecha>` y `@contigo_bookmarks` | Se queda la lectura del nodo («Lecturas del domingo» se queda, D-14); fuera lo de marcadores |
-| `SuggestSongModal` escribe `songs/updatedAt` | **Quitar** (bug, ver `02` §1) |
+| Enganche                                                                                                                            | Arreglo                                                                                                                                         |
+| ----------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------- |
+| `useSuppressCarismochito` en SongDetail y Fullscreen                                                                                | Quitar la llamada                                                                                                                               |
+| `useAdminStatus` → `AuthContext` → `authHelpers` (Contigo, Pañuelo…)                                                                | `useAdminStatus` devuelve `false` hasta el admin por código (`06`, final de la Fase 4 si da tiempo); el editor y «Ordenar» se esconden mientras |
+| `songEditorService.ts:89` usa `getIdToken()`                                                                                        | Igual: vuelve con el admin por código                                                                                                           |
+| `ReportBugsModal`, `SuggestSongModal`, `ChoirStep`, `usePlaylistSharing` leen `useUserProfile().profile.name` (y perfil/delegación) | Un **nombre local** opcional en Ajustes («¿Cómo te llamas en el coro?»); sin perfil ni delegación                                               |
+| `utils/qrScan.ts` importa `isTradeCode` de `panueloTrade`                                                                           | Quitar esa rama                                                                                                                                 |
+| `constants/analyticsEvents.ts` → `types/notifications.ts`                                                                           | Quitar los tipos de notificaciones                                                                                                              |
+| `useDailyReadings` lee `seccion_oracion/lecturas/<fecha>` y `@contigo_bookmarks`                                                    | Se queda la lectura del nodo («Lecturas del domingo» se queda, D-14); fuera lo de marcadores                                                    |
+| `SuggestSongModal` escribe `songs/updatedAt`                                                                                        | **Quitar** (bug, ver `02` §1)                                                                                                                   |
 
 ### 2.5 Borrar las áreas
 
 Por áreas, un commit por área, en este orden (de menos a más enganchada):
 Wordle → medallas → Carismochito → Pañuelo → fotos → calendario
-(`functions/` se borra: la función del admin irá en su propio *codebase*,
+(`functions/` se borra: la función del admin irá en su propio _codebase_,
 ver §2.9) →
 encuestas → eventos/Más/visitapapa → Contigo (+ `modules/highlight-menu`) →
 Comunica → notificaciones (+ `plugins/`, `targets/`, la extensión del

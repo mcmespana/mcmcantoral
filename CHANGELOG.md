@@ -9,6 +9,8 @@
 - `eas init` creó el proyecto **nuevo** `mcmespana/mcmcantoral` (slug
   `mcmcantoral`); su id vive en `app.json` y `app.config.ts` lo lee de ahí.
   El secreto `EAS_PROJECT_ID` ya no hace falta (los workflows no lo piden).
+- Web y enlaces universales en **`mcmcantoral.expo.app`** (como decía D-13;
+  antes ponía `mcm-cantoral`).
 - Fuera de `app.json` las claves de Firebase que `eas init` copió de
   `.env.local` y de `app.config.ts` los `extra.firebase*`: nadie los leía (la
   app usa `EXPO_PUBLIC_FIREBASE_*` al empaquetar) y el repo es público.

@@ -3,8 +3,8 @@
  *
  * Hay tres formatos posibles y el escáner tiene que reconocerlos todos:
  *
- *   1. Repertorio en la nube  → https://mcm-cantoral.expo.app/playlist?p=1234
- *   2. Directo                → https://mcm-cantoral.expo.app/coro?c=1234
+ *   1. Repertorio en la nube  → https://mcmcantoral.expo.app/playlist?p=1234
+ *   2. Directo                → https://mcmcantoral.expo.app/coro?c=1234
  *   3. Repertorio sin conexión → mcmcantoral://playlist?d=<payload>
  *   4. Coro → …/playlist?coro=<id> (importa SIEMPRE el último repertorio del
  *      coro) y …/coro?coro=<id> (se une a su directo). Estos no caducan: el
@@ -12,7 +12,7 @@
  *
  * Se reconoce por el PATH, no por el dominio ni el esquema: así valen igual
  * los QR y enlaces de MCM App (`mcm.expo.app`, `mcmapp://`) y los de MCM
- * Cantoral (`mcm-cantoral.expo.app`, `mcmcantoral://`), en los dos sentidos.
+ * Cantoral (`mcmcantoral.expo.app`, `mcmcantoral://`), en los dos sentidos.
  *
  * Además aceptamos que alguien escriba/pegue un QR con solo los 4 dígitos.
  *

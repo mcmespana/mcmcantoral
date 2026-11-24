@@ -138,9 +138,11 @@ describe('MCM App y MCM Cantoral se leen sus QR en los dos sentidos', () => {
   });
 
   it('y los nuevos de MCM Cantoral', () => {
-    expect(parseScannedQr('https://mcm-cantoral.expo.app/coro?c=0704')).toEqual(
-      { kind: 'code', target: 'choir', code: '0704' },
-    );
+    expect(parseScannedQr('https://mcmcantoral.expo.app/coro?c=0704')).toEqual({
+      kind: 'code',
+      target: 'choir',
+      code: '0704',
+    });
     expect(parseScannedQr('mcmcantoral://playlist?d=abc')).toEqual({
       kind: 'offline',
       payload: 'abc',
